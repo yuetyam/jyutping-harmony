@@ -1,0 +1,88 @@
+{
+  "string": [
+    {
+      "name": "tab_bar_home",
+      "value": "首页"
+    },
+    {
+      "name": "tab_bar_romanization",
+      "value": "粤拼"
+    },
+    {
+      "name": "tab_bar_cantonese",
+      "value": "粤语"
+    },
+    {
+      "name": "tab_bar_about",
+      "value": "关于"
+    },
+    {
+      "name": "search_placeholder",
+      "value": "查字音"
+    },
+    {
+      "name": "home_button_enable_keyboard",
+      "value": "启用键盘"
+    },
+    {
+      "name": "guide_abbreviated_input_heading",
+      "value": "简拼"
+    },
+    {
+      "name": "guide_abbreviated_input_body_row1",
+      "value": "首字母简拼，例如 nh → 你好。"
+    },
+    {
+      "name": "guide_abbreviated_input_body_row2",
+      "value": "部分简拼，例如 nhou / neih → 你好。"
+    },
+    {
+      "name": "guide_pinyin_reverse_lookup_heading",
+      "value": "用普通话拼音反查粤拼"
+    },
+    {
+      "name": "guide_pinyin_reverse_lookup_body",
+      "value": "以 r 开始，再输入普通话拼音，例如 rlin → 林。"
+    },
+    {
+      "name": "guide_cangjie_reverse_lookup_heading",
+      "value": "用仓颉／速成反查粤拼"
+    },
+    {
+      "name": "guide_cangjie_reverse_lookup_body_row1",
+      "value": "以 v 开始，再输入仓颉或速成码，例如 vdd → 林。"
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_heading",
+      "value": "用笔画输入反查粤拼"
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_body",
+      "value": "以 x 开始，再输入笔画码，例如 xwsad → 木。"
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_examples",
+      "value": "w = 横(waang)\ns = 竖(syu)\na = 撇\nd = 点(dim)\nz = 折(zit)"
+    },
+    {
+      "name": "guide_structure_reverse_lookup_heading",
+      "value": "用两分拆字反查粤拼"
+    },
+    {
+      "name": "guide_structure_reverse_lookup_body",
+      "value": "两分即系将一个字分成两部分，比如【林 = 木, 木】。以 q 开始，再输入两个字嘅粤拼，例如 qmukmuk → 林。"
+    },
+    {
+      "name": "guide_tones_input_heading",
+      "value": "声调输入"
+    },
+    {
+      "name": "guide_tones_input_body",
+      "value": "v = 1 阴平  vv = 4 阳平\nx = 2 阴上  xx = 5 阳上\nq = 3 阴去  qq = 6 阳去"
+    },
+    {
+      "name": "guide_tones_input_examples",
+      "value": "例: sinq = sin3(线), sinqq = sin6(羡)"
+    }
+  ]
+}

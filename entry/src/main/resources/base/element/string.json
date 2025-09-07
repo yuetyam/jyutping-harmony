@@ -1,0 +1,88 @@
+{
+  "string": [
+    {
+      "name": "tab_bar_home",
+      "value": "Home"
+    },
+    {
+      "name": "tab_bar_romanization",
+      "value": "Jyutping"
+    },
+    {
+      "name": "tab_bar_cantonese",
+      "value": "Cantonese"
+    },
+    {
+      "name": "tab_bar_about",
+      "value": "About"
+    },
+    {
+      "name": "search_placeholder",
+      "value": "Search Pronunciation"
+    },
+    {
+      "name": "home_button_enable_keyboard",
+      "value": "Enable this keyboard"
+    },
+    {
+      "name": "guide_abbreviated_input_heading",
+      "value": "Quick Input with Initials"
+    },
+    {
+      "name": "guide_abbreviated_input_body_row1",
+      "value": "Type faster by entering only the first letters of each syllable. For example, typing “nh” gives you “你好”."
+    },
+    {
+      "name": "guide_abbreviated_input_body_row2",
+      "value": "Combine abbreviated and full input for even more flexibility. For example, “nhou” or “neih” also produces “你好”."
+    },
+    {
+      "name": "guide_pinyin_reverse_lookup_heading",
+      "value": "Lookup Jyutping with Mandarin Pinyin"
+    },
+    {
+      "name": "guide_pinyin_reverse_lookup_body",
+      "value": "Start with “r”, then enter Pinyin code. For example, “rlin” → “林”."
+    },
+    {
+      "name": "guide_cangjie_reverse_lookup_heading",
+      "value": "Lookup Jyutping with Cangjie or Quick(Sucheng)"
+    },
+    {
+      "name": "guide_cangjie_reverse_lookup_body_row1",
+      "value": "Start with “v”, then enter Cangjie or Quick code. For example, “vdd” → “林”."
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_heading",
+      "value": "Lookup Jyutping with Stroke"
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_body",
+      "value": "Start with “x”, then enter Stroke code. For example, “xwsad” → “木”."
+    },
+    {
+      "name": "guide_stroke_reverse_lookup_examples",
+      "value": "w = 橫(waang), Horizontal\ns = 豎(syu), Vertical\na = 撇, Left-falling\nd = 點(dim), Right-falling\nz = 折(zit), Turning"
+    },
+    {
+      "name": "guide_structure_reverse_lookup_heading",
+      "value": "Lookup Jyutping with character components"
+    },
+    {
+      "name": "guide_structure_reverse_lookup_body",
+      "value": "Start with “q”, then enter two components’ Jyutping. For example, “qmukmuk” → “林”."
+    },
+    {
+      "name": "guide_tones_input_heading",
+      "value": "Tones Input"
+    },
+    {
+      "name": "guide_tones_input_body",
+      "value": "v = 1, High Level (陰平)\nx = 2, Medium Rising (陰上)\nq = 3, Medium Level (陰去)\nvv = 4, Low Falling (陽平)\nxx = 5, Low Rising (陽上)\nqq = 6, Low Level (陽去)"
+    },
+    {
+      "name": "guide_tones_input_examples",
+      "value": "Examples: sinq = sin3(線), sinqq = sin6(羨)"
+    }
+  ]
+}
