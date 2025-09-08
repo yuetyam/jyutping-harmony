@@ -1,5 +1,7 @@
-import { HomeScreen } from './HomeScreen'
-import { RomanizationScreen } from './RomanizationScreen'
+import { HomeScreen } from './HomeScreen';
+import { RomanizationScreen } from './RomanizationScreen';
+import { CantoneseScreen } from './CantoneseScreen';
+import { AboutScreen } from './AboutScreen';
 
 @Entry
 @Component
@@ -37,12 +39,12 @@ struct Index {
             .tabBar(this.tabBuilder(1, $r("app.string.tab_bar_romanization"), $r('sys.symbol.doc_text_badge_magnifyingglass')))
 
             TabContent() {
-                Text('Cantonese')
+                CantoneseScreen()
             }
             .tabBar(this.tabBuilder(2, $r("app.string.tab_bar_cantonese"), $r('sys.symbol.worldclock')))
 
             TabContent() {
-                Text('About')
+                AboutScreen()
             }
             .tabBar(this.tabBuilder(3, $r("app.string.tab_bar_about"), $r('sys.symbol.info_circle')))
         }
