@@ -6,14 +6,28 @@ export struct CantoneseScreen {
     build() {
         Navigation(this.pageStack) {
             List({ space: 20 }) {
-                ListItem() {
-                    Row({ space: 12 }) {
-                        SymbolGlyph($r('sys.symbol.doc_text_badge_checkmark'))
-                        Text('粤语用字参考')
-                        Blank()
-                        SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
+                ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Row({ space: 12 }) {
+                            SymbolGlyph($r('sys.symbol.doc_text_badge_checkmark'))
+                            Text('粤语用字参考')
+                            Blank()
+                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
+                        }
+                        .width('100%')
                     }
-                    .width('100%')
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        Row({ space: 12 }) {
+                            SymbolGlyph($r('sys.symbol.character_square'))
+                            Text('简化字易混淆情况')
+                            Blank()
+                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
+                        }
+                        .width('100%')
+                    }
                 }
                 .padding(8)
                 .backgroundColor(this.groupBackgroundColor)

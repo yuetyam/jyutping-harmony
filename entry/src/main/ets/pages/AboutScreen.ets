@@ -1,14 +1,15 @@
 import { bundleManager } from '@kit.AbilityKit';
+import { WebLinkView } from './WebLinkView';
 
 @Component
 export struct AboutScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 12;
-    @State private version: string = '';
+    @State private version: string = 'error';
     aboutToAppear(): void {
         bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
-            this.version = bundleInfo.versionName + ` (${bundleInfo.versionCode})`
+            this.version = bundleInfo.versionName + ' (' + bundleInfo.versionCode + ')'
         })
     }
     build() {
@@ -30,124 +31,90 @@ export struct AboutScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
-                ListItemGroup({ space: 8 }) {
+                ListItemGroup() {
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.worldclock'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('官网')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://jyutping.app',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '官网'
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.more'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('源码')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://github.com/yuetyam/jyutping-harmony',
+                            icon: $r('sys.symbol.more'),
+                            text: '源码'
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.lock'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('隐私政策')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://jyutping.app/privacy',
+                            icon: $r('sys.symbol.lock'),
+                            text: '隐私政策'
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.questionmark_circle'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('常问问题')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://jyutping.app/faq',
+                            icon: $r('sys.symbol.questionmark_circle'),
+                            text: '常问问题'
+                        })
                     }
                 }
-                .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
-                ListItemGroup({ space: 8 }) {
+                ListItemGroup() {
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.person_2'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('加入 QQ 交流群')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://jq.qq.com/?k=4PR17m3t',
+                            icon: $r('sys.symbol.person_2'),
+                            text: '加入 QQ 交流群'
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.book'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('关注小红书')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://www.xiaohongshu.com/user/profile/62ee9df9000000001e01f5d6',
+                            icon: $r('sys.symbol.book'),
+                            text: '关注小红书'
+                        })
                     }
                 }
-                .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
-                ListItemGroup({ space: 8 }) {
+                ListItemGroup() {
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.checkmark_circle'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('腾讯问卷反馈')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        WebLinkView({
+                            url: 'https://wj.qq.com/s2/14037245/fe08',
+                            icon: $r('sys.symbol.checkmark_circle'),
+                            text: '腾讯问卷反馈'
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.envelope'))
-                                .fontSize(20)
-                                .fontColor([$r('app.color.accent')])
-                            Text('邮件反馈')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.arrow_up_right')).opacity(0.66)
-                        }
-                        .width('100%')
+                        // FIXME: Email URL scheme
+                        WebLinkView({
+                            url: 'support@jyutping.app',
+                            icon: $r('sys.symbol.envelope'),
+                            text: '邮件反馈'
+                        })
                     }
                 }
-                .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
             }

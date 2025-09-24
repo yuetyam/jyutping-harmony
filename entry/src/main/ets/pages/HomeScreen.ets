@@ -31,7 +31,7 @@ export struct HomeScreen {
                     .width('100%')
                     .onClick((event?: ClickEvent) => {
                         if (event) {
-                            let context = getContext() as common.UIAbilityContext;
+                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
                             let want: Want = {
                                 bundleName: 'com.huawei.hmos.settings',
                                 abilityName: 'com.huawei.hmos.settings.MainAbility',
@@ -41,7 +41,9 @@ export struct HomeScreen {
                                     pushParams: context.abilityInfo.bundleName
                                 }
                             }
-                            context.startAbility(want)
+                            context.startAbility(want).catch(() => {
+                                // TODO: Implement error handling.
+                            })
                         }
                     })
                 }

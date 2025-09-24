@@ -1,51 +1,51 @@
 @Component
 export struct RomanizationScreen {
     private pageStack: NavPathStack = new NavPathStack();
-
+    private groupBackgroundColor = $r('app.color.group_background');
+    private groupBorderRadius: Length = 12;
     build() {
         Navigation(this.pageStack) {
             List({ space: 16 }) {
-                ListItemGroup() {
+                ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Row({ space: 16 }) {
+                        Row({ space: 12 }) {
                             SymbolGlyph($r('sys.symbol.list_bullet')).fontColor([$r('sys.color.ohos_id_color_primary')])
                             Text('粵拼聲母表')
                             Blank()
+                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
                         }
+                        .width('100%')
                     }
-                    .padding({ top: 8, bottom: 8 })
-
                     ListItem() {
                         Divider()
                     }
-
                     ListItem() {
-                        Row({ space: 16 }) {
+                        Row({ space: 12 }) {
                             SymbolGlyph($r('sys.symbol.list_bullet')).fontColor([$r('sys.color.ohos_id_color_primary')])
                             Text('粵拼韻母表')
                             Blank()
+                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
                         }
+                        .width('100%')
                     }
-                    .padding({ top: 8, bottom: 8 })
-
                     ListItem() {
                         Divider()
                     }
-
                     ListItem() {
-                        Row({ space: 16 }) {
+                        Row({ space: 12 }) {
                             SymbolGlyph($r('sys.symbol.bell')).fontColor([$r('sys.color.ohos_id_color_primary')])
                             Text('粵拼聲調表')
                             Blank()
+                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
                         }
+                        .width('100%')
                     }
-                    .padding({ top: 8, bottom: 8 })
                 }
-                .padding({ left: 8, right: 8 })
-                .backgroundColor($r('app.color.group_background'))
-                .borderRadius(10)
-                .margin({ left: 16, right: 16 })
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
             }
+            .padding({ left: 16, right: 16 })
             .width('100%')
             .height('100%')
         }
