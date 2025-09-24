@@ -1,3 +1,5 @@
+import { NavigationLabel } from "./NavigationLabel";
+
 @Component
 export struct RomanizationScreen {
     private pageStack: NavPathStack = new NavPathStack();
@@ -6,42 +8,41 @@ export struct RomanizationScreen {
     build() {
         Navigation(this.pageStack) {
             List({ space: 16 }) {
-                ListItemGroup({ space: 8 }) {
+                ListItemGroup() {
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.list_bullet')).fontColor([$r('sys.color.ohos_id_color_primary')])
-                            Text('粵拼聲母表')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
-                        }
-                        .width('100%')
+                        NavigationLabel({
+                            icon: $r('sys.symbol.list_bullet'),
+                            text: "粵拼聲母表",
+                            action: () => {
+                                this.pageStack.pushPathByName("InitialsPage", null, true)
+                            }
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.list_bullet')).fontColor([$r('sys.color.ohos_id_color_primary')])
-                            Text('粵拼韻母表')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
-                        }
-                        .width('100%')
+                        NavigationLabel({
+                            icon: $r('sys.symbol.list_bullet'),
+                            text: "粤拼韵母表",
+                            action: () => {
+                                this.pageStack.pushPathByName("FinalsPage", null, true)
+                            }
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.bell')).fontColor([$r('sys.color.ohos_id_color_primary')])
-                            Text('粵拼聲調表')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
-                        }
-                        .width('100%')
+                        NavigationLabel({
+                            icon: $r('sys.symbol.bell'),
+                            text: "粤拼声调表",
+                            action: () => {
+                                this.pageStack.pushPathByName("TonesPage", null, true)
+                            }
+                        })
                     }
                 }
-                .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
             }

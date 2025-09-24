@@ -1,0 +1,19 @@
+{
+  "routerMap": [
+    {
+      "name": "InitialsPage",
+      "pageSourceFile": "src/main/ets/pages/InitialsPage.ets",
+      "buildFunction": "PageBuilder"
+    },
+    {
+      "name": "FinalsPage",
+      "pageSourceFile": "src/main/ets/pages/FinalsPage.ets",
+      "buildFunction": "PageBuilder"
+    },
+    {
+      "name": "TonesPage",
+      "pageSourceFile": "src/main/ets/pages/TonesPage.ets",
+      "buildFunction": "PageBuilder"
+    }
+  ]
+}
