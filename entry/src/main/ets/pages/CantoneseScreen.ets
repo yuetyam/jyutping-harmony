@@ -1,4 +1,5 @@
 import { NavigationLabel } from "./NavigationLabel";
+import { WebLinkView } from "./WebLinkView";
 
 @Component
 export struct CantoneseScreen {
@@ -12,7 +13,7 @@ export struct CantoneseScreen {
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.doc_text_badge_checkmark'),
-                            text: "粤语用字参考",
+                            text: $r('app.string.cantonese_expressions_label'),
                             action: () => {
                                 this.pageStack.pushPathByName("ExpressionsPage", null, true)
                             }
@@ -24,10 +25,62 @@ export struct CantoneseScreen {
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.character_square'),
-                            text: "简化字易混淆情况",
+                            text: $r('app.string.cantonese_confusion_label'),
                             action: () => {
                                 this.pageStack.pushPathByName("ConfusionPage", null, true)
                             }
+                        })
+                    }
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
+                ListItemGroup() {
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://www.polyu.edu.hk/cbs/pronunciation',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '懶音診療室 - PolyU'
+                        })
+                    }
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://jyutping.org/blog/particles',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '粵語語氣詞'
+                        })
+                    }
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://www.classicalchineseliterature.org',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '中國古詩文精讀'
+                        })
+                    }
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://hambaanglaang.hk',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '冚唪唥粵文'
+                        })
+                    }
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://www.resonatehk.com',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '迴響'
                         })
                     }
                 }

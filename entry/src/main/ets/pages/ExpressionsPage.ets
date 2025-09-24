@@ -13,6 +13,6 @@ export struct ExpressionsPage {
             .width('100%')
             .height('100%')
         }
-        .title("粤语用字参考")
+        .title($r('app.string.cantonese_expressions_title'))
     }
 }

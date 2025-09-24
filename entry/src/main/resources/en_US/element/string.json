@@ -107,6 +107,22 @@
     {
       "name": "romanization_tones_title",
       "value": "Tones"
+    },
+    {
+      "name": "cantonese_expressions_label",
+      "value": "Cantonese Expressions"
+    },
+    {
+      "name": "cantonese_expressions_title",
+      "value": "Expressions"
+    },
+    {
+      "name": "cantonese_confusion_label",
+      "value": "Simplified Character Confusion"
+    },
+    {
+      "name": "cantonese_confusion_title",
+      "value": "Confusion"
     }
   ]
 }

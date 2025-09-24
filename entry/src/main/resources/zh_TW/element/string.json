@@ -107,6 +107,22 @@
     {
       "name": "romanization_tones_title",
       "value": "聲調表"
+    },
+    {
+      "name": "cantonese_expressions_label",
+      "value": "粵語用字參攷"
+    },
+    {
+      "name": "cantonese_expressions_title",
+      "value": "粵語用字參攷"
+    },
+    {
+      "name": "cantonese_confusion_label",
+      "value": "簡化字易混淆情況"
+    },
+    {
+      "name": "cantonese_confusion_title",
+      "value": "易混淆"
     }
   ]
 }

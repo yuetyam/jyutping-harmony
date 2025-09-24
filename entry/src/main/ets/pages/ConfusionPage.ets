@@ -13,6 +13,6 @@ export struct ConfusionPage {
             .width('100%')
             .height('100%')
         }
-        .title("简化字易混淆情况")
+        .title($r('app.string.cantonese_confusion_title'))
     }
 }
