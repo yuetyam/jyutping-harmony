@@ -83,6 +83,30 @@
     {
       "name": "guide_tones_input_examples",
       "value": "Examples: sinq = sin3(線), sinqq = sin6(羨)"
+    },
+    {
+      "name": "romanization_initials_label",
+      "value": "Jyutping Initials"
+    },
+    {
+      "name": "romanization_initials_title",
+      "value": "Initials"
+    },
+    {
+      "name": "romanization_finals_label",
+      "value": "Jyutping Finals"
+    },
+    {
+      "name": "romanization_finals_title",
+      "value": "Finals"
+    },
+    {
+      "name": "romanization_tones_label",
+      "value": "Jyutping Tones"
+    },
+    {
+      "name": "romanization_tones_title",
+      "value": "Tones"
     }
   ]
 }

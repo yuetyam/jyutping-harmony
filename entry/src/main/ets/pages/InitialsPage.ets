@@ -68,7 +68,7 @@ export struct InitialsPage {
             .width('100%')
             .height('100%')
         }
-        .title("粤拼声母表")
+        .title($r('app.string.romanization_initials_title'))
         .width('100%')
         .height('100%')
         .backgroundColor($r('app.color.window_background'))

@@ -13,6 +13,6 @@ export struct TonesPage {
             .width('100%')
             .height('100%')
         }
-        .title("粤拼声调表")
+        .title($r('app.string.romanization_tones_title'))
     }
 }

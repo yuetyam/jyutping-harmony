@@ -83,6 +83,30 @@
     {
       "name": "guide_tones_input_examples",
       "value": "例: sinq = sin3(线), sinqq = sin6(羡)"
+    },
+    {
+      "name": "romanization_initials_label",
+      "value": "粤拼声母表"
+    },
+    {
+      "name": "romanization_initials_title",
+      "value": "声母表"
+    },
+    {
+      "name": "romanization_finals_label",
+      "value": "粤拼韵母表"
+    },
+    {
+      "name": "romanization_finals_title",
+      "value": "韵母表"
+    },
+    {
+      "name": "romanization_tones_label",
+      "value": "粤拼声调表"
+    },
+    {
+      "name": "romanization_tones_title",
+      "value": "声调表"
     }
   ]
 }

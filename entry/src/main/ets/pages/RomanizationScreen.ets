@@ -13,7 +13,7 @@ export struct RomanizationScreen {
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.list_bullet'),
-                            text: "粵拼聲母表",
+                            text: $r('app.string.romanization_initials_label'),
                             action: () => {
                                 this.pageStack.pushPathByName("InitialsPage", null, true)
                             }
@@ -25,7 +25,7 @@ export struct RomanizationScreen {
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.list_bullet'),
-                            text: "粤拼韵母表",
+                            text: $r('app.string.romanization_finals_label'),
                             action: () => {
                                 this.pageStack.pushPathByName("FinalsPage", null, true)
                             }
@@ -37,7 +37,7 @@ export struct RomanizationScreen {
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.bell'),
-                            text: "粤拼声调表",
+                            text: $r('app.string.romanization_tones_label'),
                             action: () => {
                                 this.pageStack.pushPathByName("TonesPage", null, true)
                             }

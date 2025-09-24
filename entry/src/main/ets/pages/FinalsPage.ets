@@ -13,6 +13,6 @@ export struct FinalsPage {
             .width('100%')
             .height('100%')
         }
-        .title("粤拼韵母表")
+        .title($r('app.string.romanization_finals_title'))
     }
 }
