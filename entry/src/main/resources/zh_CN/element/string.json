@@ -123,6 +123,42 @@
     {
       "name": "cantonese_confusion_title",
       "value": "易混淆"
+    },
+    {
+      "name": "about_version",
+      "value": "版本"
+    },
+    {
+      "name": "about_website",
+      "value": "官网"
+    },
+    {
+      "name": "about_source_code",
+      "value": "源码"
+    },
+    {
+      "name": "about_privacy_policy",
+      "value": "私隐政策"
+    },
+    {
+      "name": "about_faq",
+      "value": "常问问题"
+    },
+    {
+      "name": "about_qq",
+      "value": "加入 QQ 交流群"
+    },
+    {
+      "name": "about_red_note",
+      "value": "关注小红书"
+    },
+    {
+      "name": "about_tencent_survey",
+      "value": "腾讯问卷反馈"
+    },
+    {
+      "name": "about_email",
+      "value": "电邮反馈"
     }
   ]
 }

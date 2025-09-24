@@ -123,6 +123,42 @@
     {
       "name": "cantonese_confusion_title",
       "value": "Confusion"
+    },
+    {
+      "name": "about_version",
+      "value": "Version"
+    },
+    {
+      "name": "about_website",
+      "value": "Website"
+    },
+    {
+      "name": "about_source_code",
+      "value": "Source Code"
+    },
+    {
+      "name": "about_privacy_policy",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "about_faq",
+      "value": "FAQ"
+    },
+    {
+      "name": "about_qq",
+      "value": "QQ Group"
+    },
+    {
+      "name": "about_red_note",
+      "value": "RedNote"
+    },
+    {
+      "name": "about_tencent_survey",
+      "value": "Tencent Survey Feedback"
+    },
+    {
+      "name": "about_email",
+      "value": "Email Feedback"
     }
   ]
 }

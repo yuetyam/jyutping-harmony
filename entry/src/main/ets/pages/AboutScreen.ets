@@ -6,7 +6,7 @@ export struct AboutScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 12;
-    @State private version: string = 'error';
+    @State private version: string = '_error';
     aboutToAppear(): void {
         bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {
             this.version = bundleInfo.versionName + ' (' + bundleInfo.versionCode + ')'
@@ -20,7 +20,7 @@ export struct AboutScreen {
                         SymbolGlyph($r('sys.symbol.info_circle'))
                             .fontSize(20)
                             .fontColor([$r('app.color.accent')])
-                        Text('版本')
+                        Text($r('app.string.about_version'))
                         Blank()
                         Text(this.version)
                             .copyOption(CopyOptions.LocalDevice)
@@ -36,7 +36,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://jyutping.app',
                             icon: $r('sys.symbol.worldclock'),
-                            text: '官网'
+                            text: $r('app.string.about_website')
                         })
                     }
                     ListItem() {
@@ -46,7 +46,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://github.com/yuetyam/jyutping-harmony',
                             icon: $r('sys.symbol.more'),
-                            text: '源码'
+                            text: $r('app.string.about_source_code')
                         })
                     }
                     ListItem() {
@@ -56,7 +56,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://jyutping.app/privacy',
                             icon: $r('sys.symbol.lock'),
-                            text: '隐私政策'
+                            text: $r('app.string.about_privacy_policy')
                         })
                     }
                     ListItem() {
@@ -66,7 +66,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://jyutping.app/faq',
                             icon: $r('sys.symbol.questionmark_circle'),
-                            text: '常问问题'
+                            text: $r('app.string.about_faq')
                         })
                     }
                 }
@@ -78,7 +78,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://jq.qq.com/?k=4PR17m3t',
                             icon: $r('sys.symbol.person_2'),
-                            text: '加入 QQ 交流群'
+                            text: $r('app.string.about_qq')
                         })
                     }
                     ListItem() {
@@ -88,7 +88,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://www.xiaohongshu.com/user/profile/62ee9df9000000001e01f5d6',
                             icon: $r('sys.symbol.book'),
-                            text: '关注小红书'
+                            text: $r('app.string.about_red_note')
                         })
                     }
                 }
@@ -100,7 +100,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'https://wj.qq.com/s2/14037245/fe08',
                             icon: $r('sys.symbol.checkmark_circle'),
-                            text: '腾讯问卷反馈'
+                            text: $r('app.string.about_tencent_survey')
                         })
                     }
                     ListItem() {
@@ -111,7 +111,7 @@ export struct AboutScreen {
                         WebLinkView({
                             url: 'support@jyutping.app',
                             icon: $r('sys.symbol.envelope'),
-                            text: '邮件反馈'
+                            text: $r('app.string.about_email')
                         })
                     }
                 }
