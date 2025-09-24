@@ -8,7 +8,7 @@ export struct NavigationLabel {
             Row({ space: 12 }) {
                 SymbolGlyph(this.icon)
                     .fontSize(20)
-                    .fontColor([$r('sys.color.ohos_id_color_primary')])
+                    .fontColor([$r('app.color.accent')])
                 Text(this.text)
                 Blank()
                 SymbolGlyph($r('sys.symbol.chevron_forward'))

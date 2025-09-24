@@ -14,6 +14,16 @@
       "name": "TonesPage",
       "pageSourceFile": "src/main/ets/pages/TonesPage.ets",
       "buildFunction": "PageBuilder"
+    },
+    {
+      "name": "ExpressionsPage",
+      "pageSourceFile": "src/main/ets/pages/ExpressionsPage.ets",
+      "buildFunction": "PageBuilder"
+    },
+    {
+      "name": "ConfusionPage",
+      "pageSourceFile": "src/main/ets/pages/ConfusionPage.ets",
+      "buildFunction": "PageBuilder"
     }
   ]
 }

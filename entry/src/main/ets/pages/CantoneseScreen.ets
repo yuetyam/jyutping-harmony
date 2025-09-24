@@ -1,3 +1,5 @@
+import { NavigationLabel } from "./NavigationLabel";
+
 @Component
 export struct CantoneseScreen {
     private pageStack: NavPathStack = new NavPathStack();
@@ -6,30 +8,29 @@ export struct CantoneseScreen {
     build() {
         Navigation(this.pageStack) {
             List({ space: 20 }) {
-                ListItemGroup({ space: 8 }) {
+                ListItemGroup() {
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.doc_text_badge_checkmark'))
-                            Text('粤语用字参考')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
-                        }
-                        .width('100%')
+                        NavigationLabel({
+                            icon: $r('sys.symbol.doc_text_badge_checkmark'),
+                            text: "粤语用字参考",
+                            action: () => {
+                                this.pageStack.pushPathByName("ExpressionsPage", null, true)
+                            }
+                        })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Row({ space: 12 }) {
-                            SymbolGlyph($r('sys.symbol.character_square'))
-                            Text('简化字易混淆情况')
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.chevron_forward')).opacity(0.66)
-                        }
-                        .width('100%')
+                        NavigationLabel({
+                            icon: $r('sys.symbol.character_square'),
+                            text: "简化字易混淆情况",
+                            action: () => {
+                                this.pageStack.pushPathByName("ConfusionPage", null, true)
+                            }
+                        })
                     }
                 }
-                .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
             }
