@@ -2,6 +2,7 @@ import inputController from '../model/InputController'
 
 @Component
 export default struct TransformKey {
+    @State private isTouching: boolean = false
     build() {
         Stack() {
             Flex({
@@ -10,7 +11,7 @@ export default struct TransformKey {
             }) {
                 Text("123")
             }
-            .backgroundColor($r('app.color.key_emphatic'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -22,8 +23,20 @@ export default struct TransformKey {
         }
         .width('100%')
         .height('100%')
+        .onTouch((event: TouchEvent) => {
+            switch (event.type) {
+                case TouchType.Down:
+                    this.isTouching = true;
+                    break;
+                case TouchType.Move:
+                    break;
+                default:
+                    this.isTouching = false;
+                    break;
+            }
+        })
         .onClick((event?: ClickEvent) => {
-            inputController.enterKeyAction()
+            inputController.insertText("123");
         })
     }
 }

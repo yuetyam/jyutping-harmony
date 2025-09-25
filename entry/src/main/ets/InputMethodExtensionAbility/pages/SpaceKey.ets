@@ -2,6 +2,7 @@ import inputController from '../model/InputController'
 
 @Component
 export default struct SpaceKey {
+    @State private isTouching: boolean = false
     build() {
         Stack() {
             Flex({
@@ -10,7 +11,7 @@ export default struct SpaceKey {
             }) {
                 Text("粵拼")
             }
-            .backgroundColor($r('app.color.key_shallow'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -22,8 +23,20 @@ export default struct SpaceKey {
         }
         .width('100%')
         .height('100%')
+        .onTouch((event: TouchEvent) => {
+            switch (event.type) {
+                case TouchType.Down:
+                    this.isTouching = true;
+                    break;
+                case TouchType.Move:
+                    break;
+                default:
+                    this.isTouching = false;
+                    break;
+            }
+        })
         .onClick((event?: ClickEvent) => {
-            let text: string = "";
+            let text: string = " ";
             inputController.insertText(text);
         })
     }

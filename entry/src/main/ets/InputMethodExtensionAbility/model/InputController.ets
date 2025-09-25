@@ -31,11 +31,22 @@ export class InputController {
             });
         }
     }
-    public deleteForward(length: number): void {
-        if(this.inputClient) {
-            this.inputClient.deleteForward(length).catch(() => {
+    public backspace(length: number = 1): void {
+        if (this.inputClient) {
+            try {
+                this.inputClient.deleteForwardSync(length);
+            } catch (error) {
                 // TODO: Implement error handling.
-            });
+            }
+        }
+    }
+    public rightDelete(length: number = 1): void {
+        if (this.inputClient) {
+            try {
+                this.inputClient.deleteBackwardSync(length);
+            } catch (error) {
+                // TODO: Implement error handling.
+            }
         }
     }
     public enterKeyAction() {

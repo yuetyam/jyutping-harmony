@@ -2,17 +2,20 @@ import inputController from '../model/InputController'
 
 @Component
 export default struct BackspaceKey {
+    @State private isTouching: boolean = false
+    @State private actionCounter: number = 0
+
     build() {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
                 alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
             }) {
-                SymbolGlyph($r('sys.symbol.delete_left'))
-                    .fontSize(24)
-                    .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+                Image(this.isTouching ? $r('app.media.key_backspacing') : $r('app.media.key_backspace'))
+                    .width('22vp')
+                    .height('22vp')
             }
-            .backgroundColor($r('app.color.key_emphatic'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -24,8 +27,44 @@ export default struct BackspaceKey {
         }
         .width('100%')
         .height('100%')
-        .onClick((event?: ClickEvent) => {
-            inputController.deleteForward(1);
+        .onTouch((event: TouchEvent) => {
+            switch (event.type) {
+                case TouchType.Down:
+                    this.isTouching = true;
+                    break;
+                case TouchType.Move:
+                    break;
+                default:
+                    this.isTouching = false;
+                    this.actionCounter = 0;
+                    break;
+            }
         })
+        .gesture(
+            GestureGroup(GestureMode.Parallel,
+                TapGesture().onAction((event: GestureEvent) => {
+                    inputController.backspace();
+                    this.actionCounter += 1;
+                }),
+                LongPressGesture({
+                    fingers: 1,
+                    repeat: true,
+                    duration: 100
+                }).onAction((event: GestureEvent) => {
+                    if (this.actionCounter < 2) {
+                        this.actionCounter += 1;
+                    } else {
+                        inputController.backspace();
+                    }
+                }),
+                SwipeGesture({
+                    fingers: 1,
+                    direction: SwipeDirection.All,
+                    speed: 100
+                }).onAction((event: GestureEvent) => {
+                    inputController.backspace(10);
+                })
+            )
+        )
     }
 }

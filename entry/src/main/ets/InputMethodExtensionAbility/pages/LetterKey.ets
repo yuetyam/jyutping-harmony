@@ -3,6 +3,7 @@ import inputController from '../model/InputController'
 @Component
 export default struct LetterKey {
     keyText: string | undefined = undefined;
+    @State private isTouching: boolean = false
 
     build() {
         Stack() {
@@ -14,7 +15,7 @@ export default struct LetterKey {
                     Text(this.keyText).fontSize(22)
                 }
             }
-            .backgroundColor($r('app.color.key_shallow'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -26,6 +27,18 @@ export default struct LetterKey {
         }
         .width('100%')
         .height('100%')
+        .onTouch((event: TouchEvent) => {
+            switch (event.type) {
+                case TouchType.Down:
+                    this.isTouching = true;
+                    break;
+                case TouchType.Move:
+                    break;
+                default:
+                    this.isTouching = false;
+                    break;
+            }
+        })
         .onClick((event?: ClickEvent) => {
             if (this.keyText) {
                 inputController.insertText(this.keyText);
