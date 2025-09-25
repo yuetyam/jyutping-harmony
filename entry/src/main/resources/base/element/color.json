@@ -15,6 +15,10 @@
     {
       "name": "accent",
       "value": "#007FFF"
+    },
+    {
+      "name": "keyboard_background",
+      "value": "#E3E4E6"
     }
   ]
 }

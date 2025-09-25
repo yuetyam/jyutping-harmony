@@ -35,7 +35,7 @@ export struct HomeScreen {
                             let want: Want = {
                                 bundleName: 'com.huawei.hmos.settings',
                                 abilityName: 'com.huawei.hmos.settings.MainAbility',
-                                uri: 'application_info_entry',
+                                uri: 'set_input',
                                 parameters: {
                                     bundleName: context.abilityInfo.bundleName,
                                     pushParams: context.abilityInfo.bundleName

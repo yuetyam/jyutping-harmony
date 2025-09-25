@@ -11,6 +11,10 @@
     {
       "name": "group_background",
       "value": "#000000"
+    },
+    {
+      "name": "keyboard_background",
+      "value": "#242424"
     }
   ]
 }

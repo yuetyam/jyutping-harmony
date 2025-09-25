@@ -2,7 +2,7 @@
   "module": {
     "name": "entry",
     "type": "entry",
-    "description": "module description",
+    "description": "Main Module",
     "mainElement": "EntryAbility",
     "deviceTypes": [
       "phone",
@@ -16,7 +16,7 @@
       {
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
-        "description": "entry ability_description",
+        "description": "Main Ability",
         "startWindowIcon": "$media:start",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
@@ -44,6 +44,14 @@
             "resource": "$profile:backup_config"
           }
         ],
+      },
+      {
+        "description": "Jyutping Keyboard",
+        "name": "InputMethodExtensionAbility",
+        "icon": "$media:layered_image",
+        "srcEntry": "./ets/InputMethodExtensionAbility/InputService.ets",
+        "type": "inputMethod",
+        "exported": true
       }
     ]
   }
