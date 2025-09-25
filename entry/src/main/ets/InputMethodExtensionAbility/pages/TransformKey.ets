@@ -1,14 +1,14 @@
 import inputController from '../model/InputController'
 
 @Component
-export default struct EnterKey {
+export default struct TransformKey {
     build() {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
                 alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
             }) {
-                Text("換行")
+                Text("123")
             }
             .backgroundColor($r('app.color.key_emphatic'))
             .borderRadius(7)

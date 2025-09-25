@@ -1,14 +1,14 @@
 import inputController from '../model/InputController'
 
 @Component
-export default struct EnterKey {
+export default struct ShiftKey {
     build() {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
                 alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
             }) {
-                Text("換行")
+                Text("⇧").fontSize(18)
             }
             .backgroundColor($r('app.color.key_emphatic'))
             .borderRadius(7)
@@ -23,7 +23,7 @@ export default struct EnterKey {
         .width('100%')
         .height('100%')
         .onClick((event?: ClickEvent) => {
-            inputController.enterKeyAction()
+            inputController.deleteForward(1);
         })
     }
 }

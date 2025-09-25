@@ -8,24 +8,15 @@ struct Index {
             Flex({
                 direction: FlexDirection.Column,
                 alignItems: ItemAlign.Center,
-                justifyContent: FlexAlign.End
+                justifyContent: FlexAlign.SpaceBetween
             }) {
-                Flex({
-                    direction: FlexDirection.Column,
-                    alignItems: ItemAlign.Center,
-                    justifyContent: FlexAlign.SpaceBetween
-                }) {
-                    ABCKeyboard()
-                }
-                .align(Alignment.End)
-                .width("100%")
-                .height("75%")
+                ABCKeyboard()
             }
+            .width("100%")
             .height("100%")
-            .align(Alignment.End)
-            .backgroundColor(Color.Gray)
-            // .backgroundColor($r('app.color.keyboard_background'))
+            .backgroundColor($r('app.color.keyboard_background'))
         }
-        .position({ x: 0, y: 0 }).zIndex(99999)
+        .position({ x: 0, y: 0 })
+        .zIndex(99999)
     }
 }

@@ -7,7 +7,7 @@ export class InputController {
     private panel: inputMethodEngine.Panel | undefined = undefined;
     private attribute: inputMethodEngine.EditorAttribute | undefined = undefined
     private inputClient: inputMethodEngine.InputClient | undefined = undefined;
-    // private keyboardController: inputMethodEngine.KeyboardController | undefined = undefined;
+    private keyboardController: inputMethodEngine.KeyboardController | undefined = undefined;
     constructor() {
     }
     public onCreate(context: InputMethodExtensionContext): void {
@@ -52,8 +52,7 @@ export class InputController {
         let defaultDisplay = display.getDefaultDisplaySync();
         let displayWidth = defaultDisplay.width;
         let displayHeight = defaultDisplay.height;
-        // let keyboardHeight = Math.min(displayWidth / 3.0 * 2, displayHeight / 3.0)
-        let keyboardHeight = (52 * 4 + 56) * defaultDisplay.scaledDensity
+        let keyboardHeight = (56 * 4 + 56) * defaultDisplay.scaledDensity
         let nonBarPosition = displayHeight - keyboardHeight;
         let panelInfo: inputMethodEngine.PanelInfo = {
             type: inputMethodEngine.PanelType.SOFT_KEYBOARD,
@@ -81,7 +80,7 @@ export class InputController {
             } catch (error) {
                 // TODO: Implement error handling.
             }
-            // this.keyboardController = kbController;
+            this.keyboardController = kbController;
         })
         inputMethodAbility.on('inputStop', () => {
             this.onDestroy();

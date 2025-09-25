@@ -15,6 +15,14 @@
     {
       "name": "keyboard_background",
       "value": "#242424"
+    },
+    {
+      "name": "key_shallow",
+      "value": "#666666"
+    },
+    {
+      "name": "key_emphatic",
+      "value": "#3D3D3D"
     }
   ]
 }

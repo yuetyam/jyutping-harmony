@@ -19,6 +19,14 @@
     {
       "name": "keyboard_background",
       "value": "#E3E4E6"
+    },
+    {
+      "name": "key_shallow",
+      "value": "#FFFFFF"
+    },
+    {
+      "name": "key_emphatic",
+      "value": "#BBC0C8"
     }
   ]
 }

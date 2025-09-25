@@ -2,23 +2,34 @@ import inputController from '../model/InputController'
 
 @Component
 export default struct LetterKey {
-    keyText: string = 'a';
+    keyText: string | undefined = undefined;
+
     build() {
-        Column() {
+        Stack() {
             Flex({
                 direction: FlexDirection.Column,
                 alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
             }) {
-                Text(this.keyText)
-                    .fontSize(20)
+                if (this.keyText) {
+                    Text(this.keyText).fontSize(22)
+                }
             }
+            .backgroundColor($r('app.color.key_shallow'))
+            .borderRadius(7)
+            .shadow({
+                radius: 1,
+                color: Color.Gray,
+                offsetY: 1
+            })
+            .width('calc(100% - 6vp)')
+            .height('calc(100% - 12vp)')
         }
-        .backgroundColor(Color.White)
-        .borderRadius(6)
-        .width("8%")
-        .height("65%")
+        .width('100%')
+        .height('100%')
         .onClick((event?: ClickEvent) => {
-            inputController.insertText(this.keyText);
+            if (this.keyText) {
+                inputController.insertText(this.keyText);
+            }
         })
     }
 }
