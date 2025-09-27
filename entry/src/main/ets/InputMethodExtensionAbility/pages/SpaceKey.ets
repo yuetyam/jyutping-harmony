@@ -1,8 +1,10 @@
 import inputController from '../model/InputController'
+import { InputMode } from '../model/InputMode'
 
 @Component
 export default struct SpaceKey {
     @State private isTouching: boolean = false
+    @StorageProp('currentInputMode') private inputMode: InputMode = InputMode.Cantonese
     build() {
         Stack() {
             Flex({
@@ -10,7 +12,7 @@ export default struct SpaceKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text("粵拼")
+                Text(this.inputMode === InputMode.Cantonese ? "粵拼" : "space")
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
@@ -37,8 +39,10 @@ export default struct SpaceKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            let text: string = " ";
-            inputController.insertText(text);
+            if (event) {
+                let text: string = " ";
+                inputController.insertText(text);
+            }
         })
     }
 }

@@ -9,7 +9,7 @@ export default struct ToolBar {
     private iconLength: Length = '24vp';
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
-    @StorageLink('currentInputMode') inputMode: InputMode = InputMode.ABC
+    @StorageLink('currentInputMode') inputMode: InputMode = InputMode.Cantonese;
     build() {
         Flex({
             direction: FlexDirection.Row,
