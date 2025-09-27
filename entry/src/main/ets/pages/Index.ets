@@ -17,11 +17,11 @@ struct Index {
         Column({ space: 4 }) {
             SymbolGlyph(icon)
                 .fontSize(24)
-                .fontColor(this.selection == index ? [$r('app.color.accent')] :
+                .fontColor(this.selection === index ? [$r('app.color.accent')] :
                     [$r('sys.color.ohos_id_color_primary')])
             Text(title)
                 .fontSize(12)
-                .fontColor(this.selection == index ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
+                .fontColor(this.selection === index ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
         }
         .justifyContent(FlexAlign.Center)
     }

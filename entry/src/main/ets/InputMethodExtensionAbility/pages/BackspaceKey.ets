@@ -9,9 +9,11 @@ export default struct BackspaceKey {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
+                alignItems: ItemAlign.Center,
+                justifyContent: FlexAlign.Center
             }) {
                 Image(this.isTouching ? $r('app.media.key_backspacing') : $r('app.media.key_backspace'))
+                    .fillColor($r('sys.color.ohos_id_color_primary'))
                     .width('22vp')
                     .height('22vp')
             }

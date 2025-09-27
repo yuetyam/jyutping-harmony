@@ -7,9 +7,11 @@ export default struct ShiftKey {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
+                alignItems: ItemAlign.Center,
+                justifyContent: FlexAlign.Center
             }) {
                 Image($r('app.media.key_shift'))
+                    .fillColor($r('sys.color.ohos_id_color_primary'))
                     .width('22vp')
                     .height('22vp')
             }

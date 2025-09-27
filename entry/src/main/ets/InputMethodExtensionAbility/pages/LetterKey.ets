@@ -1,18 +1,20 @@
-import inputController from '../model/InputController'
+import inputController from '../model/InputController';
+import { InputKeyEvent } from '../model/InputKeyEvent';
 
 @Component
 export default struct LetterKey {
-    keyText: string | undefined = undefined;
-    @State private isTouching: boolean = false
+    event: InputKeyEvent | undefined = undefined;
+    @State private isTouching: boolean = false;
 
     build() {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
+                alignItems: ItemAlign.Center,
+                justifyContent: FlexAlign.Center
             }) {
-                if (this.keyText) {
-                    Text(this.keyText).fontSize(22)
+                if (this.event) {
+                    Text(this.event.text).fontSize(22)
                 }
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
@@ -40,8 +42,10 @@ export default struct LetterKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            if (this.keyText) {
-                inputController.insertText(this.keyText);
+            if (event) {
+                if (this.event) {
+                    inputController.insertText(this.event.text)
+                }
             }
         })
     }

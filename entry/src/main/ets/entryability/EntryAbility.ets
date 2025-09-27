@@ -42,7 +42,7 @@ export default class EntryAbility extends UIAbility {
                 if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
                     let topRectHeight = data.area.topRect.height;
                     AppStorage.setOrCreate('topRectHeight', topRectHeight);
-                } else if (data.type == window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
+                } else if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
                     let bottomRectHeight = data.area.bottomRect.height;
                     AppStorage.setOrCreate('bottomRectHeight', bottomRectHeight);
                 }

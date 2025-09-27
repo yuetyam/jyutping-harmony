@@ -7,7 +7,8 @@ export default struct RightKey {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
+                alignItems: ItemAlign.Center,
+                justifyContent: FlexAlign.Center
             }) {
                 Text(this.keyText).fontSize(20)
             }

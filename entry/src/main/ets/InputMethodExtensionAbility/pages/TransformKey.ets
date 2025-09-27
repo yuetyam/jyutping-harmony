@@ -7,7 +7,8 @@ export default struct TransformKey {
         Stack() {
             Flex({
                 direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center, justifyContent: FlexAlign.Center
+                alignItems: ItemAlign.Center,
+                justifyContent: FlexAlign.Center
             }) {
                 Text("123")
             }
