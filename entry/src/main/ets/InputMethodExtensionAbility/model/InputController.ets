@@ -34,29 +34,23 @@ export class InputController {
             this.ctx.destroy();
         }
     }
-    public insertText(text: string): void {
-        if(this.inputClient) {
-            this.inputClient.insertText(text).catch(() => {
-                // TODO: Implement error handling.
-            });
-        }
+    public insert(text: string): void {
+        this.inputClient?.insertText(text).catch(() => {
+            // TODO: Implement error handling.
+        });
     }
     public backspace(length: number = 1): void {
-        if (this.inputClient) {
-            try {
-                this.inputClient.deleteForwardSync(length);
-            } catch (error) {
-                // TODO: Implement error handling.
-            }
+        try {
+            this.inputClient?.deleteForwardSync(length);
+        } catch (error) {
+            // TODO: Implement error handling.
         }
     }
     public rightDelete(length: number = 1): void {
-        if (this.inputClient) {
-            try {
-                this.inputClient.deleteBackwardSync(length);
-            } catch (error) {
-                // TODO: Implement error handling.
-            }
+        try {
+            this.inputClient?.deleteBackwardSync(length);
+        } catch (error) {
+            // TODO: Implement error handling.
         }
     }
     public enterKeyAction() {
@@ -64,6 +58,9 @@ export class InputController {
         this.inputClient?.sendKeyFunction(actionCode).catch(() => {
             // TODO: Implement error handling.
         })
+    }
+    public dismissKeyboard() {
+        this.panel?.hide()
     }
 
     private initWindow(screen: display.Display): void {

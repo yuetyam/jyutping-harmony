@@ -40,7 +40,7 @@ export default struct ShiftKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            inputController.insertText("shift");
+            inputController.insert("shift");
         })
     }
 }

@@ -41,7 +41,7 @@ export default struct SpaceKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 let text: string = " ";
-                inputController.insertText(text);
+                inputController.insert(text);
             }
         })
     }

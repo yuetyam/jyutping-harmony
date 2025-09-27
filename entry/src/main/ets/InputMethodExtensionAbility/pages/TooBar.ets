@@ -32,7 +32,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insertText("settings")
+                    inputController.insert("settings");
                 }
             })
 
@@ -52,7 +52,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insertText("emoji")
+                    inputController.insert("emoji");
                 }
             })
 
@@ -81,7 +81,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insertText("editing")
+                    inputController.insert("editing");
                 }
             })
 
@@ -101,7 +101,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insertText("dismiss")
+                    inputController.dismissKeyboard();
                 }
             })
         }

@@ -31,7 +31,7 @@ export default struct LeftKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 let text = this.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText;
-                inputController.insertText(text);
+                inputController.insert(text);
             }
         })
     }

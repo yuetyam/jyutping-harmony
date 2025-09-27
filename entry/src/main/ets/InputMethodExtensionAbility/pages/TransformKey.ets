@@ -37,7 +37,7 @@ export default struct TransformKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            inputController.insertText("123");
+            inputController.insert("123");
         })
     }
 }
