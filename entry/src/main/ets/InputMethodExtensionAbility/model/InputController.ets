@@ -1,8 +1,12 @@
 import { display } from '@kit.ArkUI';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
+import { InputKeyEvent } from './InputKeyEvent';
 import { InputMode } from './InputMode';
+import { KeyboardForm } from './KeyboardForm';
 
 const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
+
+@ObservedV2
 export class InputController {
     private ctx: InputMethodExtensionContext | undefined = undefined;
     private panel: inputMethodEngine.Panel | undefined = undefined;
@@ -11,7 +15,7 @@ export class InputController {
     private keyboardController: inputMethodEngine.KeyboardController | undefined = undefined;
     constructor() {
     }
-    public onCreate(context: InputMethodExtensionContext): void {
+    onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
         try {
             let defaultDisplay = display.getDefaultDisplaySync();
@@ -20,12 +24,8 @@ export class InputController {
             // TODO: Implement error handling.
         }
         this.registerListener()
-        let inputMode: InputMode | undefined = AppStorage.get('currentInputMode');
-        if (inputMode === undefined) {
-            AppStorage.setOrCreate('currentInputMode', InputMode.Cantonese);
-        }
     }
-    public onDestroy(): void {
+    onDestroy(): void {
         this.unRegisterListener()
         if(this.panel) {
             inputMethodAbility.destroyPanel(this.panel);
@@ -34,35 +34,61 @@ export class InputController {
             this.ctx.destroy();
         }
     }
-    public insert(text: string): void {
+    handle(event: InputKeyEvent): void {
+        try {
+            this.inputClient?.insertTextSync(event.text);
+        } catch (error) {
+            // TODO: Implement error handling.
+        }
+    }
+    process(text: string): void {
+        try {
+            this.inputClient?.insertTextSync(text);
+        } catch (error) {
+            // TODO: Implement error handling.
+        }
+    }
+    insert(text: string): void {
         this.inputClient?.insertText(text).catch(() => {
             // TODO: Implement error handling.
         });
     }
-    public backspace(length: number = 1): void {
+    backspace(length: number = 1): void {
         try {
             this.inputClient?.deleteForwardSync(length);
         } catch (error) {
             // TODO: Implement error handling.
         }
     }
-    public rightDelete(length: number = 1): void {
+    rightDelete(length: number = 1): void {
         try {
             this.inputClient?.deleteBackwardSync(length);
         } catch (error) {
             // TODO: Implement error handling.
         }
     }
-    public enterKeyAction() {
+    enterKeyAction(): void {
         let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
         this.inputClient?.sendKeyFunction(actionCode).catch(() => {
             // TODO: Implement error handling.
         })
     }
-    public dismissKeyboard() {
-        this.panel?.hide()
+    dismissKeyboard(): void {
+        this.panel?.hide();
     }
 
+    @Trace keyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
+    transformTo(destination: KeyboardForm): void {
+        this.keyboardForm = destination;
+    }
+
+    @Trace inputMode: InputMode = InputMode.Cantonese;
+    updateInputMode(newInputMode: InputMode): void {
+        this.inputMode = newInputMode;
+    }
+
+    @Trace keyHeight: Length = 53;
+    @Trace keyboardHeight: Length = 268;
     private initWindow(screen: display.Display): void {
         if(this.ctx === undefined) {
             return;
@@ -73,8 +99,8 @@ export class InputController {
         let widthInPoint = displayWidth / density;
         let keyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
         let keyboardHeight = keyHeight * 4 + 56;
-        AppStorage.setOrCreate('keyHeight', keyHeight);
-        AppStorage.setOrCreate('keyboardHeight', keyboardHeight);
+        this.keyHeight = keyHeight;
+        this.keyboardHeight = keyboardHeight;
         let panelHeight = keyboardHeight * density;
         let nonBarPosition = displayHeight - panelHeight;
         let panelInfo: inputMethodEngine.PanelInfo = {

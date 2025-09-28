@@ -1,19 +1,10 @@
 import inputController from '../model/InputController';
-import { KeyboardForm } from '../model/KeyboardForm'
 
 @Component
-export default struct TransformKey {
-    destination: KeyboardForm | undefined = undefined;
+export default struct SymbolKey {
+    keyText: string | undefined = undefined;
     @State private isTouching: boolean = false;
-    private keyText(): string {
-        if (this.destination === KeyboardForm.Numeric) {
-            return "123";
-        } else if (this.destination === KeyboardForm.Symbolic) {
-            return "#+="
-        } else {
-            return "ABC"
-        }
-    }
+
     build() {
         Stack() {
             Flex({
@@ -21,9 +12,11 @@ export default struct TransformKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(this.keyText())
+                if (this.keyText) {
+                    Text(this.keyText).fontSize(22)
+                }
             }
-            .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -49,8 +42,8 @@ export default struct TransformKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                if (this.destination) {
-                    inputController.transformTo(this.destination);
+                if (this.keyText) {
+                    inputController.process(this.keyText)
                 }
             }
         })

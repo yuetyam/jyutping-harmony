@@ -1,8 +1,8 @@
 import inputController from '../model/InputController'
 
-@Component
+@ComponentV2
 export default struct ShiftKey {
-    @State private isTouching: boolean = false
+    @Local private isTouching: boolean = false
     build() {
         Stack() {
             Flex({
@@ -40,7 +40,9 @@ export default struct ShiftKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            inputController.insert("shift");
+            if (event) {
+                inputController.insert("shift");
+            }
         })
     }
 }

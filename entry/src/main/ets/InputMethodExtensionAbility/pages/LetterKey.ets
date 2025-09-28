@@ -44,7 +44,7 @@ export default struct LetterKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 if (this.event) {
-                    inputController.insert(this.event.text)
+                    inputController.handle(this.event)
                 }
             }
         })

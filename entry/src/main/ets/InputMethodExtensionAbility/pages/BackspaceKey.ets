@@ -1,9 +1,9 @@
 import inputController from '../model/InputController'
 
-@Component
+@ComponentV2
 export default struct BackspaceKey {
-    @State private isTouching: boolean = false
-    @State private actionCounter: number = 0
+    @Local private isTouching: boolean = false
+    @Local private actionCounter: number = 0
 
     build() {
         Stack() {

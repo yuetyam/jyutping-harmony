@@ -1,8 +1,8 @@
 import inputController from '../model/InputController'
 
-@Component
+@ComponentV2
 export default struct EnterKey {
-    @State private isTouching: boolean = false
+    @Local private isTouching: boolean = false
     build() {
         Stack() {
             Flex({
@@ -40,7 +40,9 @@ export default struct EnterKey {
             }
         })
         .onClick((event?: ClickEvent) => {
-            inputController.enterKeyAction()
+            if (event) {
+                inputController.enterKeyAction();
+            }
         })
     }
 }

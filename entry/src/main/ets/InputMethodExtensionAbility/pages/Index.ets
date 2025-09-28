@@ -1,7 +1,11 @@
-import ABCKeyboard from './ABCKeyboard'
+import inputController from '../model/InputController';
+import { KeyboardForm } from '../model/KeyboardForm';
+import ABCKeyboard from './ABCKeyboard';
+import NumericKeyboard from './NumericKeyboard';
+import SymbolicKeyboard from './SymbolicKeyboard';
 
 @Entry
-@Component
+@ComponentV2
 struct Index {
     build() {
         Stack() {
@@ -10,7 +14,15 @@ struct Index {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.SpaceBetween
             }) {
-                ABCKeyboard()
+                if (inputController.keyboardForm === KeyboardForm.Numeric) {
+                    NumericKeyboard()
+                } else if (inputController.keyboardForm === KeyboardForm.Symbolic) {
+                    SymbolicKeyboard()
+                } else if (inputController.keyboardForm === KeyboardForm.Alphabetic) {
+                    ABCKeyboard()
+                } else {
+                    ABCKeyboard()
+                }
             }
             .width("100%")
             .height("100%")

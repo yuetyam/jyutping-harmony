@@ -1,4 +1,6 @@
+import inputController from '../model/InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
+import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
 import LeftKey from './LeftKey';
@@ -9,9 +11,9 @@ import SpaceKey from './SpaceKey';
 import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
 
-@Component
+@ComponentV2
 export default struct ABCKeyboard {
-    @StorageProp('keyHeight') keyHeight: Length = 53;
+    keyHeight: Length = inputController.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -20,7 +22,7 @@ export default struct ABCKeyboard {
         }) {
             ToolBar()
                 .width('100%')
-                .height("56vp")
+                .height('56vp')
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 LetterKey({ event: InputKeyEvent.letterQ })
                 LetterKey({ event: InputKeyEvent.letterW })
@@ -69,7 +71,7 @@ export default struct ABCKeyboard {
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey().width('20%')
+                TransformKey({ destination: KeyboardForm.Numeric }).width('20%')
                 LeftKey().width('10%')
                 SpaceKey().width('40%')
                 RightKey().width('10%')

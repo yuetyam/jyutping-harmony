@@ -3,13 +3,12 @@ import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
 import { InputMode } from "../model/InputMode";
 
-@Component
+@ComponentV2
 export default struct ToolBar {
     private buttonLength: Length = '50vp';
     private iconLength: Length = '24vp';
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
-    @StorageLink('currentInputMode') inputMode: InputMode = InputMode.Cantonese;
     build() {
         Flex({
             direction: FlexDirection.Row,
@@ -56,12 +55,13 @@ export default struct ToolBar {
                 }
             })
 
-            InputModeSwitch({ isSwitched: this.inputMode === InputMode.ABC })
+            InputModeSwitch({ isSwitched: inputController.inputMode === InputMode.ABC })
                 .width('70vp')
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
-                        this.inputMode = (this.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
+                        let newMode = (inputController.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
+                        inputController.updateInputMode(newMode);
                     }
                 })
 
