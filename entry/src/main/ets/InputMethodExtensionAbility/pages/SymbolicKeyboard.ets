@@ -1,4 +1,4 @@
-import inputController from '../model/InputController';
+import controller from '../model/InputController';
 import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
@@ -11,7 +11,7 @@ import TransformKey from './TransformKey';
 
 @ComponentV2
 export default struct SymbolicKeyboard {
-    keyHeight: Length = inputController.keyHeight;
+    keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,

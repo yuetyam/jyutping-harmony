@@ -1,4 +1,4 @@
-import inputController from "../model/InputController";
+import controller from "../model/InputController";
 import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
 import { InputMode } from "../model/InputMode";
@@ -31,7 +31,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insert("settings");
+                    controller.insert("settings");
                 }
             })
 
@@ -51,17 +51,17 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insert("emoji");
+                    controller.insert("emoji");
                 }
             })
 
-            InputModeSwitch({ isSwitched: inputController.inputMode === InputMode.ABC })
+            InputModeSwitch({ isSwitched: controller.inputMode === InputMode.ABC })
                 .width('70vp')
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
-                        let newMode = (inputController.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
-                        inputController.updateInputMode(newMode);
+                        let newMode = (controller.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
+                        controller.updateInputMode(newMode);
                     }
                 })
 
@@ -81,7 +81,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.insert("editing");
+                    controller.insert("editing");
                 }
             })
 
@@ -101,7 +101,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
-                    inputController.dismissKeyboard();
+                    controller.dismissKeyboard();
                 }
             })
         }

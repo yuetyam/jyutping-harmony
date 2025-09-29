@@ -1,4 +1,4 @@
-import inputController from '../model/InputController'
+import controller from '../model/InputController'
 
 @ComponentV2
 export default struct BackspaceKey {
@@ -45,7 +45,7 @@ export default struct BackspaceKey {
         .gesture(
             GestureGroup(GestureMode.Parallel,
                 TapGesture().onAction((event: GestureEvent) => {
-                    inputController.backspace();
+                    controller.backspace();
                     this.actionCounter += 1;
                 }),
                 LongPressGesture({
@@ -56,7 +56,7 @@ export default struct BackspaceKey {
                     if (this.actionCounter < 2) {
                         this.actionCounter += 1;
                     } else {
-                        inputController.backspace();
+                        controller.backspace();
                     }
                 }),
                 SwipeGesture({
@@ -64,7 +64,7 @@ export default struct BackspaceKey {
                     direction: SwipeDirection.All,
                     speed: 100
                 }).onAction((event: GestureEvent) => {
-                    inputController.backspace(10);
+                    controller.backspace(10);
                 })
             )
         )

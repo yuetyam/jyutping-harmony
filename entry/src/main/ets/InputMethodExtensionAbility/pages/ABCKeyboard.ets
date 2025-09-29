@@ -1,4 +1,4 @@
-import inputController from '../model/InputController';
+import controller from '../model/InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';
@@ -13,7 +13,7 @@ import TransformKey from './TransformKey';
 
 @ComponentV2
 export default struct ABCKeyboard {
-    keyHeight: Length = inputController.keyHeight;
+    keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,

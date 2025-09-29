@@ -1,4 +1,4 @@
-import inputController from '../model/InputController'
+import controller from '../model/InputController'
 import { InputMode } from '../model/InputMode';
 
 @ComponentV2
@@ -12,7 +12,7 @@ export default struct LeftKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(inputController.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText)
+                Text(controller.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText)
                     .fontSize(20)
             }
             .backgroundColor($r('app.color.key_shallow'))
@@ -29,8 +29,8 @@ export default struct LeftKey {
         .height('100%')
         .onClick((event?: ClickEvent) => {
             if (event) {
-                let text = inputController.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText;
-                inputController.insert(text);
+                let text = controller.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText;
+                controller.insert(text);
             }
         })
     }

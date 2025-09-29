@@ -1,4 +1,4 @@
-import inputController from '../model/InputController';
+import controller from '../model/InputController';
 
 @Component
 export default struct SymbolKey {
@@ -43,7 +43,7 @@ export default struct SymbolKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 if (this.keyText) {
-                    inputController.process(this.keyText)
+                    controller.process(this.keyText)
                 }
             }
         })

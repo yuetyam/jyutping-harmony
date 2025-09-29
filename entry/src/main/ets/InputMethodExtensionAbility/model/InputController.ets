@@ -141,5 +141,5 @@ export class InputController {
     }
 }
 
-const inputController = new InputController();
-export default inputController;
+const controller = new InputController();
+export default controller;

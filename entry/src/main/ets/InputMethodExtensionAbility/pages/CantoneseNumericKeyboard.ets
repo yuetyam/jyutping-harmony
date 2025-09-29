@@ -10,7 +10,7 @@ import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
 
 @ComponentV2
-export default struct NumericKeyboard {
+export default struct CantoneseNumericKeyboard {
     keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
@@ -39,14 +39,14 @@ export default struct NumericKeyboard {
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 SymbolKey({ keyText: "-" })
                 SymbolKey({ keyText: "/" })
-                SymbolKey({ keyText: ":" })
-                SymbolKey({ keyText: ";" })
-                SymbolKey({ keyText: "(" })
-                SymbolKey({ keyText: ")" })
+                SymbolKey({ keyText: "：" })
+                SymbolKey({ keyText: "；" })
+                SymbolKey({ keyText: "（" })
+                SymbolKey({ keyText: "）" })
                 SymbolKey({ keyText: "$" })
-                SymbolKey({ keyText: "&" })
                 SymbolKey({ keyText: "@" })
-                SymbolKey({ keyText: "\"" })
+                SymbolKey({ keyText: "「" })
+                SymbolKey({ keyText: "」" })
             }
             .width('100%')
             .height(this.keyHeight)
@@ -54,13 +54,13 @@ export default struct NumericKeyboard {
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 TransformKey({ destination: KeyboardForm.Symbolic }).width('13%')
                 Blank().width('2%')
+                SymbolKey({ keyText: "。" }).width('10%')
+                SymbolKey({ keyText: "，" }).width('10%')
+                SymbolKey({ keyText: "、" }).width('10%')
+                SymbolKey({ keyText: "？" }).width('10%')
+                SymbolKey({ keyText: "！" }).width('10%')
                 SymbolKey({ keyText: "." }).width('10%')
-                SymbolKey({ keyText: "," }).width('10%')
-                SymbolKey({ keyText: "?" }).width('10%')
-                SymbolKey({ keyText: "!" }).width('10%')
-                SymbolKey({ keyText: "%" }).width('10%')
-                SymbolKey({ keyText: "*" }).width('10%')
-                SymbolKey({ keyText: "'" }).width('10%')
+                SymbolKey({ keyText: "\"" }).width('10%')
                 Blank().width('2%')
                 BackspaceKey().width('13%')
             }

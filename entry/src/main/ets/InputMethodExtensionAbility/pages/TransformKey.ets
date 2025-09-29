@@ -1,4 +1,4 @@
-import inputController from '../model/InputController';
+import controller from '../model/InputController';
 import { KeyboardForm } from '../model/KeyboardForm'
 
 @Component
@@ -50,7 +50,7 @@ export default struct TransformKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 if (this.destination) {
-                    inputController.transformTo(this.destination);
+                    controller.transformTo(this.destination);
                 }
             }
         })

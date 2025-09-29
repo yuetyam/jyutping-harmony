@@ -1,4 +1,4 @@
-import inputController from '../model/InputController'
+import controller from '../model/InputController'
 
 @ComponentV2
 export default struct EnterKey {
@@ -41,7 +41,7 @@ export default struct EnterKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                inputController.enterKeyAction();
+                controller.enterKeyAction();
             }
         })
     }

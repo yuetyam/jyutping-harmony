@@ -1,4 +1,4 @@
-import inputController from '../model/InputController';
+import controller from '../model/InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 
 @Component
@@ -44,7 +44,7 @@ export default struct LetterKey {
         .onClick((event?: ClickEvent) => {
             if (event) {
                 if (this.event) {
-                    inputController.handle(this.event)
+                    controller.handle(this.event)
                 }
             }
         })

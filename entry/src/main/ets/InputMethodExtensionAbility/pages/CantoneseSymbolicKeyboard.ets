@@ -10,7 +10,7 @@ import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
 
 @ComponentV2
-export default struct NumericKeyboard {
+export default struct CantoneseSymbolicKeyboard {
     keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
@@ -22,44 +22,44 @@ export default struct NumericKeyboard {
                 .width('100%')
                 .height('56vp')
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                SymbolKey({ keyText: "1" })
-                SymbolKey({ keyText: "2" })
-                SymbolKey({ keyText: "3" })
-                SymbolKey({ keyText: "4" })
-                SymbolKey({ keyText: "5" })
-                SymbolKey({ keyText: "6" })
-                SymbolKey({ keyText: "7" })
-                SymbolKey({ keyText: "8" })
-                SymbolKey({ keyText: "9" })
-                SymbolKey({ keyText: "0" })
+                SymbolKey({ keyText: "［" })
+                SymbolKey({ keyText: "］" })
+                SymbolKey({ keyText: "｛" })
+                SymbolKey({ keyText: "｝" })
+                SymbolKey({ keyText: "#" })
+                SymbolKey({ keyText: "%" })
+                SymbolKey({ keyText: "^" })
+                SymbolKey({ keyText: "*" })
+                SymbolKey({ keyText: "+" })
+                SymbolKey({ keyText: "=" })
             }
             .width('100%')
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                SymbolKey({ keyText: "-" })
-                SymbolKey({ keyText: "/" })
-                SymbolKey({ keyText: ":" })
-                SymbolKey({ keyText: ";" })
-                SymbolKey({ keyText: "(" })
-                SymbolKey({ keyText: ")" })
-                SymbolKey({ keyText: "$" })
+                SymbolKey({ keyText: "_" })
+                SymbolKey({ keyText: "—" })
+                SymbolKey({ keyText: "\\" })
+                SymbolKey({ keyText: "｜" })
+                SymbolKey({ keyText: "～" })
+                SymbolKey({ keyText: "《" })
+                SymbolKey({ keyText: "》" })
+                SymbolKey({ keyText: "¥" })
                 SymbolKey({ keyText: "&" })
-                SymbolKey({ keyText: "@" })
-                SymbolKey({ keyText: "\"" })
+                SymbolKey({ keyText: "·" })
             }
             .width('100%')
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: KeyboardForm.Symbolic }).width('13%')
+                TransformKey({ destination: KeyboardForm.Numeric }).width('13%')
                 Blank().width('2%')
-                SymbolKey({ keyText: "." }).width('10%')
-                SymbolKey({ keyText: "," }).width('10%')
-                SymbolKey({ keyText: "?" }).width('10%')
-                SymbolKey({ keyText: "!" }).width('10%')
-                SymbolKey({ keyText: "%" }).width('10%')
-                SymbolKey({ keyText: "*" }).width('10%')
+                SymbolKey({ keyText: "…" }).width('10%')
+                SymbolKey({ keyText: "©" }).width('10%')
+                SymbolKey({ keyText: "®" }).width('10%')
+                SymbolKey({ keyText: "℗" }).width('10%')
+                SymbolKey({ keyText: "™" }).width('10%')
+                SymbolKey({ keyText: "℠" }).width('10%')
                 SymbolKey({ keyText: "'" }).width('10%')
                 Blank().width('2%')
                 BackspaceKey().width('13%')
