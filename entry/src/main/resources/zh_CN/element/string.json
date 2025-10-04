@@ -163,6 +163,42 @@
     {
       "name": "permission_vibrate_reason",
       "value": "键盘按键振动"
+    },
+    {
+      "name": "keyboard_editing_panel_back",
+      "value": "返回"
+    },
+    {
+      "name": "keyboard_editing_panel_backspace",
+      "value": "刪除"
+    },
+    {
+      "name": "keyboard_editing_panel_clear",
+      "value": "清空"
+    },
+    {
+      "name": "keyboard_editing_panel_clipboard_clear",
+      "value": "清空系统剪贴板"
+    },
+    {
+      "name": "keyboard_editing_panel_conversion",
+      "value": "简⇆繁"
+    },
+    {
+      "name": "keyboard_editing_panel_copy",
+      "value": "复制"
+    },
+    {
+      "name": "keyboard_editing_panel_cut",
+      "value": "剪下"
+    },
+    {
+      "name": "keyboard_editing_panel_paste",
+      "value": "贴上"
+    },
+    {
+      "name": "keyboard_editing_panel_right_delete",
+      "value": "刪除"
     }
   ]
 }

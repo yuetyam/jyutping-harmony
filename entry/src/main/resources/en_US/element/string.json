@@ -163,6 +163,42 @@
     {
       "name": "permission_vibrate_reason",
       "value": "Keyboard Haptic Feedback"
+    },
+    {
+      "name": "keyboard_editing_panel_back",
+      "value": "Back"
+    },
+    {
+      "name": "keyboard_editing_panel_backspace",
+      "value": "Delete"
+    },
+    {
+      "name": "keyboard_editing_panel_clear",
+      "value": "Clear"
+    },
+    {
+      "name": "keyboard_editing_panel_clipboard_clear",
+      "value": "Clear System Clipboard"
+    },
+    {
+      "name": "keyboard_editing_panel_conversion",
+      "value": "简⇆繁"
+    },
+    {
+      "name": "keyboard_editing_panel_copy",
+      "value": "Copy"
+    },
+    {
+      "name": "keyboard_editing_panel_cut",
+      "value": "Cut"
+    },
+    {
+      "name": "keyboard_editing_panel_paste",
+      "value": "Paste"
+    },
+    {
+      "name": "keyboard_editing_panel_right_delete",
+      "value": "Delete"
     }
   ]
 }

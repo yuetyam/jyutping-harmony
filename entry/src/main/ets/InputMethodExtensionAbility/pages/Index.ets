@@ -1,3 +1,4 @@
+import EditingPanel from '../editing/EditingPanel';
 import controller from '../model/InputController';
 import { InputMode } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
@@ -36,6 +37,8 @@ struct Index {
                     } else {
                         CantoneseSymbolicKeyboard()
                     }
+                } else if (controller.keyboardForm === KeyboardForm.EditingPanel) {
+                    EditingPanel()
                 } else {
                     CantoneseKeyboard()
                 }

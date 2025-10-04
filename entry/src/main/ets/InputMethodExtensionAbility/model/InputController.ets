@@ -158,7 +158,9 @@ export class InputController {
     }
 
     @Trace keyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
+    @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
     transformTo(destination: KeyboardForm): void {
+        this.previousKeyboardForm = this.keyboardForm;
         this.keyboardForm = destination;
     }
 

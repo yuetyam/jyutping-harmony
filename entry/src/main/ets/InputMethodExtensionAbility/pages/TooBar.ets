@@ -2,6 +2,7 @@ import controller from "../model/InputController";
 import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
 import { InputMode } from "../model/InputMode";
+import { KeyboardForm } from "../model/KeyboardForm";
 
 @ComponentV2
 export default struct ToolBar {
@@ -85,7 +86,7 @@ export default struct ToolBar {
             .onClick((event?: ClickEvent) => {
                 if (event) {
                     controller.playModifierSound();
-                    controller.insert("editing");
+                    controller.transformTo(KeyboardForm.EditingPanel);
                 }
             })
 
