@@ -33,6 +33,7 @@ export default struct BackspaceKey {
             switch (event.type) {
                 case TouchType.Down:
                     this.isTouching = true;
+                    controller.playDeleteSound();
                     break;
                 case TouchType.Move:
                     break;

@@ -159,6 +159,10 @@
     {
       "name": "about_email",
       "value": "電郵反饋"
+    },
+    {
+      "name": "permission_vibrate_reason",
+      "value": "鍵盤按鍵振動"
     }
   ]
 }

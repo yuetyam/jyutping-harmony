@@ -30,11 +30,11 @@
     },
     {
       "name": "guide_abbreviated_input_body_row1",
-      "value": "Type faster by entering only the first letters of each syllable. For example, typing “nh” gives you “你好”."
+      "value": "Type faster by entering only syllable initials (e.g., “nh” → “你好”)."
     },
     {
       "name": "guide_abbreviated_input_body_row2",
-      "value": "Combine abbreviated and full input for even more flexibility. For example, “nhou” or “neih” also produces “你好”."
+      "value": "Combine abbreviated and full input for flexibility (e.g., “nhou” / “neih” → “你好”)."
     },
     {
       "name": "guide_pinyin_reverse_lookup_heading",
@@ -159,6 +159,10 @@
     {
       "name": "about_email",
       "value": "Email Feedback"
+    },
+    {
+      "name": "permission_vibrate_reason",
+      "value": "Keyboard Haptic Feedback"
     }
   ]
 }

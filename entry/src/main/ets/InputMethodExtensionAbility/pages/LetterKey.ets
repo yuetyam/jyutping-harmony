@@ -33,6 +33,7 @@ export default struct LetterKey {
             switch (event.type) {
                 case TouchType.Down:
                     this.isTouching = true;
+                    controller.playInputSound();
                     break;
                 case TouchType.Move:
                     break;

@@ -159,6 +159,10 @@
     {
       "name": "about_email",
       "value": "电邮反馈"
+    },
+    {
+      "name": "permission_vibrate_reason",
+      "value": "键盘按键振动"
     }
   ]
 }
