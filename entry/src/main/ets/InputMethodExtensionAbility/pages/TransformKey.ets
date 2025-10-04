@@ -50,9 +50,8 @@ export default struct TransformKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                if (this.destination) {
-                    controller.transformTo(this.destination);
-                }
+                let nextForm = this.destination ?? KeyboardForm.Alphabetic;
+                controller.transformTo(nextForm);
             }
         })
     }

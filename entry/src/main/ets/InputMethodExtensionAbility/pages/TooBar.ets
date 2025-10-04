@@ -31,6 +31,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
+                    controller.playModifierSound();
                     controller.insert("settings");
                 }
             })
@@ -51,6 +52,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
+                    controller.playModifierSound();
                     controller.insert("emoji");
                 }
             })
@@ -60,6 +62,7 @@ export default struct ToolBar {
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
+                        controller.playModifierSound();
                         let newMode = (controller.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
                         controller.updateInputMode(newMode);
                     }
@@ -81,6 +84,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
+                    controller.playModifierSound();
                     controller.insert("editing");
                 }
             })
@@ -101,6 +105,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event?: ClickEvent) => {
                 if (event) {
+                    controller.playModifierSound();
                     controller.dismissKeyboard();
                 }
             })

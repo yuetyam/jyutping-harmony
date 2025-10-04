@@ -2,6 +2,7 @@ import controller from '../model/InputController';
 import { InputMode } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
 import ABCKeyboard from './ABCKeyboard';
+import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
 import NumericKeyboard from './NumericKeyboard';
@@ -17,7 +18,13 @@ struct Index {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.SpaceBetween
             }) {
-                if (controller.keyboardForm === KeyboardForm.Numeric) {
+                if (controller.keyboardForm === KeyboardForm.Alphabetic) {
+                    if (controller.inputMode === InputMode.ABC) {
+                        ABCKeyboard()
+                    } else {
+                        CantoneseKeyboard()
+                    }
+                } else if (controller.keyboardForm === KeyboardForm.Numeric) {
                     if (controller.inputMode === InputMode.ABC) {
                         NumericKeyboard()
                     } else {
@@ -30,7 +37,7 @@ struct Index {
                         CantoneseSymbolicKeyboard()
                     }
                 } else {
-                    ABCKeyboard()
+                    CantoneseKeyboard()
                 }
             }
             .width("100%")
