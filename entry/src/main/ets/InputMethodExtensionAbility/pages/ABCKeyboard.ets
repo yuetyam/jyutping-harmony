@@ -1,11 +1,11 @@
 import controller from '../model/InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 import { KeyboardForm } from '../model/KeyboardForm';
+import ABCLeftKey from './ABCLeftKey';
+import ABCRightKey from './ABCRightKey';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
-import LeftKey from './LeftKey';
 import LetterKey from './LetterKey';
-import RightKey from './RightKey';
 import ShiftKey from './ShiftKey';
 import SpaceKey from './SpaceKey';
 import ToolBar from './TooBar';
@@ -72,9 +72,9 @@ export default struct ABCKeyboard {
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 TransformKey({ destination: KeyboardForm.Numeric }).width('20%')
-                LeftKey().width('10%')
+                ABCLeftKey().width('10%')
                 SpaceKey().width('40%')
-                RightKey().width('10%')
+                ABCRightKey().width('10%')
                 EnterKey().width('20%')
             }
             .width('100%')

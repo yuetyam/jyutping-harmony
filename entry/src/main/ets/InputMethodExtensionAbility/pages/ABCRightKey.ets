@@ -1,8 +1,9 @@
 import controller from '../model/InputController'
+import { InputMode } from '../model/InputMode';
 
 @ComponentV2
-export default struct LeftKey {
-    private keyText: string = "，";
+export default struct ABCRightKey {
+    private keyText: string = ".";
 
     build() {
         Stack() {

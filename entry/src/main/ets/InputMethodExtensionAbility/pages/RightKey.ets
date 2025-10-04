@@ -1,10 +1,9 @@
 import controller from '../model/InputController'
-import { InputMode } from '../model/InputMode';
 
 @ComponentV2
 export default struct RightKey {
     private keyText: string = "。";
-    private altKeyText: string = ".";
+
     build() {
         Stack() {
             Flex({
@@ -12,8 +11,7 @@ export default struct RightKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(controller.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText)
-                    .fontSize(20)
+                Text(this.keyText).fontSize(20)
             }
             .backgroundColor($r('app.color.key_shallow'))
             .borderRadius(7)
@@ -29,8 +27,7 @@ export default struct RightKey {
         .height('100%')
         .onClick((event?: ClickEvent) => {
             if (event) {
-                let text = controller.inputMode === InputMode.Cantonese ? this.keyText : this.altKeyText;
-                controller.insert(text);
+                controller.insert(this.keyText);
             }
         })
     }
