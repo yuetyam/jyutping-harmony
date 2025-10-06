@@ -31,6 +31,37 @@ export default struct SettingsPanel {
                         controller.transformTo(controller.previousKeyboardForm);
                     }
                 })
+                Blank()
+                Text('This page is scrollable')
+                    .fontSize(12)
+                    .opacity(0.8)
+                Blank()
+                Stack() {
+                    Button() {
+                        Stack() {
+                            SymbolGlyph($r('sys.symbol.arrow_up'))
+                                .fontSize(22)
+                                .fontColor([$r('sys.color.ohos_id_color_primary')])
+                                .padding({ bottom: 5 })
+                            SymbolGlyph($r('sys.symbol.arrow_down'))
+                                .fontSize(22)
+                                .fontColor([$r('sys.color.ohos_id_color_primary')])
+                                .padding({ top: 5 })
+                        }
+                    }
+                    .backgroundColor($r('app.color.key_shallow'))
+                    .clipShape(this.shape)
+                    .width(this.shapeLength)
+                    .height(this.shapeLength)
+                }
+                .width('50vp')
+                .height('100%')
+                .onClick((event?: ClickEvent) => {
+                    if (event) {
+                        controller.playModifierSound();
+                        // TODO: Extend Keyboard Height
+                    }
+                })
             }
             .width('100%')
             .height('50vp')
@@ -127,6 +158,42 @@ export default struct SettingsPanel {
                                 // TODO: Handler
                             }
                         })
+                    }
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
+                ListItemGroup() {
+                    ListItem() {
+                        Row() {
+                            Text("Sound Feedback")
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: true })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    // TODO: Handle sound switch
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
+                    }
+                    ListItem() {
+                        Divider()
+                    }
+                    ListItem() {
+                        Row() {
+                            Text("Haptic Feedback")
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: true })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    // TODO: Handle haptic switch
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
                     }
                 }
                 .backgroundColor(this.groupBackgroundColor)

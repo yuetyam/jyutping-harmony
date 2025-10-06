@@ -13,7 +13,7 @@ export struct WebLinkView {
                     .fontColor([$r('app.color.accent')])
                 Text(this.text)
                 Blank()
-                SymbolGlyph($r('sys.symbol.arrow_up_right'))
+                SymbolGlyph($r('sys.symbol.arrow_right_up_and_square'))
                     .fontColor([$r('sys.color.ohos_id_color_primary')])
                     .opacity(0.66)
             }
