@@ -7,6 +7,7 @@ import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
 import NumericKeyboard from './NumericKeyboard';
+import SettingsPanel from './SettingsPanel';
 import SymbolicKeyboard from './SymbolicKeyboard';
 
 @Entry
@@ -39,6 +40,8 @@ struct Index {
                     }
                 } else if (controller.keyboardForm === KeyboardForm.EditingPanel) {
                     EditingPanel()
+                } else if (controller.keyboardForm === KeyboardForm.Settings) {
+                    SettingsPanel()
                 } else {
                     CantoneseKeyboard()
                 }

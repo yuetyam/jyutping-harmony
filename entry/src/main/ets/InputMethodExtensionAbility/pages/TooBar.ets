@@ -33,7 +33,7 @@ export default struct ToolBar {
             .onClick((event?: ClickEvent) => {
                 if (event) {
                     controller.playModifierSound();
-                    controller.insert("settings");
+                    controller.transformTo(KeyboardForm.Settings);
                 }
             })
 
