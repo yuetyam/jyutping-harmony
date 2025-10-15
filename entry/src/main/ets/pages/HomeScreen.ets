@@ -1,11 +1,58 @@
-import { common, Want } from '@kit.AbilityKit'
+import { common, Want } from '@kit.AbilityKit';
+import { relationalStore } from '@kit.ArkData';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { bundleManager } from '@kit.AbilityKit';
+import { CantoneseLexicon } from '../search/CantoneseLexicon';
+import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
+import { DatabaseHelper } from '../search/DatabaseHelper';
 
-@Component
+@ComponentV2
 export struct HomeScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 12;
-    @State private inputText: string = '';
+    @Local private inputText: string = '';
+    @Local private submittedText: string = '';
+    @Monitor('submittedText') performSearch() {
+        if (this.store === undefined) {
+            this.prepareStore();
+        }
+        if (this.store) {
+            if (this.submittedText) {
+                let lexicon = DatabaseHelper.search(this.submittedText, this.store);
+                this.lexicons = [lexicon];
+            } else {
+                this.lexicons = [];
+            }
+        }
+    }
+    @Local private lexicons: CantoneseLexicon[] = [];
+    private store: relationalStore.RdbStore | undefined = undefined;
+    private async prepareStore() {
+        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        let fileName: string = `appdb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let storeConfig: relationalStore.StoreConfig = {
+            name: fileName,
+            securityLevel: relationalStore.SecurityLevel.S1,
+            encrypt: false,
+            customDir: 'app',
+            isReadOnly: true
+        };
+        relationalStore.getRdbStore(this.getUIContext().getHostContext(), storeConfig,
+            async (err: BusinessError, rdbStore: relationalStore.RdbStore) => {
+                if (err) {
+                    console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
+                    return;
+                }
+                this.store = rdbStore;
+            });
+    }
+    onDidBuild(): void {
+        if (this.store === undefined) {
+            this.prepareStore();
+        }
+    }
+
     build() {
         Navigation(this.pageStack) {
             List({ space: 20 }) {
@@ -13,8 +60,19 @@ export struct HomeScreen {
                     Search({
                         value: this.inputText,
                         placeholder: $r('app.string.search_placeholder'),
+                    }).onSubmit((text: string) => {
+                        this.submittedText = text;
                     })
                 }
+                Repeat(this.lexicons)
+                    .each((obj: RepeatItem<CantoneseLexicon>) => {
+                        ListItem() {
+                            CantoneseLexiconView({ lexicon: obj.item })
+                        }
+                        .padding(8)
+                        .backgroundColor(this.groupBackgroundColor)
+                        .borderRadius(this.groupBorderRadius)
+                    })
 
                 ListItem() {
                     Button() {
@@ -22,7 +80,7 @@ export struct HomeScreen {
                             Blank()
                             SymbolGlyph($r('sys.symbol.keyboard')).fontColor([Color.White])
                             Text($r('app.string.home_button_enable_keyboard')).fontColor(Color.White)
-                            SymbolGlyph($r('sys.symbol.keyboard')).opacity(0)
+                            SymbolGlyph($r('sys.symbol.arrow_right_up_and_square')).fontColor([Color.White])
                             Blank()
                         }
                         .padding(8)

@@ -53,7 +53,7 @@
             "name": "ohos.extension.backup",
             "resource": "$profile:backup_config"
           }
-        ],
+        ]
       },
       {
         "description": "Jyutping Keyboard",
