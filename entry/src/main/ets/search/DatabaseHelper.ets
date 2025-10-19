@@ -104,6 +104,9 @@ export class DatabaseHelper {
     }
     static fetchDefinition(text: string, store: relationalStore.RdbStore): string | undefined {
         let definition: string | undefined = undefined;
+        if (text.length != 1) {
+            return definition;
+        }
         const code = text.codePointAt(0);
         const command: string = `SELECT definition FROM definitiontable WHERE code = ${code} LIMIT 1;`;
         let res: relationalStore.ResultSet | undefined = undefined;

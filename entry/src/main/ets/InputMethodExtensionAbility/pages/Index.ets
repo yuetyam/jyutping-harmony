@@ -1,5 +1,5 @@
 import EditingPanel from '../editing/EditingPanel';
-import controller from '../model/InputController';
+import controller from '../InputController';
 import { InputMode } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
 import ABCKeyboard from './ABCKeyboard';

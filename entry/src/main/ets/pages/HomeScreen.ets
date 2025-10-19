@@ -14,9 +14,7 @@ export struct HomeScreen {
     @Local private inputText: string = '';
     @Local private submittedText: string = '';
     @Monitor('submittedText') performSearch() {
-        if (this.store === undefined) {
-            this.prepareStore();
-        }
+        this.prepareStore();
         if (this.store) {
             if (this.submittedText) {
                 let lexicon = DatabaseHelper.search(this.submittedText, this.store);
@@ -28,7 +26,7 @@ export struct HomeScreen {
     }
     @Local private lexicons: CantoneseLexicon[] = [];
     private store: relationalStore.RdbStore | undefined = undefined;
-    private async prepareStore() {
+    private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         let fileName: string = `appdb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
         let storeConfig: relationalStore.StoreConfig = {
@@ -47,9 +45,11 @@ export struct HomeScreen {
                 this.store = rdbStore;
             });
     }
-    onDidBuild(): void {
+    private prepareStore(): void {
         if (this.store === undefined) {
-            this.prepareStore();
+            this.obtainStore();
+        } else if (this.store.version < 1) {
+            this.obtainStore();
         }
     }
 
@@ -60,6 +60,10 @@ export struct HomeScreen {
                     Search({
                         value: this.inputText,
                         placeholder: $r('app.string.search_placeholder'),
+                    }).onEditChange((changed: boolean) => {
+                        if (changed) {
+                            this.prepareStore();
+                        }
                     }).onSubmit((text: string) => {
                         this.submittedText = text;
                     })

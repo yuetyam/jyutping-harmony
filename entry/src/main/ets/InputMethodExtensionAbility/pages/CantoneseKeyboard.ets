@@ -1,4 +1,4 @@
-import controller from '../model/InputController';
+import controller from '../InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';

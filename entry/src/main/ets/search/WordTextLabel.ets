@@ -17,6 +17,8 @@ export struct WordTextLabel {
                     .fontSize('13vp')
                     .opacity(0.75)
             }
+            Blank()
         }
+        .width('100%')
     }
 }

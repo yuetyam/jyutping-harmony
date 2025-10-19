@@ -1,4 +1,4 @@
-import controller from "../model/InputController"
+import controller from "../InputController"
 import { CircleShape } from "@kit.ArkUI";
 
 @ComponentV2

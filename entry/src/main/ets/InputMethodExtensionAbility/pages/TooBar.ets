@@ -1,4 +1,4 @@
-import controller from "../model/InputController";
+import controller from "../InputController";
 import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
 import { InputMode } from "../model/InputMode";

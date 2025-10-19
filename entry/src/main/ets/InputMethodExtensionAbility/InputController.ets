@@ -1,10 +1,14 @@
 import { display } from '@kit.ArkUI';
-import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
+import { relationalStore } from '@kit.ArkData';
+import { bundleManager } from '@kit.AbilityKit';
 import { audio } from '@kit.AudioKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
-import { InputKeyEvent } from './InputKeyEvent';
-import { InputMode } from './InputMode';
-import { KeyboardForm } from './KeyboardForm';
+import { InputKeyEvent } from './model/InputKeyEvent';
+import { InputMode } from './model/InputMode';
+import { KeyboardForm } from './model/KeyboardForm';
+import { Researcher } from './model/Researcher';
 
 const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
 
@@ -100,6 +104,34 @@ export class InputController {
         });
     }
 
+    private store: relationalStore.RdbStore | undefined = undefined;
+    private async obtainStore() {
+        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        let fileName: string = `imedb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let storeConfig: relationalStore.StoreConfig = {
+            name: fileName,
+            securityLevel: relationalStore.SecurityLevel.S1,
+            encrypt: false,
+            customDir: 'ime',
+            isReadOnly: true
+        };
+        relationalStore.getRdbStore(this.ctx, storeConfig,
+            async (err: BusinessError, rdbStore: relationalStore.RdbStore) => {
+                if (err) {
+                    console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
+                    return;
+                }
+                this.store = rdbStore;
+            });
+    }
+    private async prepareStore() {
+        if (this.store === undefined) {
+            this.obtainStore();
+        } else if (this.store.version < 1) {
+            this.obtainStore();
+        }
+    }
+
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
@@ -111,6 +143,7 @@ export class InputController {
         }
         this.registerListener();
         this.prepareSoundPool();
+        this.prepareStore();
     }
     onDestroy(): void {
         this.releaseSoundPool();
@@ -122,10 +155,17 @@ export class InputController {
             this.ctx.destroy();
         }
     }
+    private bufferEvents: InputKeyEvent[] = [];
     handle(event: InputKeyEvent): void {
-        this.inputClient?.insertText(event.text).catch(() => {
-            // TODO: Implement error handling.
-        });
+        this.bufferEvents.push(event);
+        if (this.store) {
+            let lexicons = Researcher.search(this.bufferEvents, this.store);
+            if (lexicons.length > 0) {
+                this.inputClient?.insertText(lexicons[0].text).catch(() => {
+                    // TODO: Implement error handling.
+                });
+            }
+        }
     }
     process(text: string): void {
         this.inputClient?.insertText(text).catch(() => {

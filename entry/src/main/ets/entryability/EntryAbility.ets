@@ -22,7 +22,7 @@ export default class EntryAbility extends UIAbility {
             }
         } catch (error) {
             let err: BusinessError = error as BusinessError;
-            console.error("copy directory failed with error message: " + err.message + ", error code: " + err.code);
+            console.error("copyAppDatabase() failed with error message: " + err.message + ", error code: " + err.code);
         }
     }
 
@@ -33,6 +33,7 @@ export default class EntryAbility extends UIAbility {
             // TODO: Implement error handling.
         }
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
+        this.copyAppDatabase();
     }
 
     onDestroy(): void {
@@ -73,7 +74,6 @@ export default class EntryAbility extends UIAbility {
                 }
             });
         });
-        this.copyAppDatabase();
     }
 
     onWindowStageDestroy(): void {

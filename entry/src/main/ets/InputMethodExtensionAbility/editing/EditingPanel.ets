@@ -1,4 +1,4 @@
-import controller from '../model/InputController';
+import controller from '../InputController';
 import EditingBackKey from './EditingBackKey';
 import EditingBackspaceKey from './EditingBackspaceKey';
 import EditingClearKey from './EditingClearKey';

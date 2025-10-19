@@ -1,4 +1,4 @@
-import controller from '../model/InputController'
+import controller from '../InputController'
 import { InputMode } from '../model/InputMode';
 
 @ComponentV2
