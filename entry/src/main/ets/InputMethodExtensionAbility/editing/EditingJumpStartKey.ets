@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingJumpStartKey {
@@ -41,7 +42,7 @@ export default struct EditingJumpStartKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert('start');
+                controller.performEditing(EditingAction.JumpToStart);
             }
         })
     }

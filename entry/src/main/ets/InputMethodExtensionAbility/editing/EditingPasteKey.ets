@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingPasteKey {
@@ -43,7 +44,7 @@ export default struct EditingPasteKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert("paste");
+                controller.performEditing(EditingAction.Paste);
             }
         })
     }

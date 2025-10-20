@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingMoveRightKey {
@@ -41,7 +42,7 @@ export default struct EditingMoveRightKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert('right');
+                controller.performEditing(EditingAction.MoveRight);
             }
         })
     }

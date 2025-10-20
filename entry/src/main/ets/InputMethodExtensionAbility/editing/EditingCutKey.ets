@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingCutKey {
@@ -43,7 +44,7 @@ export default struct EditingCutKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert("cut");
+                controller.performEditing(EditingAction.CutAllText);
             }
         })
     }

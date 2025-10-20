@@ -2,7 +2,7 @@ import { display } from '@kit.ArkUI';
 import { relationalStore } from '@kit.ArkData';
 import { bundleManager } from '@kit.AbilityKit';
 import { audio } from '@kit.AudioKit';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
 import { InputKeyEvent } from './model/InputKeyEvent';
@@ -11,6 +11,7 @@ import { KeyboardForm } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
+import { EditingAction } from './editing/EditingAction';
 
 const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
 
@@ -305,6 +306,83 @@ export class InputController {
     private unRegisterListener(): void {
         inputMethodAbility.off('inputStart');
         inputMethodAbility.off('inputStop', () => {});
+    }
+
+    performEditing(action: EditingAction): void {
+        switch (action) {
+            case EditingAction.Paste:
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.PASTE).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.ClearSystemClipboard:
+                pasteboard.getSystemPasteboard().clearData();
+                break
+            case EditingAction.CopyAllText:
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.COPY).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.CutAllText:
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.CUT).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.ClearAllText:
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                this.inputClient?.deleteForward(1).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.ConvertAllText:
+                // TODO: Traditional-Simplified conversion
+                let text: string = "Implement T-S conversion";
+                this.insert(text);
+                break
+            case EditingAction.MoveLeft:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_LEFT).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.MoveRight:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_RIGHT).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.MoveUp:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.MoveDown:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.JumpToStart:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            case EditingAction.JumpToEnd:
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
+                    // TODO: Implement error handling.
+                });
+                break
+            default:
+                break
+        }
     }
 }
 

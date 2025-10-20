@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingConversionKey {
@@ -43,7 +44,7 @@ export default struct EditingConversionKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert("简⇆繁");
+                controller.performEditing(EditingAction.ConvertAllText);
             }
         })
     }

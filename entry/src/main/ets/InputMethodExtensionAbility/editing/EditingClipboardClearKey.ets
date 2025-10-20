@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { EditingAction } from './EditingAction';
 
 @ComponentV2
 export default struct EditingClipboardClearKey {
@@ -43,7 +44,7 @@ export default struct EditingClipboardClearKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.insert("clear");
+                controller.performEditing(EditingAction.ClearSystemClipboard);
             }
         })
     }
