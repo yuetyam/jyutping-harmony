@@ -3,7 +3,7 @@ import { SeparatorMark } from "./SeparatorMark";
 
 @ComponentV2
 export struct PronunciationView {
-    @Param @Require pronunciation: Pronunciation;
+    @Param @Require @Once pronunciation: Pronunciation;
     build() {
         Column({ space: 6 }) {
             Row({ space: 2 }) {
@@ -21,7 +21,6 @@ export struct PronunciationView {
                     SeparatorMark()
                     Text(this.pronunciation.homophones.join(" "))
                 }
-                .alignItems(VerticalAlign.Top)
             }
             if (this.pronunciation.collocations.length > 0) {
                 Row({ space: 2 }) {
@@ -29,22 +28,23 @@ export struct PronunciationView {
                         .fontSize('15vp')
                         .opacity(0.9)
                     SeparatorMark()
-                    Text(this.pronunciation.collocations.join(" "))
+                    Text(this.pronunciation.collocations.slice(0, 5).join(" "))
                 }
                 .alignItems(VerticalAlign.Top)
             }
-            Repeat(this.pronunciation.descriptions)
-                .each((obj: RepeatItem<string>) => {
-                    Row({ space: 2 }) {
-                        Text("釋義")
-                            .fontSize('15vp')
-                            .opacity(0.9)
-                        SeparatorMark()
-                        Text(obj.item)
-                    }
-                    .alignItems(VerticalAlign.Top)
-                })
+            ForEach(this.pronunciation.descriptions, (item: string) => {
+                Row({ space: 2 }) {
+                    Text("釋義")
+                        .fontSize('15vp')
+                        .opacity(0.9)
+                    SeparatorMark()
+                    Text(item)
+                }
+                .alignItems(VerticalAlign.Top)
+            }, (item: string) => item)
         }
         .alignItems(HorizontalAlign.Start)
+        .width('85%')
+        // TODO: Better width value
     }
 }

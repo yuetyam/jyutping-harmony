@@ -80,7 +80,7 @@ export class DatabaseHelper {
         if (rowText === "X") {
             return [];
         } else {
-            const items = rowText?.split(";").map((item) => item.trim())
+            const items = rowText?.split(";").map((item) => item.trim());
             return items ?? [];
         }
     }

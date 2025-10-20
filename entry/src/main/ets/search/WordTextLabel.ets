@@ -2,7 +2,7 @@ import { SeparatorMark } from "./SeparatorMark";
 
 @ComponentV2
 export struct WordTextLabel {
-    @Param @Require word: string;
+    @Param @Require @Once word: string;
     build() {
         Row({ space: 16 }) {
             Row({ space: 2 }) {

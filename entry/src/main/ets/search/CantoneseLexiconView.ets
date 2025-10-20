@@ -6,15 +6,14 @@ import { SeparatorMark } from "./SeparatorMark";
 
 @ComponentV2
 export struct CantoneseLexiconView {
-    @Param @Require lexicon: CantoneseLexicon;
+    @Param @Require @Once lexicon: CantoneseLexicon;
     build() {
         Column({ space: 6 }) {
             WordTextLabel({ word: this.lexicon.text })
-            Repeat(this.lexicon.pronunciations)
-                .each((obj: RepeatItem<Pronunciation>) => {
-                    Divider()
-                    PronunciationView({ pronunciation: obj.item })
-                })
+            ForEach(this.lexicon.pronunciations, (item: Pronunciation) => {
+                Divider()
+                PronunciationView({ pronunciation: item })
+            }, (item: Pronunciation) => item.romanization)
             if (this.lexicon?.unihanDefinition) {
                 Divider()
                 Row({ space: 2 }) {

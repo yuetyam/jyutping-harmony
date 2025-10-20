@@ -68,15 +68,14 @@ export struct HomeScreen {
                         this.submittedText = text;
                     })
                 }
-                Repeat(this.lexicons)
-                    .each((obj: RepeatItem<CantoneseLexicon>) => {
-                        ListItem() {
-                            CantoneseLexiconView({ lexicon: obj.item })
-                        }
-                        .padding(8)
-                        .backgroundColor(this.groupBackgroundColor)
-                        .borderRadius(this.groupBorderRadius)
-                    })
+                ForEach(this.lexicons, (item: CantoneseLexicon) => {
+                    ListItem() {
+                        CantoneseLexiconView({ lexicon: item })
+                    }
+                    .padding(8)
+                    .backgroundColor(this.groupBackgroundColor)
+                    .borderRadius(this.groupBorderRadius)
+                }, (item: CantoneseLexicon) => item.text)
 
                 ListItem() {
                     Button() {
