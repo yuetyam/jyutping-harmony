@@ -1,11 +1,10 @@
 import controller from '../InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 
-@Component
+@ComponentV2
 export default struct LetterKey {
-    event: InputKeyEvent | undefined = undefined;
-    @State private isTouching: boolean = false;
-
+    @Param @Require @Once event: InputKeyEvent;
+    @Local private isTouching: boolean = false;
     build() {
         Stack() {
             Flex({
@@ -13,9 +12,7 @@ export default struct LetterKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                if (this.event) {
-                    Text(this.event.text).fontSize(22)
-                }
+                Text(this.event.text).fontSize(22)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
@@ -44,9 +41,7 @@ export default struct LetterKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                if (this.event) {
-                    controller.handle(this.event)
-                }
+                controller.handle(this.event)
             }
         })
     }

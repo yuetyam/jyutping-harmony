@@ -9,6 +9,8 @@ import { InputKeyEvent } from './model/InputKeyEvent';
 import { InputMode } from './model/InputMode';
 import { KeyboardForm } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
+import { Candidate } from './model/Candidate';
+import { CandidateType } from './model/CandidateType';
 
 const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
 
@@ -155,16 +157,36 @@ export class InputController {
             this.ctx.destroy();
         }
     }
+    @Trace candidates: Candidate[] = [];
+    @Trace isBuffering: boolean = false;
     private bufferEvents: InputKeyEvent[] = [];
+    get isBufferEmpty(): boolean {
+        const hasBuffer = this.bufferEvents.length > 0;
+        if (this.isBuffering != hasBuffer) {
+            this.isBuffering = hasBuffer;
+        }
+        return !hasBuffer
+    }
     handle(event: InputKeyEvent): void {
         this.bufferEvents.push(event);
+        this.runInputSession();
+    }
+    private async runInputSession() {
+        if (this.isBufferEmpty) {
+            this.candidates = [];
+            return;
+        }
         if (this.store) {
-            let lexicons = Researcher.search(this.bufferEvents, this.store);
-            if (lexicons.length > 0) {
-                this.inputClient?.insertText(lexicons[0].text).catch(() => {
-                    // TODO: Implement error handling.
-                });
-            }
+            const items = await Researcher.search(this.bufferEvents, this.store);
+            this.candidates = items.map((item) => {
+                let instance: Candidate = {
+                    type: CandidateType.Cantonese,
+                    text: item.text,
+                    comment: item.romanization,
+                    lexicon: item
+                };
+                return instance;
+            });
         }
     }
     process(text: string): void {
@@ -178,14 +200,37 @@ export class InputController {
         });
     }
     backspace(length: number = 1): void {
-        this.inputClient?.deleteForward(length).catch(() => {
-            // TODO: Implement error handling.
-        });
+        if (this.isBufferEmpty) {
+            this.inputClient?.deleteForward(length).catch(() => {
+                // TODO: Implement error handling.
+            });
+        } else {
+            this.bufferEvents.pop();
+            this.runInputSession();
+        }
+    }
+    clearBuffer(): void {
+        this.bufferEvents = [];
+        this.runInputSession();
     }
     rightDelete(length: number = 1): void {
         this.inputClient?.deleteBackward(length).catch(() => {
             // TODO: Implement error handling.
         });
+    }
+    space(): void {
+        if (this.candidates.length > 0) {
+            let first = this.candidates[0];
+            let text = first.text;
+            this.insert(text);
+            let inputLength = first.lexicon.inputCount;
+            let startIndex = this.bufferEvents.length - inputLength;
+            this.bufferEvents.splice(startIndex, inputLength);
+            this.runInputSession();
+        } else {
+            let text = " ";
+            this.insert(text);
+        }
     }
     enterKeyAction(): void {
         let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;

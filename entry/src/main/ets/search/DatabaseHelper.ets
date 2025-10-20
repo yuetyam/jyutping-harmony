@@ -7,7 +7,7 @@ export class DatabaseHelper {
     static search(text: string, store: relationalStore.RdbStore): CantoneseLexicon {
         const romanizations = DatabaseHelper.fetchRomanizations(text, store);
         const pronunciations: Pronunciation[] = romanizations.map( (romanization) => {
-            const homophones = DatabaseHelper.fetchHomophones(romanization, store);
+            const homophones = DatabaseHelper.fetchHomophones(romanization, store).filter(item => item !== text);
             const collocations = DatabaseHelper.fetchCollocations(text, romanization, store);
             const descriptions = DatabaseHelper.fetchDescriptions(text, romanization, store);
             let pronunciation: Pronunciation = {

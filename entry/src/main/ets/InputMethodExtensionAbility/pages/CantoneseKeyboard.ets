@@ -2,6 +2,7 @@ import controller from '../InputController';
 import { InputKeyEvent } from '../model/InputKeyEvent';
 import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';
+import CandidateBar from './CandidateBar';
 import EnterKey from './EnterKey';
 import LeftKey from './LeftKey';
 import LetterKey from './LetterKey';
@@ -20,9 +21,15 @@ export default struct CantoneseKeyboard {
             alignItems: ItemAlign.Center,
             justifyContent: FlexAlign.SpaceEvenly
         }) {
-            ToolBar()
-                .width('100%')
-                .height('56vp')
+            Stack() {
+                if (controller.isBuffering) {
+                    CandidateBar()
+                } else {
+                    ToolBar()
+                }
+            }
+            .width('100%')
+            .height('56vp')
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 LetterKey({ event: InputKeyEvent.letterQ })
                 LetterKey({ event: InputKeyEvent.letterW })

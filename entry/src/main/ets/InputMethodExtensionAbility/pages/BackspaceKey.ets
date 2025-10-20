@@ -65,7 +65,7 @@ export default struct BackspaceKey {
                     direction: SwipeDirection.All,
                     speed: 100
                 }).onAction((event: GestureEvent) => {
-                    controller.backspace(10);
+                    controller.clearBuffer();
                 })
             )
         )
