@@ -6,12 +6,13 @@ import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
 import { InputKeyEvent } from './model/InputKeyEvent';
-import { InputMode } from './model/InputMode';
+import { InputMode, InputModeCompanion } from './model/InputMode';
 import { KeyboardForm } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
 import { EditingAction } from './editing/EditingAction';
+import { KeyboardCase } from './model/KeyboardCase';
 
 const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
 
@@ -169,8 +170,12 @@ export class InputController {
         return !hasBuffer
     }
     handle(event: InputKeyEvent): void {
-        this.bufferEvents.push(event);
-        this.runInputSession();
+        if (InputModeCompanion.isABC(this.inputMode)) {
+            this.insert(event.text);
+        } else {
+            this.bufferEvents.push(event);
+            this.runInputSession();
+        }
     }
     private async runInputSession() {
         if (this.isBufferEmpty) {
@@ -253,6 +258,11 @@ export class InputController {
     @Trace inputMode: InputMode = InputMode.Cantonese;
     updateInputMode(newInputMode: InputMode): void {
         this.inputMode = newInputMode;
+    }
+
+    @Trace keyboardCase: KeyboardCase = KeyboardCase.lowercased;
+    updateKeyboardCase(newCase: KeyboardCase): void {
+        this.keyboardCase = newCase;
     }
 
     @Trace keyHeight: Length = 53;

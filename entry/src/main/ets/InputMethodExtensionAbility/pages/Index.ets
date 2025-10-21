@@ -1,6 +1,6 @@
 import EditingPanel from '../editing/EditingPanel';
 import controller from '../InputController';
-import { InputMode } from '../model/InputMode';
+import { InputModeCompanion } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
 import ABCKeyboard from './ABCKeyboard';
 import CantoneseKeyboard from './CantoneseKeyboard';
@@ -21,19 +21,19 @@ struct Index {
                 justifyContent: FlexAlign.SpaceBetween
             }) {
                 if (controller.keyboardForm === KeyboardForm.Alphabetic) {
-                    if (controller.inputMode === InputMode.ABC) {
+                    if (InputModeCompanion.isABC(controller.inputMode)) {
                         ABCKeyboard()
                     } else {
                         CantoneseKeyboard()
                     }
                 } else if (controller.keyboardForm === KeyboardForm.Numeric) {
-                    if (controller.inputMode === InputMode.ABC) {
+                    if (InputModeCompanion.isABC(controller.inputMode)) {
                         NumericKeyboard()
                     } else {
                         CantoneseNumericKeyboard()
                     }
                 } else if (controller.keyboardForm === KeyboardForm.Symbolic) {
-                    if (controller.inputMode === InputMode.ABC) {
+                    if (InputModeCompanion.isABC(controller.inputMode)) {
                         SymbolicKeyboard()
                     } else {
                         CantoneseSymbolicKeyboard()

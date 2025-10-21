@@ -1,5 +1,5 @@
 import controller from '../InputController'
-import { InputMode } from '../model/InputMode'
+import { InputModeCompanion } from '../model/InputMode'
 
 @ComponentV2
 export default struct SpaceKey {
@@ -11,7 +11,7 @@ export default struct SpaceKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(controller.inputMode === InputMode.Cantonese ? "粵拼" : "space")
+                Text(InputModeCompanion.isABC(controller.inputMode) ? "space" : "粵拼")
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)

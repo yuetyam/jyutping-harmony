@@ -1,7 +1,7 @@
 import controller from "../InputController";
 import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
-import { InputMode } from "../model/InputMode";
+import { InputMode, InputModeCompanion } from "../model/InputMode";
 import { KeyboardForm } from "../model/KeyboardForm";
 
 @ComponentV2
@@ -58,13 +58,13 @@ export default struct ToolBar {
                 }
             })
 
-            InputModeSwitch({ isSwitched: controller.inputMode === InputMode.ABC })
+            InputModeSwitch({ isSwitched: InputModeCompanion.isABC(controller.inputMode) })
                 .width('70vp')
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
                         controller.playModifierSound();
-                        let newMode = (controller.inputMode === InputMode.ABC) ? InputMode.Cantonese : InputMode.ABC;
+                        let newMode = InputModeCompanion.isABC(controller.inputMode) ? InputMode.Cantonese : InputMode.ABC;
                         controller.updateInputMode(newMode);
                     }
                 })
