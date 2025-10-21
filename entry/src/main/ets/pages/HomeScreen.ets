@@ -1,7 +1,7 @@
-import { common, Want } from '@kit.AbilityKit';
+import { common, Want, bundleManager } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { bundleManager } from '@kit.AbilityKit';
+import { inputMethod } from '@kit.IMEKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
 import { DatabaseHelper } from '../search/DatabaseHelper';
@@ -53,6 +53,23 @@ export struct HomeScreen {
         }
     }
 
+    @Local private shouldShowInputMethodButtons: boolean = true;
+    private detectInputMethodState(): void {
+        const packageName: string = "org.jyutping.jyutping";
+        // const identifier: string = "InputMethodExtensionAbility";
+        try {
+            let currentInputMethod = inputMethod.getCurrentInputMethod();
+            this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
+        } catch (error) {
+        }
+    }
+    aboutToAppear(): void {
+        this.detectInputMethodState();
+    }
+    aboutToReuse(): void {
+        this.detectInputMethodState();
+    }
+
     build() {
         Navigation(this.pageStack) {
             List({ space: 20 }) {
@@ -77,36 +94,38 @@ export struct HomeScreen {
                     .borderRadius(this.groupBorderRadius)
                 }, (item: CantoneseLexicon) => item.text)
 
-                ListItem() {
-                    Button() {
-                        Row({ space: 12 }) {
-                            Blank()
-                            SymbolGlyph($r('sys.symbol.keyboard')).fontColor([Color.White])
-                            Text($r('app.string.home_button_enable_keyboard')).fontColor(Color.White)
-                            SymbolGlyph($r('sys.symbol.arrow_right_up_and_square')).fontColor([Color.White])
-                            Blank()
-                        }
-                        .padding(8)
-                    }
-                    .backgroundColor($r('app.color.accent'))
-                    .width('100%')
-                    .onClick((event?: ClickEvent) => {
-                        if (event) {
-                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-                            let want: Want = {
-                                bundleName: 'com.huawei.hmos.settings',
-                                abilityName: 'com.huawei.hmos.settings.MainAbility',
-                                uri: 'set_input',
-                                parameters: {
-                                    bundleName: context.abilityInfo.bundleName,
-                                    pushParams: context.abilityInfo.bundleName
-                                }
+                if (this.shouldShowInputMethodButtons) {
+                    ListItem() {
+                        Button() {
+                            Row({ space: 12 }) {
+                                Blank()
+                                SymbolGlyph($r('sys.symbol.keyboard')).fontColor([Color.White])
+                                Text($r('app.string.home_button_enable_keyboard')).fontColor(Color.White)
+                                SymbolGlyph($r('sys.symbol.arrow_right_up_and_square')).fontColor([Color.White])
+                                Blank()
                             }
-                            context.startAbility(want).catch(() => {
-                                // TODO: Implement error handling.
-                            })
+                            .padding(8)
                         }
-                    })
+                        .backgroundColor($r('app.color.accent'))
+                        .width('100%')
+                        .onClick((event?: ClickEvent) => {
+                            if (event) {
+                                let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+                                let want: Want = {
+                                    bundleName: 'com.huawei.hmos.settings',
+                                    abilityName: 'com.huawei.hmos.settings.MainAbility',
+                                    uri: 'set_input',
+                                    parameters: {
+                                        bundleName: context.abilityInfo.bundleName,
+                                        pushParams: context.abilityInfo.bundleName
+                                    }
+                                }
+                                context.startAbility(want).catch(() => {
+                                    // TODO: Implement error handling.
+                                })
+                            }
+                        })
+                    }
                 }
 
                 ListItemGroup({ space: 8 }) {
