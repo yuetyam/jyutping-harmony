@@ -25,11 +25,22 @@ export class Researcher {
         return Researcher.radix100Combined(codes);
     }
     static async search(events: InputKeyEvent[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
-        const text = events.map((item) => item.text).join("");
-        const pingMatched: Lexicon[] = Researcher.hashMatch(text, store);
-        const anchorsMatched: Lexicon[] = Researcher.anchorsMatch(events, text, store);
-        return [...pingMatched, ...anchorsMatched];
+        return Researcher.processSlices(events, store);
     }
+
+    private static processSlices(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+        const eventLength: number = events.length;
+        const range = [...Array(eventLength)].map((value: number, index: number) => index);
+        let items: Lexicon[] = range.flatMap(num => {
+            const leadingEvents = events.slice(0, eventLength - num);
+            const leadingText = leadingEvents.map((event) => event.text).join("")
+            const pingMatched = Researcher.hashMatch(leadingText, store);
+            const anchorsMatched = Researcher.anchorsMatch(leadingEvents, leadingText, store);
+            return [...pingMatched, ...anchorsMatched];
+        })
+        return items;
+    }
+
     private static anchorsMatch(events: InputKeyEvent[], text: string, store: relationalStore.RdbStore): Lexicon[] {
         const code = Researcher.anchorsCode(events);
         if (code === 0) {
