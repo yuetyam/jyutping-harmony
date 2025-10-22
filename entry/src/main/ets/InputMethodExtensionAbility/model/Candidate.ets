@@ -6,4 +6,5 @@ export interface Candidate {
     readonly text: string;
     readonly comment?: string;
     readonly lexicon: Lexicon;
+    readonly number: number;
 }

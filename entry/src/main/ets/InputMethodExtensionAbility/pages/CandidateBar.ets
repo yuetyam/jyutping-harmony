@@ -6,7 +6,6 @@ import CandidateView from "./CandidateView";
 @ComponentV2
 export default struct CandidateBar {
     private buttonLength = '44vp';
-    private iconLength: Length = '24vp';
     private shape = new CircleShape({ width: this.buttonLength, height: this.buttonLength });
     private scroller: Scroller = new Scroller();
     build() {
@@ -26,8 +25,8 @@ export default struct CandidateBar {
                 Button() {
                     Image($r('app.media.chevron_down'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
+                        .width('20vp')
+                        .height('20vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)

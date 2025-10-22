@@ -1,3 +1,4 @@
+import controller from "../InputController";
 import { Candidate } from "../model/Candidate"
 
 @ComponentV2
@@ -15,5 +16,10 @@ export default struct CandidateView {
         }
         .padding({ left: 5, right: 5 })
         .height('100%')
+        .onClick((event?: ClickEvent) => {
+            if (event) {
+                controller.selectCandidate(this.candidate.number);
+            }
+        })
     }
 }

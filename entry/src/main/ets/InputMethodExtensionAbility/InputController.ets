@@ -184,15 +184,29 @@ export class InputController {
         }
         if (this.store) {
             const items = await Researcher.search(this.bufferEvents, this.store);
+            let currentIndex: number = 0;
             this.candidates = items.map((item) => {
                 let instance: Candidate = {
                     type: CandidateType.Cantonese,
                     text: item.text,
                     comment: item.romanization,
-                    lexicon: item
+                    lexicon: item,
+                    number: currentIndex,
                 };
+                currentIndex += 1;
                 return instance;
             });
+        }
+    }
+    selectCandidate(index: number) {
+        if (this.candidates.length > index) {
+            const selected = this.candidates[index];
+            const text = selected.text;
+            this.insert(text);
+            const inputLength = selected.lexicon.inputCount;
+            const startIndex = this.bufferEvents.length - inputLength;
+            this.bufferEvents.splice(startIndex, inputLength);
+            this.runInputSession();
         }
     }
     process(text: string): void {
@@ -226,13 +240,7 @@ export class InputController {
     }
     space(): void {
         if (this.candidates.length > 0) {
-            let first = this.candidates[0];
-            let text = first.text;
-            this.insert(text);
-            let inputLength = first.lexicon.inputCount;
-            let startIndex = this.bufferEvents.length - inputLength;
-            this.bufferEvents.splice(startIndex, inputLength);
-            this.runInputSession();
+            this.selectCandidate(0);
         } else {
             let text = " ";
             this.insert(text);
