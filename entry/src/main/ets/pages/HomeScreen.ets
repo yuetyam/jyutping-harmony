@@ -5,6 +5,9 @@ import { inputMethod } from '@kit.IMEKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
 import { DatabaseHelper } from '../search/DatabaseHelper';
+import { YingWaaHelper } from '../search/YingWaaHelper';
+import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
+import { YingWaaLexicon } from '../search/YingWaaUnit';
 
 @ComponentV2
 export struct HomeScreen {
@@ -17,14 +20,17 @@ export struct HomeScreen {
         this.prepareStore();
         if (this.store) {
             if (this.submittedText) {
-                let lexicon = DatabaseHelper.search(this.submittedText, this.store);
+                const lexicon = DatabaseHelper.search(this.submittedText, this.store);
                 this.lexicons = [lexicon];
+                this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
             } else {
                 this.lexicons = [];
+                this.yingWaaLexicons = [];
             }
         }
     }
     @Local private lexicons: CantoneseLexicon[] = [];
+    @Local private yingWaaLexicons: YingWaaLexicon[] = [];
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -93,6 +99,23 @@ export struct HomeScreen {
                     .backgroundColor(this.groupBackgroundColor)
                     .borderRadius(this.groupBorderRadius)
                 }, (item: CantoneseLexicon) => item.text)
+
+                ForEach(this.yingWaaLexicons, (item: YingWaaLexicon) => {
+                    ListItemGroup() {
+                        ListItem() {
+                            Text("《英華分韻撮要》　衛三畏　1856年　廣州")
+                                .fontSize(13)
+                                .opacity(0.9)
+                        }
+                        .padding(2)
+                        ListItem() {
+                            YingWaaLexiconView({ lexicon: item })
+                        }
+                        .padding(8)
+                        .backgroundColor(this.groupBackgroundColor)
+                        .borderRadius(this.groupBorderRadius)
+                    }
+                }, (item: YingWaaLexicon) => item.word)
 
                 if (this.shouldShowInputMethodButtons) {
                     ListItem() {
