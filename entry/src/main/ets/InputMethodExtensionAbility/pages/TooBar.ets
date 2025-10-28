@@ -59,7 +59,7 @@ export default struct ToolBar {
             })
 
             InputModeSwitch({ isSwitched: InputModeCompanion.isABC(controller.inputMode) })
-                .width('70vp')
+                .width('68vp')
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
