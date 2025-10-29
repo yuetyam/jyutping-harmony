@@ -1,11 +1,11 @@
 import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
-import { ChoHokLexicon, ChoHokUnit } from './ChoHokUnit';
+import { FanWanLexicon, FanWanUnit } from './FanWanUnit';
 
-// chohoktable(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, tone TEXT NOT NULL, faancit TEXT NOT NULL);
+// fanwantable(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, yamyeung TEXT NOT NULL, tone TEXT NOT NULL, rhyme TEXT NOT NULL, interpretation TEXT NOT NULL);
 
-export class ChoHokHelper {
-    static search(text: string, store: relationalStore.RdbStore): ChoHokLexicon[] {
+export class FanWanHelper {
+    static search(text: string, store: relationalStore.RdbStore): FanWanLexicon[] {
         if (text.length > 0) {
             const codes = new Set<number>();
             for (let index = 0; index < text.length; index++) {
@@ -14,9 +14,9 @@ export class ChoHokHelper {
                     codes.add(code);
                 }
             }
-            const lexicons: ChoHokLexicon[] = [];
+            const lexicons: FanWanLexicon[] = [];
             codes.forEach(code => {
-                const instance = ChoHokHelper.match(code, store);
+                const instance = FanWanHelper.match(code, store);
                 lexicons.push(instance);
             })
             return lexicons.filter(item => item.isNotEmpty);
@@ -24,9 +24,9 @@ export class ChoHokHelper {
             return [];
         }
     }
-    static match(code: number, store: relationalStore.RdbStore): ChoHokLexicon {
-        const units: ChoHokUnit[] = [];
-        const command: string = `SELECT * FROM chohoktable WHERE code = ${code};`;
+    static match(code: number, store: relationalStore.RdbStore): FanWanLexicon {
+        const units: FanWanUnit[] = [];
+        const command: string = `SELECT * FROM fanwantable WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
@@ -36,14 +36,19 @@ export class ChoHokHelper {
                 const romanization = res.getString(2);
                 const initial = res.getString(3);
                 const final = res.getString(4);
-                const tone = res.getString(5);
-                const faancit = res.getString(6);
-                const instance: ChoHokUnit = {
+                const yamyeung = res.getString(5);
+                const tone = res.getString(6);
+                const rhyme = res.getString(7);
+                const interpretation = res.getString(8);
+                const instance: FanWanUnit = {
                     word: word,
                     romanization: romanization,
-                    pronunciation: ChoHokHelper.pronunciationFrom(initial, final),
+                    initial: initial,
+                    final: final,
+                    yamyeung: yamyeung,
                     tone: tone,
-                    faancit: (faancit + "切"),
+                    rhyme: rhyme,
+                    interpretation: interpretation,
                     homophones: []
                 };
                 units.push(instance);
@@ -55,19 +60,22 @@ export class ChoHokHelper {
             res?.close();
         }
         const word: string = (units.length > 0) ? units[0].word : "?";
-        const adjustedUnits: ChoHokUnit[] = units.map((unit) => {
-            const fetchedHomophones = ChoHokHelper.fetchHomophones(unit.romanization, store).filter(item => item !== word);
-            const newInstance: ChoHokUnit = {
+        const adjustedUnits: FanWanUnit[] = units.map((unit) => {
+            const fetchedHomophones = FanWanHelper.fetchHomophones(unit.romanization, store).filter(item => item !== word);
+            const newInstance: FanWanUnit = {
                 word: unit.word,
-                romanization: unit.romanization,
-                pronunciation: unit.pronunciation,
+                romanization: unit.romanization.replace("7", "1").replace("8", "3").replace("9", "6"),
+                initial: unit.initial,
+                final: unit.final,
+                yamyeung: unit.yamyeung,
                 tone: unit.tone,
-                faancit: unit.faancit,
+                rhyme: unit.rhyme,
+                interpretation: unit.interpretation,
                 homophones: fetchedHomophones
             };
             return newInstance;
         })
-        const lexicon: ChoHokLexicon = {
+        const lexicon: FanWanLexicon = {
             isEmpty: adjustedUnits.length < 1,
             isNotEmpty: adjustedUnits.length > 0,
             word: word,
@@ -92,10 +100,5 @@ export class ChoHokHelper {
             res?.close();
         }
         return homophones;
-    }
-    private static pronunciationFrom(initial: string, final: string): string {
-        const convertedInitial: string = (initial === "X") ? "" : initial;
-        const convertedFinal: string = (final === "X") ? "" : final;
-        return convertedInitial + convertedFinal;
     }
 }

@@ -8,6 +8,9 @@ import { ChoHokHelper } from '../search/ChoHokHelper';
 import { ChoHokLexiconView } from '../search/ChoHokLexiconView';
 import { ChoHokLexicon } from '../search/ChoHokUnit';
 import { DatabaseHelper } from '../search/DatabaseHelper';
+import { FanWanHelper } from '../search/FanWanHelper';
+import { FanWanLexiconView } from '../search/FanWanLexiconView';
+import { FanWanLexicon } from '../search/FanWanUnit';
 import { YingWaaHelper } from '../search/YingWaaHelper';
 import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
 import { YingWaaLexicon } from '../search/YingWaaUnit';
@@ -27,16 +30,19 @@ export struct HomeScreen {
                 this.lexicons = [lexicon];
                 this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
                 this.choHokLexicons = ChoHokHelper.search(this.submittedText, this.store);
+                this.fanWanLexicons = FanWanHelper.search(this.submittedText, this.store);
             } else {
                 this.lexicons = [];
                 this.yingWaaLexicons = [];
                 this.choHokLexicons = [];
+                this.fanWanLexicons = [];
             }
         }
     }
     @Local private lexicons: CantoneseLexicon[] = [];
     @Local private yingWaaLexicons: YingWaaLexicon[] = [];
     @Local private choHokLexicons: ChoHokLexicon[] = [];
+    @Local private fanWanLexicons: FanWanLexicon[] = [];
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -139,6 +145,23 @@ export struct HomeScreen {
                         .borderRadius(this.groupBorderRadius)
                     }
                 }, (item: ChoHokLexicon) => item.word)
+
+                ForEach(this.fanWanLexicons, (item: FanWanLexicon) => {
+                    ListItemGroup() {
+                        ListItem() {
+                            Text("《分韻撮要》　佚名　廣州府　清初")
+                                .fontSize(13)
+                                .opacity(0.9)
+                        }
+                        .padding(2)
+                        ListItem() {
+                            FanWanLexiconView({ lexicon: item })
+                        }
+                        .padding(8)
+                        .backgroundColor(this.groupBackgroundColor)
+                        .borderRadius(this.groupBorderRadius)
+                    }
+                }, (item: FanWanLexicon) => item.word)
 
                 if (this.shouldShowInputMethodButtons) {
                     ListItem() {
