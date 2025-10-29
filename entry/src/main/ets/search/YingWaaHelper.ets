@@ -67,6 +67,7 @@ export class YingWaaHelper {
             return newInstance;
         })
         const lexicon: YingWaaLexicon = {
+            isEmpty: adjustedUnits.length < 1,
             isNotEmpty: adjustedUnits.length > 0,
             word: word,
             units: adjustedUnits

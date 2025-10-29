@@ -4,6 +4,9 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { inputMethod } from '@kit.IMEKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
+import { ChoHokHelper } from '../search/ChoHokHelper';
+import { ChoHokLexiconView } from '../search/ChoHokLexiconView';
+import { ChoHokLexicon } from '../search/ChoHokUnit';
 import { DatabaseHelper } from '../search/DatabaseHelper';
 import { YingWaaHelper } from '../search/YingWaaHelper';
 import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
@@ -23,14 +26,17 @@ export struct HomeScreen {
                 const lexicon = DatabaseHelper.search(this.submittedText, this.store);
                 this.lexicons = [lexicon];
                 this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
+                this.choHokLexicons = ChoHokHelper.search(this.submittedText, this.store);
             } else {
                 this.lexicons = [];
                 this.yingWaaLexicons = [];
+                this.choHokLexicons = [];
             }
         }
     }
     @Local private lexicons: CantoneseLexicon[] = [];
     @Local private yingWaaLexicons: YingWaaLexicon[] = [];
+    @Local private choHokLexicons: ChoHokLexicon[] = [];
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -116,6 +122,23 @@ export struct HomeScreen {
                         .borderRadius(this.groupBorderRadius)
                     }
                 }, (item: YingWaaLexicon) => item.word)
+
+                ForEach(this.choHokLexicons, (item: ChoHokLexicon) => {
+                    ListItemGroup() {
+                        ListItem() {
+                            Text("《初學粵音切要》　湛約翰　1855年　香港")
+                                .fontSize(13)
+                                .opacity(0.9)
+                        }
+                        .padding(2)
+                        ListItem() {
+                            ChoHokLexiconView({ lexicon: item })
+                        }
+                        .padding(8)
+                        .backgroundColor(this.groupBackgroundColor)
+                        .borderRadius(this.groupBorderRadius)
+                    }
+                }, (item: ChoHokLexicon) => item.word)
 
                 if (this.shouldShowInputMethodButtons) {
                     ListItem() {

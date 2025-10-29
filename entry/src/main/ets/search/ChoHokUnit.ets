@@ -1,15 +1,15 @@
-export interface YingWaaUnit {
+export interface ChoHokUnit {
     readonly word: string;
     readonly romanization: string;
     readonly pronunciation: string;
-    readonly pronunciationMark?: string;
-    readonly interpretation?: string;
+    readonly tone: string;
+    readonly faancit: string;
     readonly homophones: string[];
 }
 
-export interface YingWaaLexicon {
+export interface ChoHokLexicon {
     readonly isEmpty: boolean;
     readonly isNotEmpty: boolean;
     readonly word: string;
-    readonly units: YingWaaUnit[];
+    readonly units: ChoHokUnit[];
 }
