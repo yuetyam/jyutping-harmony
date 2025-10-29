@@ -11,6 +11,9 @@ import { DatabaseHelper } from '../search/DatabaseHelper';
 import { FanWanHelper } from '../search/FanWanHelper';
 import { FanWanLexiconView } from '../search/FanWanLexiconView';
 import { FanWanLexicon } from '../search/FanWanUnit';
+import { GwongWanHelper } from '../search/GwongWanHelper';
+import { GwongWanLexicon } from '../search/GwongWanUnit';
+import { GwongWanLexiconView } from '../search/GwongWanLexiconView';
 import { YingWaaHelper } from '../search/YingWaaHelper';
 import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
 import { YingWaaLexicon } from '../search/YingWaaUnit';
@@ -31,11 +34,13 @@ export struct HomeScreen {
                 this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
                 this.choHokLexicons = ChoHokHelper.search(this.submittedText, this.store);
                 this.fanWanLexicons = FanWanHelper.search(this.submittedText, this.store);
+                this.gwongWanLexicons = GwongWanHelper.search(this.submittedText, this.store);
             } else {
                 this.lexicons = [];
                 this.yingWaaLexicons = [];
                 this.choHokLexicons = [];
                 this.fanWanLexicons = [];
+                this.gwongWanLexicons = [];
             }
         }
     }
@@ -43,6 +48,7 @@ export struct HomeScreen {
     @Local private yingWaaLexicons: YingWaaLexicon[] = [];
     @Local private choHokLexicons: ChoHokLexicon[] = [];
     @Local private fanWanLexicons: FanWanLexicon[] = [];
+    @Local private gwongWanLexicons: GwongWanLexicon[] = [];
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -162,6 +168,23 @@ export struct HomeScreen {
                         .borderRadius(this.groupBorderRadius)
                     }
                 }, (item: FanWanLexicon) => item.word)
+
+                ForEach(this.gwongWanLexicons, (item: GwongWanLexicon) => {
+                    ListItemGroup() {
+                        ListItem() {
+                            Text("《大宋重修廣韻》　陳彭年等　北宋")
+                                .fontSize(13)
+                                .opacity(0.9)
+                        }
+                        .padding(2)
+                        ListItem() {
+                            GwongWanLexiconView({ lexicon: item })
+                        }
+                        .padding(8)
+                        .backgroundColor(this.groupBackgroundColor)
+                        .borderRadius(this.groupBorderRadius)
+                    }
+                }, (item: GwongWanLexicon) => item.word)
 
                 if (this.shouldShowInputMethodButtons) {
                     ListItem() {
