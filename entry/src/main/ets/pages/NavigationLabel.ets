@@ -1,8 +1,8 @@
-@Component
+@ComponentV2
 export struct NavigationLabel {
-    icon: Resource | undefined = undefined;
-    text: string | Resource = 'placeholder';
-    action: () => void = () => {};
+    @Param @Require @Once icon: Resource;
+    @Param @Require @Once text: Resource | string;
+    @Param @Require @Once action: () => void;
     build() {
         Button() {
             Row({ space: 12 }) {
@@ -20,9 +20,7 @@ export struct NavigationLabel {
         }
         .backgroundColor(Color.Transparent)
         .onClick((event: ClickEvent) => {
-            if (event) {
-                this.action()
-            }
+            this.action();
         })
     }
 }

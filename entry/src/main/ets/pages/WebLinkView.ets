@@ -1,10 +1,10 @@
 import { common, Want } from '@kit.AbilityKit'
 
-@Component
+@ComponentV2
 export struct WebLinkView {
-    url: string = 'https://jyutping.app';
-    icon: Resource | undefined = undefined;
-    text: string | Resource = 'placeholder';
+    @Param @Require @Once url: string;
+    @Param @Require @Once icon: Resource;
+    @Param @Require @Once text: Resource | string;
     build() {
         Button() {
             Row({ space: 12 }) {
@@ -22,18 +22,16 @@ export struct WebLinkView {
         }
         .backgroundColor(Color.Transparent)
         .onClick((event: ClickEvent) => {
-            if (event) {
-                let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-                let want: Want = {
-                    action: 'ohos.want.action.viewData',
-                    entities: ['entity.system.browsable'],
-                    abilityName: 'MainAbility',
-                    uri: this.url
-                }
-                context.startAbility(want).catch(() => {
-                    // TODO: Implement error handling.
-                })
+            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+            let want: Want = {
+                action: 'ohos.want.action.viewData',
+                entities: ['entity.system.browsable'],
+                abilityName: 'MainAbility',
+                uri: this.url
             }
+            context.startAbility(want).catch(() => {
+                // TODO: Implement error handling.
+            });
         })
     }
 }
