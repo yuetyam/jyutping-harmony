@@ -13,25 +13,25 @@ export struct InitialsPage {
             List({ space: 20 }) {
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
-                        Text("巴 baa1")
+                        InitialLabel({ word: "巴", syllable: "baa1", jyutping: "b", ipa: "[ p ]" })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Text("趴 paa1")
+                        InitialLabel({ word: "趴", syllable: "paa1", jyutping: "p", ipa: "[ pʰ ]" })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Text("媽 maa1")
+                        InitialLabel({ word: "媽", syllable: "maa1", jyutping: "m", ipa: "[ m ]" })
                     }
                     ListItem() {
                         Divider()
                     }
                     ListItem() {
-                        Text("花 faa1")
+                        InitialLabel({ word: "花", syllable: "faa1", jyutping: "f", ipa: "[ f ]" })
                     }
                 }
                 .padding(8)
@@ -72,5 +72,21 @@ export struct InitialsPage {
         .width('100%')
         .height('100%')
         .backgroundColor($r('app.color.window_background'))
+    }
+}
+
+@ComponentV2
+struct InitialLabel {
+    @Param @Require @Once word: string;
+    @Param @Require @Once syllable: string;
+    @Param @Require @Once jyutping: string;
+    @Param @Require @Once ipa: string;
+    build() {
+        Row({ space: 32 }) {
+            Text(this.word + " " + this.syllable)
+            Text(this.jyutping)
+            Text(this.ipa)
+        }
+        .width('100%')
     }
 }

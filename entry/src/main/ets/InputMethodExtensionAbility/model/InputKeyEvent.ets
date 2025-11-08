@@ -39,17 +39,17 @@ export class InputKeyEvent {
 
     /** Checks if the key is a digit from 0-9. */
     get isNumber(): boolean {
-        return InputKeyEvent.digitSet.has(this);
+        return InputKeyEvent.digitSet.includes(this);
     }
 
     /** Checks if the key is a Cantonese tone digit from 1-6. */
     get isToneNumber(): boolean {
-        return InputKeyEvent.toneSet.has(this);
+        return InputKeyEvent.toneSet.includes(this);
     }
 
     /** Checks if the key is a letter from a-z. */
     get isLetter(): boolean {
-        return InputKeyEvent.alphabetSet.has(this);
+        return InputKeyEvent.alphabetSet.includes(this);
     }
 
     /** Checks if the key is a letter used for syllables (a-z, excluding tone letters v, x, q). */
@@ -85,6 +85,10 @@ export class InputKeyEvent {
     /** Returns the integer value of the number key, or `null` if it's not a number key. */
     get digit(): number | null {
         return this.isNumber ? (this.code - 10) : null;
+    }
+
+    static matchEvent(value: number): InputKeyEvent | undefined {
+        return InputKeyEvent.alphabetSet.find((item) => item.code === value) ?? InputKeyEvent.digitSet.find((item) => item.code === value);
     }
 
     static readonly number0 = new InputKeyEvent("0", 10);
@@ -132,7 +136,7 @@ export class InputKeyEvent {
     static readonly grave = new InputKeyEvent("`", 48);
 
     /** Set of digit keys [0-9] */
-    static readonly digitSet: Set<InputKeyEvent> = new Set([
+    static readonly digitSet: InputKeyEvent[] = [
         InputKeyEvent.number0,
         InputKeyEvent.number1,
         InputKeyEvent.number2,
@@ -143,20 +147,20 @@ export class InputKeyEvent {
         InputKeyEvent.number7,
         InputKeyEvent.number8,
         InputKeyEvent.number9
-    ]);
+    ];
 
     /** Set of Cantonese tone digit keys [1-6] */
-    static readonly toneSet: Set<InputKeyEvent> = new Set([
+    static readonly toneSet: InputKeyEvent[] = [
         InputKeyEvent.number1,
         InputKeyEvent.number2,
         InputKeyEvent.number3,
         InputKeyEvent.number4,
         InputKeyEvent.number5,
         InputKeyEvent.number6
-    ]);
+    ];
 
     /** Set of alphabet letter keys [a-z] */
-    static readonly alphabetSet: Set<InputKeyEvent> = new Set([
+    static readonly alphabetSet: InputKeyEvent[] = [
         InputKeyEvent.letterA,
         InputKeyEvent.letterB,
         InputKeyEvent.letterC,
@@ -183,5 +187,5 @@ export class InputKeyEvent {
         InputKeyEvent.letterX,
         InputKeyEvent.letterY,
         InputKeyEvent.letterZ
-    ]);
+    ];
 }
