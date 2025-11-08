@@ -183,29 +183,40 @@ export class InputController {
             return;
         }
         if (this.store) {
+            this.candidates = [];
             const items = await Researcher.search(this.bufferEvents, this.store);
-            let currentIndex: number = 0;
-            this.candidates = items.map((item) => {
+            const newCandidates: Candidate[] = [];
+            for (let index = 0; index < items.length; index++) {
+                const item = items[index];
                 let instance: Candidate = {
                     type: CandidateType.Cantonese,
                     text: item.text,
                     comment: item.romanization,
                     lexicon: item,
-                    number: currentIndex,
+                    number: index,
                 };
-                currentIndex += 1;
-                return instance;
-            });
+                newCandidates.push(instance);
+            }
+            this.candidates = newCandidates;
         }
     }
-    selectCandidate(index: number) {
+    selectCandidateBy(index: number) {
         if (this.candidates.length > index) {
             const selected = this.candidates[index];
             const text = selected.text;
             this.insert(text);
             const inputLength = selected.lexicon.inputCount;
-            const startIndex = this.bufferEvents.length - inputLength;
-            this.bufferEvents.splice(startIndex, inputLength);
+            this.bufferEvents.splice(0, inputLength);
+            this.runInputSession();
+        }
+    }
+    selectCandidate(selected: Candidate) {
+        const candidate = this.candidates.find((item) => item.text === selected.text && item.comment === selected.comment);
+        if (candidate) {
+            const text = candidate.text;
+            this.insert(text);
+            const inputLength = candidate.lexicon.inputCount;
+            this.bufferEvents.splice(0, inputLength);
             this.runInputSession();
         }
     }
@@ -240,7 +251,7 @@ export class InputController {
     }
     space(): void {
         if (this.candidates.length > 0) {
-            this.selectCandidate(0);
+            this.selectCandidateBy(0);
         } else {
             let text = " ";
             this.insert(text);

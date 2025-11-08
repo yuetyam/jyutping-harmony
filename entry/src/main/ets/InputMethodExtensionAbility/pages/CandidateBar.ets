@@ -2,6 +2,7 @@ import { Candidate } from "../model/Candidate"
 import { CircleShape } from "@kit.ArkUI";
 import controller from "../InputController";
 import CandidateView from "./CandidateView";
+import { it } from "@ohos/hypium";
 
 @ComponentV2
 export default struct CandidateBar {
@@ -14,6 +15,11 @@ export default struct CandidateBar {
                 ForEach(controller.candidates, (item: Candidate) => {
                     ListItem() {
                         CandidateView({ candidate: item })
+                            .onClick((event: ClickEvent) => {
+                                controller.playModifierSound();
+                                controller.selectCandidate(item);
+                                this.scroller.scrollToIndex(0);
+                            })
                     }
                 }, (item: Candidate) => item.text + item.comment)
             }
