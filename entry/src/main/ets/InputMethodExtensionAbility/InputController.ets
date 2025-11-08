@@ -14,8 +14,6 @@ import { CandidateType } from './model/CandidateType';
 import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase } from './model/KeyboardCase';
 
-const inputMethodAbility: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
-
 @ObservedV2
 export class InputController {
     private ctx: InputMethodExtensionContext | undefined = undefined;
@@ -23,6 +21,7 @@ export class InputController {
     private attribute: inputMethodEngine.EditorAttribute | undefined = undefined
     private inputClient: inputMethodEngine.InputClient | undefined = undefined;
     private keyboardController: inputMethodEngine.KeyboardController | undefined = undefined;
+    private ability: inputMethodEngine.InputMethodAbility = inputMethodEngine.getInputMethodAbility();
 
     private soundPool: media.SoundPool | undefined = undefined;
     private inputSoundID: number = 0;
@@ -152,8 +151,9 @@ export class InputController {
     onDestroy(): void {
         this.releaseSoundPool();
         this.unRegisterListener();
+        this.clearBuffer();
         if(this.panel) {
-            inputMethodAbility.destroyPanel(this.panel);
+            this.ability.destroyPanel(this.panel);
         }
         if(this.ctx) {
             this.ctx.destroy();
@@ -293,7 +293,7 @@ export class InputController {
             type: inputMethodEngine.PanelType.SOFT_KEYBOARD,
             flag: inputMethodEngine.PanelFlag.FLG_FIXED
         };
-        inputMethodAbility.createPanel(this.ctx, panelInfo)
+        this.ability.createPanel(this.ctx, panelInfo)
             .then(async (inputPanel: inputMethodEngine.Panel) => {
                 this.panel = inputPanel;
                 if(this.panel) {
@@ -308,7 +308,7 @@ export class InputController {
     }
 
     private registerListener(): void {
-        inputMethodAbility.on('inputStart', (kbController, inputClient) => {
+        this.ability.on('inputStart', (kbController, inputClient) => {
             this.inputClient = inputClient;
             try {
                 this.attribute = inputClient.getEditorAttributeSync()
@@ -317,13 +317,17 @@ export class InputController {
             }
             this.keyboardController = kbController;
         })
-        inputMethodAbility.on('inputStop', () => {
+        this.ability.on('inputStop', () => {
             this.onDestroy();
         });
+        this.ability.on('keyboardHide', () => {
+            this.clearBuffer();
+        })
     }
     private unRegisterListener(): void {
-        inputMethodAbility.off('inputStart');
-        inputMethodAbility.off('inputStop', () => {});
+        this.ability.off('inputStart');
+        this.ability.off('inputStop', () => {});
+        this.ability.off('keyboardHide', () => {});
     }
 
     performEditing(action: EditingAction): void {
