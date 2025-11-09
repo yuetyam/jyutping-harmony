@@ -2,7 +2,6 @@ import { Candidate } from "../model/Candidate"
 import { CircleShape } from "@kit.ArkUI";
 import controller from "../InputController";
 import CandidateView from "./CandidateView";
-import { it } from "@ohos/hypium";
 
 @ComponentV2
 export default struct CandidateBar {
@@ -16,7 +15,7 @@ export default struct CandidateBar {
                     ListItem() {
                         CandidateView({ candidate: item })
                             .onClick((event: ClickEvent) => {
-                                controller.playModifierSound();
+                                controller.playInputSound();
                                 controller.selectCandidate(item);
                                 this.scroller.scrollToIndex(0);
                             })
@@ -25,6 +24,9 @@ export default struct CandidateBar {
             }
             .listDirection(Axis.Horizontal)
             .scrollBar(BarState.Off)
+            .width('calc(100% - 4vp)')
+            .height('100%')
+            /*
             .width('calc(100% - 44vp)')
             .height('100%')
             Stack() {
@@ -41,12 +43,11 @@ export default struct CandidateBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event?: ClickEvent) => {
-                if (event) {
-                    controller.playModifierSound();
-                    this.scroller.scrollToIndex(0);
-                }
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
+                this.scroller.scrollToIndex(0);
             })
+            */
         }
         .width('100%')
         .height('100%')
