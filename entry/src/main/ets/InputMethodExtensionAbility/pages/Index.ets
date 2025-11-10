@@ -3,6 +3,7 @@ import controller from '../InputController';
 import { InputModeCompanion } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
 import ABCKeyboard from './ABCKeyboard';
+import CandidateBoard from './CandidateBoard';
 import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
@@ -42,6 +43,8 @@ struct Index {
                     EditingPanel()
                 } else if (controller.keyboardForm === KeyboardForm.Settings) {
                     SettingsPanel()
+                } else if (controller.keyboardForm === KeyboardForm.CandidateBoard) {
+                    CandidateBoard()
                 } else {
                     CantoneseKeyboard()
                 }

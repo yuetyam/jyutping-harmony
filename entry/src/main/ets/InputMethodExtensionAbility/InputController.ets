@@ -180,6 +180,9 @@ export class InputController {
     private async runInputSession() {
         if (this.isBufferEmpty) {
             this.candidates = [];
+            if (this.keyboardForm === KeyboardForm.CandidateBoard) {
+                this.transformTo(KeyboardForm.Alphabetic);
+            }
             return;
         }
         if (this.store) {

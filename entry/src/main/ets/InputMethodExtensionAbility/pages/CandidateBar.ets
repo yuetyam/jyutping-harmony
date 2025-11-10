@@ -2,6 +2,7 @@ import { Candidate } from "../model/Candidate"
 import { CircleShape } from "@kit.ArkUI";
 import controller from "../InputController";
 import CandidateView from "./CandidateView";
+import { KeyboardForm } from "../model/KeyboardForm";
 
 @ComponentV2
 export default struct CandidateBar {
@@ -24,9 +25,6 @@ export default struct CandidateBar {
             }
             .listDirection(Axis.Horizontal)
             .scrollBar(BarState.Off)
-            .width('calc(100% - 4vp)')
-            .height('100%')
-            /*
             .width('calc(100% - 44vp)')
             .height('100%')
             Stack() {
@@ -45,9 +43,8 @@ export default struct CandidateBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
-                this.scroller.scrollToIndex(0);
+                controller.transformTo(KeyboardForm.CandidateBoard);
             })
-            */
         }
         .width('100%')
         .height('100%')
