@@ -17,6 +17,22 @@
       "value": "#007FFF"
     },
     {
+      "name": "red",
+      "value": "#F44336"
+    },
+    {
+      "name": "green",
+      "value": "#4CAF50"
+    },
+    {
+      "name": "blue",
+      "value": "#2196F3"
+    },
+    {
+      "name": "orange",
+      "value": "#FF9800"
+    },
+    {
       "name": "keyboard_background",
       "value": "#E3E4E6"
     },
