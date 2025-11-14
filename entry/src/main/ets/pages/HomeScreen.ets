@@ -7,7 +7,7 @@ import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
 import { ChoHokHelper } from '../search/ChoHokHelper';
 import { ChoHokLexiconView } from '../search/ChoHokLexiconView';
 import { ChoHokLexicon } from '../search/ChoHokUnit';
-import { DatabaseHelper } from '../search/DatabaseHelper';
+import { CantoneseDataHelper } from '../search/CantoneseDataHelper';
 import { FanWanHelper } from '../search/FanWanHelper';
 import { FanWanLexiconView } from '../search/FanWanLexiconView';
 import { FanWanLexicon } from '../search/FanWanUnit';
@@ -29,8 +29,7 @@ export struct HomeScreen {
         this.prepareStore();
         if (this.store) {
             if (this.submittedText) {
-                const lexicon = DatabaseHelper.search(this.submittedText, this.store);
-                this.lexicons = [lexicon];
+                this.lexicons = CantoneseDataHelper.search(this.submittedText, this.store);
                 this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
                 this.choHokLexicons = ChoHokHelper.search(this.submittedText, this.store);
                 this.fanWanLexicons = FanWanHelper.search(this.submittedText, this.store);

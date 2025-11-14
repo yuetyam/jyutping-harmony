@@ -3,13 +3,22 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { CantoneseLexicon } from './CantoneseLexicon';
 import { Pronunciation } from './Pronunciation';
 
-export class DatabaseHelper {
-    static search(text: string, store: relationalStore.RdbStore): CantoneseLexicon {
-        const romanizations = DatabaseHelper.fetchRomanizations(text, store);
+export class CantoneseDataHelper {
+    static search(text: string, store: relationalStore.RdbStore): CantoneseLexicon[] {
+        if (text.length < 1) {
+            return [];
+        }
+        const primary = CantoneseDataHelper.match(text, store);
+        let characters = Array.from(text);
+        let otherLexicons = characters.map((item) => CantoneseDataHelper.match(item, store))
+        return [primary, ...otherLexicons];
+    }
+    private static match(text: string, store: relationalStore.RdbStore): CantoneseLexicon {
+        const romanizations = CantoneseDataHelper.fetchRomanizations(text, store);
         const pronunciations: Pronunciation[] = romanizations.map( (romanization) => {
-            const homophones = DatabaseHelper.fetchHomophones(romanization, store).filter(item => item !== text);
-            const collocations = DatabaseHelper.fetchCollocations(text, romanization, store);
-            const descriptions = DatabaseHelper.fetchDescriptions(text, romanization, store);
+            const homophones = CantoneseDataHelper.fetchHomophones(romanization, store).filter(item => item !== text);
+            const collocations = CantoneseDataHelper.fetchCollocations(text, romanization, store);
+            const descriptions = CantoneseDataHelper.fetchDescriptions(text, romanization, store);
             let pronunciation: Pronunciation = {
                 romanization: romanization,
                 homophones: homophones,
@@ -18,7 +27,7 @@ export class DatabaseHelper {
             }
             return pronunciation;
         })
-        const definition = DatabaseHelper.fetchDefinition(text, store);
+        const definition = CantoneseDataHelper.fetchDefinition(text, store);
         const lexicon: CantoneseLexicon = {
             text: text,
             pronunciations: pronunciations,
@@ -26,7 +35,7 @@ export class DatabaseHelper {
         }
         return lexicon
     }
-    static fetchRomanizations(text: string, store: relationalStore.RdbStore): string[] {
+    private static fetchRomanizations(text: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
         const command: string = "SELECT romanization FROM jyutpingtable WHERE word = ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -44,7 +53,7 @@ export class DatabaseHelper {
         }
         return items;
     }
-    static fetchHomophones(romanization: string, store: relationalStore.RdbStore): string[] {
+    private static fetchHomophones(romanization: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
         const command: string = "SELECT word FROM jyutpingtable WHERE romanization = ? LIMIT 11;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -62,7 +71,7 @@ export class DatabaseHelper {
         }
         return items;
     }
-    static fetchCollocations(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
+    private static fetchCollocations(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
         let rowText: string | undefined = undefined;
         const command: string = "SELECT collocation FROM collocationtable WHERE word = ? AND romanization = ? LIMIT 1;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -84,7 +93,7 @@ export class DatabaseHelper {
             return items ?? [];
         }
     }
-    static fetchDescriptions(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
+    private static fetchDescriptions(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
         const command: string = "SELECT description FROM dictionarytable WHERE word = ? AND romanization = ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -102,7 +111,7 @@ export class DatabaseHelper {
         }
         return items;
     }
-    static fetchDefinition(text: string, store: relationalStore.RdbStore): string | undefined {
+    private static fetchDefinition(text: string, store: relationalStore.RdbStore): string | undefined {
         let definition: string | undefined = undefined;
         if (text.length != 1) {
             return definition;
