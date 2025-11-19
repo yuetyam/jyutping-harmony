@@ -1,4 +1,5 @@
 import controller from '../InputController'
+import { KeyboardCaseCompanion } from '../model/KeyboardCase'
 
 @ComponentV2
 export default struct ShiftKey {
@@ -10,7 +11,7 @@ export default struct ShiftKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Image($r('app.media.key_shift'))
+                Image(KeyboardCaseCompanion.isLowercased(controller.keyboardCase) ? $r('app.media.key_shift') : $r('app.media.key_shifting'))
                     .fillColor($r('sys.color.ohos_id_color_primary'))
                     .width('22vp')
                     .height('22vp')
@@ -40,10 +41,8 @@ export default struct ShiftKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.insert("shift");
-            }
+        .onClick((event: ClickEvent) => {
+            controller.shift();
         })
     }
 }

@@ -12,7 +12,7 @@ import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
 import { EditingAction } from './editing/EditingAction';
-import { KeyboardCase } from './model/KeyboardCase';
+import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
 
 @ObservedV2
 export class InputController {
@@ -172,7 +172,8 @@ export class InputController {
     }
     handle(event: InputKeyEvent): void {
         if (InputModeCompanion.isABC(this.inputMode)) {
-            this.insert(event.text);
+            const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? event.text : event.text.toUpperCase();
+            this.insert(text);
         } else {
             this.bufferEvents.push(event);
             this.runInputSession();
@@ -289,6 +290,10 @@ export class InputController {
     updateKeyboardCase(newCase: KeyboardCase): void {
         this.keyboardCase = newCase;
     }
+    shift() {
+        const newCase: KeyboardCase = KeyboardCaseCompanion.isCapitalized(this.keyboardCase) ? KeyboardCase.lowercased : KeyboardCase.uppercased;
+        this.updateKeyboardCase(newCase);
+    }
 
     @Trace keyHeight: Length = 53;
     @Trace keyboardHeight: Length = 268;
@@ -341,6 +346,7 @@ export class InputController {
         });
         this.ability.on('keyboardHide', () => {
             this.clearBuffer();
+            this.keyboardCase = KeyboardCase.lowercased;
         })
     }
     private unRegisterListener(): void {
