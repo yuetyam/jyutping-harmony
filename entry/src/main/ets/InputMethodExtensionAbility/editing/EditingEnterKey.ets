@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { InputModeCompanion } from '../model/InputMode';
 
 @ComponentV2
 export default struct EditingEnterKey {
@@ -14,7 +15,7 @@ export default struct EditingEnterKey {
                     .fillColor($r('sys.color.ohos_id_color_primary'))
                     .width('20vp')
                     .height('20vp')
-                Text('Return')
+                Text(InputModeCompanion.isCantonese(controller.inputMode) ? '回車' : 'return')
                     .fontSize(11)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
@@ -42,10 +43,8 @@ export default struct EditingEnterKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.enterKeyAction();
-            }
+        .onClick((event: ClickEvent) => {
+            controller.enterKeyAction();
         })
     }
 }

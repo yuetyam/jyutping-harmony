@@ -18,6 +18,10 @@ export default struct NumericKeyboard {
             alignItems: ItemAlign.Center,
             justifyContent: FlexAlign.SpaceEvenly
         }) {
+            Blank()
+                .width('100%')
+                .height('12vp')
+            Divider()
             ToolBar()
                 .width('100%')
                 .height('56vp')

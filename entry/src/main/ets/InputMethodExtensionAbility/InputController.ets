@@ -160,6 +160,7 @@ export class InputController {
         }
     }
     @Trace candidates: Candidate[] = [];
+    @Trace markedText: string = "";
     @Trace isBuffering: boolean = false;
     private bufferEvents: InputKeyEvent[] = [];
     get isBufferEmpty(): boolean {
@@ -179,12 +180,14 @@ export class InputController {
     }
     private async runInputSession() {
         if (this.isBufferEmpty) {
+            this.markedText = "";
             this.candidates = [];
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Alphabetic);
             }
             return;
         }
+        this.markedText = this.bufferEvents.map(item => item.text).join("");
         if (this.store) {
             this.candidates = [];
             const items = await Researcher.search(this.bufferEvents, this.store);
@@ -296,13 +299,15 @@ export class InputController {
         let displayWidth = screen.width;
         let displayHeight = screen.height;
         let density = screen.scaledDensity;
-        let widthInPoint = displayWidth / density;
-        let keyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
-        let keyboardHeight = keyHeight * 4 + 56;
+        const widthInPoint = displayWidth / density;
+        const keyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
+        const toolBarHeight = 56;
+        const bufferBarHeight = 13;
+        const keyboardHeight = (keyHeight * 4) + toolBarHeight + bufferBarHeight;
         this.keyHeight = keyHeight;
         this.keyboardHeight = keyboardHeight;
-        let panelHeight = keyboardHeight * density;
-        let nonBarPosition = displayHeight - panelHeight;
+        const panelHeight = keyboardHeight * density;
+        const nonBarPosition = displayHeight - panelHeight;
         let panelInfo: inputMethodEngine.PanelInfo = {
             type: inputMethodEngine.PanelType.SOFT_KEYBOARD,
             flag: inputMethodEngine.PanelFlag.FLG_FIXED

@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { InputModeCompanion } from '../model/InputMode';
 
 @ComponentV2
 export default struct EditingSpaceKey {
@@ -10,7 +11,7 @@ export default struct EditingSpaceKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text('space')
+                Text(InputModeCompanion.isCantonese(controller.inputMode) ? '空格' : 'space')
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
             .borderRadius(8)
@@ -37,10 +38,8 @@ export default struct EditingSpaceKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.insert('space');
-            }
+        .onClick((event: ClickEvent) => {
+            controller.insert(' ');
         })
     }
 }
