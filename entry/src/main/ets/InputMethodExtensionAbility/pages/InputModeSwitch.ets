@@ -7,11 +7,11 @@ export default struct InputModeSwitch {
                 Stack({ alignContent: Alignment.Start }) {
                     Stack({ alignContent: Alignment.Center }) {
                         Text("粵")
-                            .fontSize(this.isSwitched ? 14: 17)
+                            .fontSize(this.isSwitched ? 13: 17)
                     }
                     .backgroundColor(this.isSwitched ? Color.Transparent : $r('app.color.key_shallow'))
                     .borderRadius('13.vp')
-                    .width('36vp')
+                    .width('35vp')
                     .height('100%')
                 }
                 .width('100%')
@@ -19,11 +19,11 @@ export default struct InputModeSwitch {
                 Stack({ alignContent: Alignment.End }) {
                     Stack({ alignContent: Alignment.Center }) {
                         Text("A")
-                            .fontSize(this.isSwitched ? 17: 14)
+                            .fontSize(this.isSwitched ? 17: 13)
                     }
                     .backgroundColor(this.isSwitched ? $r('app.color.key_shallow') : Color.Transparent)
                     .borderRadius('13.vp')
-                    .width('36vp')
+                    .width('35vp')
                     .height('100%')
                 }
                 .width('100%')
@@ -31,7 +31,7 @@ export default struct InputModeSwitch {
             }
             .backgroundColor($r('app.color.key_emphatic'))
             .borderRadius('13.vp')
-            .width('64vp')
+            .width('60vp')
             .height('26vp')
         }
         .width('100%')

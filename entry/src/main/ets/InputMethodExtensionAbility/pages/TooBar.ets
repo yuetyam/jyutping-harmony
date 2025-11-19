@@ -6,7 +6,7 @@ import { KeyboardForm } from "../model/KeyboardForm";
 
 @ComponentV2
 export default struct ToolBar {
-    private buttonLength: Length = '50vp';
+    private buttonLength: Length = '48vp';
     private iconLength: Length = '24vp';
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
@@ -59,7 +59,7 @@ export default struct ToolBar {
             })
 
             InputModeSwitch({ isSwitched: InputModeCompanion.isABC(controller.inputMode) })
-                .width('68vp')
+                .width('64vp')
                 .height('100%')
                 .onClick((event?: ClickEvent) => {
                     if (event) {
