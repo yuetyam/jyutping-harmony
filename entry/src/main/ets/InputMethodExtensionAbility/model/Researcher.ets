@@ -106,4 +106,21 @@ export class Researcher {
         }
         return lexicons;
     }
+    static test(store: relationalStore.RdbStore): number {
+        let num: number = -1;
+        const command: string = "SELECT rowid romanization FROM lexicontable WHERE anchors = 32 LIMIT 1;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command);
+            if (res.goToNextRow()) {
+                num = res.getLong(0);
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            res?.close();
+        }
+        return num;
+    }
 }

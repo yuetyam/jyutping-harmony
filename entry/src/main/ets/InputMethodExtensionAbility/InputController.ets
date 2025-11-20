@@ -3,6 +3,7 @@ import { relationalStore } from '@kit.ArkData';
 import { bundleManager } from '@kit.AbilityKit';
 import { audio } from '@kit.AudioKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
+import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
 import { InputKeyEvent } from './model/InputKeyEvent';
@@ -30,7 +31,7 @@ export class InputController {
     private modifierStreamID: number = 0;
     private deleteSoundID: number = 0;
     private deleteStreamID: number = 0;
-    async prepareSoundPool() {
+    private async prepareSoundPool() {
         try {
             let audioRendererInfo: audio.AudioRendererInfo = {
                 usage: audio.StreamUsage.STREAM_USAGE_MUSIC,
@@ -59,7 +60,7 @@ export class InputController {
             console.error('createSoundPool error: ' + e);
         }
     }
-    async releaseSoundPool() {
+    private async releaseSoundPool() {
         try {
             await this.soundPool?.stop(this.inputStreamID);
             await this.soundPool?.unload(this.inputSoundID);
@@ -107,6 +108,24 @@ export class InputController {
         });
     }
 
+    private async copyKeyboardDatabase(context: Context) {
+        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        let sourcePath: string = context.resourceDir + "/imedb.sqlite3";
+        let fileName: string = `imedb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let destinationPath: string = context.databaseDir + "/rdb/ime/" + fileName;
+        try {
+            if (fs.accessSync(destinationPath)) {
+                console.debug("keyboard database path: " + destinationPath);
+            } else {
+                console.debug("src database path: " + sourcePath);
+                console.debug("des database path: " + destinationPath);
+                await fs.copyFile(sourcePath, destinationPath);
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("copyKeyboardDatabase() failed, message: " + err.message + ", code: " + err.code);
+        }
+    }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -128,10 +147,23 @@ export class InputController {
             });
     }
     private async prepareStore() {
-        if (this.store === undefined) {
-            this.obtainStore();
-        } else if (this.store.version < 1) {
-            this.obtainStore();
+        if (this.store) {
+            const code: number = Researcher.test(this.store);
+            if (code > 0) {
+                return;
+            }
+            try {
+                await this.store.close();
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
+            } finally {
+                this.store = undefined;
+            }
+        }
+        if (this.ctx) {
+            await this.copyKeyboardDatabase(this.ctx);
+            await this.obtainStore();
         }
     }
 
@@ -147,6 +179,9 @@ export class InputController {
         this.registerListener();
         this.prepareSoundPool();
         this.prepareStore();
+        setTimeout(() => {
+            this.prepareStore();
+        }, 1000);
     }
     onDestroy(): void {
         this.releaseSoundPool();
@@ -205,6 +240,8 @@ export class InputController {
                 newCandidates.push(instance);
             }
             this.candidates = newCandidates;
+        } else {
+            this.prepareStore();
         }
     }
     selectCandidateBy(index: number) {

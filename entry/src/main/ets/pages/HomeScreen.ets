@@ -1,6 +1,7 @@
 import { common, Want, bundleManager } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
+import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethod } from '@kit.IMEKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
@@ -26,7 +27,6 @@ export struct HomeScreen {
     @Local private inputText: string = '';
     @Local private submittedText: string = '';
     @Monitor('submittedText') performSearch() {
-        this.prepareStore();
         if (this.store) {
             if (this.submittedText) {
                 this.lexicons = CantoneseDataHelper.search(this.submittedText, this.store);
@@ -41,6 +41,8 @@ export struct HomeScreen {
                 this.fanWanLexicons = [];
                 this.gwongWanLexicons = [];
             }
+        } else {
+            this.prepareStore();
         }
     }
     @Local private lexicons: CantoneseLexicon[] = [];
@@ -48,6 +50,25 @@ export struct HomeScreen {
     @Local private choHokLexicons: ChoHokLexicon[] = [];
     @Local private fanWanLexicons: FanWanLexicon[] = [];
     @Local private gwongWanLexicons: GwongWanLexicon[] = [];
+
+    private async copyAppDatabase(context: Context) {
+        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
+        let sourcePath: string = context.resourceDir + "/appdb.sqlite3";
+        let fileName: string = `appdb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let destinationPath: string = context.databaseDir + "/rdb/app/" + fileName;
+        try {
+            if (fs.accessSync(destinationPath)) {
+                console.debug("app database path: " + destinationPath);
+            } else {
+                console.debug("src database path: " + sourcePath);
+                console.debug("des database path: " + destinationPath);
+                await fs.copyFile(sourcePath, destinationPath);
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("copyAppDatabase() failed, message: " + err.message + ", code: " + err.code);
+        }
+    }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
         let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
@@ -68,11 +89,25 @@ export struct HomeScreen {
                 this.store = rdbStore;
             });
     }
-    private prepareStore(): void {
-        if (this.store === undefined) {
-            this.obtainStore();
-        } else if (this.store.version < 1) {
-            this.obtainStore();
+    private async prepareStore() {
+        if (this.store) {
+            const code: number = CantoneseDataHelper.test(this.store);
+            if (code > 0) {
+                return;
+            }
+            try {
+                await this.store.close();
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
+            } finally {
+                this.store = undefined;
+            }
+        }
+        let context = this.getUIContext().getHostContext();
+        if (context) {
+            await this.copyAppDatabase(context);
+            await this.obtainStore();
         }
     }
 
@@ -88,6 +123,7 @@ export struct HomeScreen {
     }
     aboutToAppear(): void {
         this.detectInputMethodState();
+        this.prepareStore();
     }
     aboutToReuse(): void {
         this.detectInputMethodState();
@@ -199,22 +235,20 @@ export struct HomeScreen {
                         }
                         .backgroundColor($r('app.color.accent'))
                         .width('100%')
-                        .onClick((event?: ClickEvent) => {
-                            if (event) {
-                                let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-                                let want: Want = {
-                                    bundleName: 'com.huawei.hmos.settings',
-                                    abilityName: 'com.huawei.hmos.settings.MainAbility',
-                                    uri: 'set_input',
-                                    parameters: {
-                                        bundleName: context.abilityInfo.bundleName,
-                                        pushParams: context.abilityInfo.bundleName
-                                    }
+                        .onClick((event: ClickEvent) => {
+                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+                            let want: Want = {
+                                bundleName: 'com.huawei.hmos.settings',
+                                abilityName: 'com.huawei.hmos.settings.MainAbility',
+                                uri: 'set_input',
+                                parameters: {
+                                    bundleName: context.abilityInfo.bundleName,
+                                    pushParams: context.abilityInfo.bundleName
                                 }
-                                context.startAbility(want).catch(() => {
-                                    // TODO: Implement error handling.
-                                })
-                            }
+                            };
+                            context.startAbility(want).catch(() => {
+                                console.warn("Failed to jump to input method settings");
+                            });
                         })
                     }
                 }
