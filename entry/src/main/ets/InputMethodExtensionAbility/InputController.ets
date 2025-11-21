@@ -16,6 +16,7 @@ import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
 import { InputMemory } from './model/InputMemory';
 import { Lexicon } from './model/Lexicon';
+import { Converter } from './model/Converter';
 
 @ObservedV2
 export class InputController {
@@ -197,6 +198,10 @@ export class InputController {
                 this.memory = rdbStore;
             });
     }
+    @Trace isMutilated: boolean = false;
+    toggleCharacterScriptVariant() {
+        this.isMutilated = !(this.isMutilated);
+    }
 
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
@@ -260,29 +265,21 @@ export class InputController {
         }
         this.markedText = this.bufferEvents.map(item => item.text).join("");
         const newCandidates: Candidate[] = [];
+        let newLexicons: Lexicon[] = [];
         if (this.memory) {
-            const items = await InputMemory.search(this.bufferEvents, this.memory);
-            for (let index = 0; index < items.length; index++) {
-                const item = items[index];
-                let instance: Candidate = {
-                    type: CandidateType.Cantonese,
-                    text: item.text,
-                    comment: item.romanization,
-                    lexicon: item,
-                    number: index,
-                };
-                newCandidates.push(instance);
-            }
+            newLexicons = await InputMemory.search(this.bufferEvents, this.memory);
         } else {
             this.prepareMemory();
         }
         if (this.store) {
             const items = await Researcher.search(this.bufferEvents, this.store);
-            for (let index = 0; index < items.length; index++) {
-                const item = items[index];
+            newLexicons = newLexicons.concat(items);
+            const needsConversion: boolean = this.isMutilated;
+            for (let index = 0; index < newLexicons.length; index++) {
+                const item = newLexicons[index];
                 let instance: Candidate = {
                     type: CandidateType.Cantonese,
-                    text: item.text,
+                    text: needsConversion ? Converter.convert(item.text, true, this.store) : item.text,
                     comment: item.romanization,
                     lexicon: item,
                     number: index,
@@ -383,8 +380,8 @@ export class InputController {
     }
 
     @Trace inputMode: InputMode = InputMode.Cantonese;
-    updateInputMode(newInputMode: InputMode): void {
-        this.inputMode = newInputMode;
+    toggleInputMode(): void {
+        this.inputMode = InputModeCompanion.isCantonese(this.inputMode) ? InputMode.ABC : InputMode.Cantonese;
     }
 
     @Trace keyboardCase: KeyboardCase = KeyboardCase.lowercased;
@@ -462,10 +459,10 @@ export class InputController {
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.PASTE).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.ClearSystemClipboard:
                 pasteboard.getSystemPasteboard().clearData();
-                break
+                break;
             case EditingAction.CopyAllText:
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
                     // TODO: Implement error handling.
@@ -476,7 +473,7 @@ export class InputController {
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.CutAllText:
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
                     // TODO: Implement error handling.
@@ -484,7 +481,7 @@ export class InputController {
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.CUT).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.ClearAllText:
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
                     // TODO: Implement error handling.
@@ -492,44 +489,41 @@ export class InputController {
                 this.inputClient?.deleteForward(1).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.ConvertAllText:
-                // TODO: Traditional-Simplified conversion
-                let text: string = "Implement T-S conversion";
-                this.insert(text);
-                break
+                break;
             case EditingAction.MoveLeft:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_LEFT).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.MoveRight:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_RIGHT).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.MoveUp:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.MoveDown:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.JumpToStart:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             case EditingAction.JumpToEnd:
                 this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
                     // TODO: Implement error handling.
                 });
-                break
+                break;
             default:
-                break
+                break;
         }
     }
 }

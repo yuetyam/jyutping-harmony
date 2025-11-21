@@ -11,7 +11,7 @@ export default struct SpaceKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(InputModeCompanion.isABC(controller.inputMode) ? "space" : "粵拼")
+                Text(InputModeCompanion.isABC(controller.inputMode) ? "space" : (controller.isMutilated ? "粤拼" : "粵拼"))
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)

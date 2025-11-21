@@ -1,8 +1,9 @@
 import controller from "../InputController";
 import { CircleShape } from "@kit.ArkUI";
 import InputModeSwitch from "./InputModeSwitch";
-import { InputMode, InputModeCompanion } from "../model/InputMode";
+import { InputModeCompanion } from "../model/InputMode";
 import { KeyboardForm } from "../model/KeyboardForm";
+import CharacterSetSwitch from "./CharacterSetSwitch";
 
 @ComponentV2
 export default struct ToolBar {
@@ -30,11 +31,9 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event?: ClickEvent) => {
-                if (event) {
-                    controller.playModifierSound();
-                    controller.transformTo(KeyboardForm.Settings);
-                }
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
+                controller.transformTo(KeyboardForm.Settings);
             })
 
             Stack() {
@@ -51,22 +50,34 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event?: ClickEvent) => {
-                if (event) {
-                    controller.playModifierSound();
-                    controller.insert("emoji");
-                }
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
             })
 
-            InputModeSwitch({ isSwitched: InputModeCompanion.isABC(controller.inputMode) })
+            Stack() {
+                Button() {
+                    Image($r('app.media.button_emoji'))
+                        .fillColor($r('sys.color.ohos_id_color_primary'))
+                        .width(this.iconLength)
+                        .height(this.iconLength)
+                }
+                .backgroundColor(Color.Transparent)
+                .clipShape(this.shape)
+                .width(this.shapeLength)
+                .height(this.shapeLength)
+            }
+            .width('50vp')
+            .height('100%')
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
+            })
+
+            InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')
                 .height('100%')
-                .onClick((event?: ClickEvent) => {
-                    if (event) {
-                        controller.playModifierSound();
-                        let newMode = InputModeCompanion.isABC(controller.inputMode) ? InputMode.Cantonese : InputMode.ABC;
-                        controller.updateInputMode(newMode);
-                    }
+                .onClick((event: ClickEvent) => {
+                    controller.playModifierSound();
+                    controller.toggleInputMode();
                 })
 
             Stack() {
@@ -83,12 +94,18 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event?: ClickEvent) => {
-                if (event) {
-                    controller.playModifierSound();
-                    controller.transformTo(KeyboardForm.EditingPanel);
-                }
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
+                controller.transformTo(KeyboardForm.EditingPanel);
             })
+
+            CharacterSetSwitch({ isMutilated: controller.isMutilated })
+                .width('50vp')
+                .height('100%')
+                .onClick((event: ClickEvent) => {
+                    controller.playModifierSound();
+                    controller.toggleCharacterScriptVariant();
+                })
 
             Stack() {
                 Button() {
@@ -104,11 +121,9 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event?: ClickEvent) => {
-                if (event) {
-                    controller.playModifierSound();
-                    controller.dismissKeyboard();
-                }
+            .onClick((event: ClickEvent) => {
+                controller.playModifierSound();
+                controller.dismissKeyboard();
             })
         }
         .width('100%')

@@ -42,10 +42,8 @@ export default struct EditingPasteKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.performEditing(EditingAction.Paste);
-            }
+        .onClick((event: ClickEvent) => {
+            controller.performEditing(EditingAction.Paste);
         })
     }
 }
