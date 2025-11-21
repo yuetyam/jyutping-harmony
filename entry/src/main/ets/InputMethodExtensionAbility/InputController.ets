@@ -14,6 +14,8 @@ import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
 import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
+import { InputMemory } from './model/InputMemory';
+import { Lexicon } from './model/Lexicon';
 
 @ObservedV2
 export class InputController {
@@ -166,6 +168,35 @@ export class InputController {
             await this.obtainStore();
         }
     }
+    private async prepareMemory() {
+        if (this.memory) {
+            InputMemory.prepare(this.memory);
+        } else {
+            await this.attachMemory();
+            if (this.memory) {
+                InputMemory.prepare(this.memory);
+            }
+        }
+    }
+    private memory: relationalStore.RdbStore | undefined = undefined;
+    private async attachMemory() {
+        let fileName: string = "memory.sqlite3";
+        let storeConfig: relationalStore.StoreConfig = {
+            name: fileName,
+            securityLevel: relationalStore.SecurityLevel.S1,
+            encrypt: false,
+            customDir: 'ime',
+            isReadOnly: false
+        };
+        relationalStore.getRdbStore(this.ctx, storeConfig,
+            async (err: BusinessError, rdbStore: relationalStore.RdbStore) => {
+                if (err) {
+                    console.error(`Error in attachMemory(). message: ${err.message}, code: ${err.code}`);
+                    return;
+                }
+                this.memory = rdbStore;
+            });
+    }
 
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
@@ -179,8 +210,10 @@ export class InputController {
         this.registerListener();
         this.prepareSoundPool();
         this.prepareStore();
+        this.prepareMemory();
         setTimeout(() => {
             this.prepareStore();
+            this.prepareMemory();
         }, 1000);
     }
     onDestroy(): void {
@@ -195,6 +228,7 @@ export class InputController {
         }
     }
     @Trace candidates: Candidate[] = [];
+    private selectedCandidates: Candidate[] = [];
     @Trace markedText: string = "";
     @Trace isBuffering: boolean = false;
     private bufferEvents: InputKeyEvent[] = [];
@@ -215,19 +249,19 @@ export class InputController {
         }
     }
     private async runInputSession() {
+        this.candidates = [];
         if (this.isBufferEmpty) {
             this.markedText = "";
-            this.candidates = [];
+            this.selectedCandidates = [];
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Alphabetic);
             }
             return;
         }
         this.markedText = this.bufferEvents.map(item => item.text).join("");
-        if (this.store) {
-            this.candidates = [];
-            const items = await Researcher.search(this.bufferEvents, this.store);
-            const newCandidates: Candidate[] = [];
+        const newCandidates: Candidate[] = [];
+        if (this.memory) {
+            const items = await InputMemory.search(this.bufferEvents, this.memory);
             for (let index = 0; index < items.length; index++) {
                 const item = items[index];
                 let instance: Candidate = {
@@ -239,18 +273,41 @@ export class InputController {
                 };
                 newCandidates.push(instance);
             }
-            this.candidates = newCandidates;
+        } else {
+            this.prepareMemory();
+        }
+        if (this.store) {
+            const items = await Researcher.search(this.bufferEvents, this.store);
+            for (let index = 0; index < items.length; index++) {
+                const item = items[index];
+                let instance: Candidate = {
+                    type: CandidateType.Cantonese,
+                    text: item.text,
+                    comment: item.romanization,
+                    lexicon: item,
+                    number: index,
+                };
+                newCandidates.push(instance);
+            }
         } else {
             this.prepareStore();
         }
+        this.candidates = newCandidates;
     }
     selectCandidateBy(index: number) {
         if (this.candidates.length > index) {
             const selected = this.candidates[index];
             const text = selected.text;
             this.insert(text);
+            this.selectedCandidates.push(selected);
             const inputLength = selected.lexicon.inputCount;
             this.bufferEvents.splice(0, inputLength);
+            if (this.bufferEvents.length < 1) {
+                if (this.memory) {
+                    InputMemory.process(this.selectedCandidates, this.memory);
+                }
+                this.selectedCandidates = [];
+            }
             this.runInputSession();
         }
     }
@@ -259,8 +316,15 @@ export class InputController {
         if (candidate) {
             const text = candidate.text;
             this.insert(text);
+            this.selectedCandidates.push(candidate);
             const inputLength = candidate.lexicon.inputCount;
             this.bufferEvents.splice(0, inputLength);
+            if (this.bufferEvents.length < 1) {
+                if (this.memory) {
+                    InputMemory.process(this.selectedCandidates, this.memory);
+                }
+                this.selectedCandidates = [];
+            }
             this.runInputSession();
         }
     }
