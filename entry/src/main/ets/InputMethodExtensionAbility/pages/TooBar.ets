@@ -35,6 +35,7 @@ export default struct ToolBar {
                 controller.playModifierSound();
                 controller.transformTo(KeyboardForm.Settings);
             })
+            .opacity(0)
 
             Stack() {
                 Button() {
@@ -53,6 +54,7 @@ export default struct ToolBar {
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
             })
+            .opacity(0)
 
             Stack() {
                 Button() {
@@ -71,6 +73,7 @@ export default struct ToolBar {
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
             })
+            .opacity(0)
 
             InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')

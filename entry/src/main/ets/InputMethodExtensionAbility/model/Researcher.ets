@@ -49,7 +49,7 @@ export class Researcher {
         const inputCount = events.length;
         const lexicons: Lexicon[] = [];
         const limit = 50;
-        const command: string = "SELECT rowid, word, romanization FROM lexicontable WHERE anchors = ? LIMIT ?;";
+        const command: string = "SELECT rowid, word, romanization FROM core_lexicon WHERE anchors = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -80,7 +80,7 @@ export class Researcher {
         const lexicons: Lexicon[] = [];
         const code = Researcher.hashCode(text);
         const limit = -1;
-        const command: string = "SELECT rowid, word, romanization FROM lexicontable WHERE ping = ? LIMIT ?;";
+        const command: string = "SELECT rowid, word, romanization FROM core_lexicon WHERE ping = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -108,7 +108,7 @@ export class Researcher {
     }
     static test(store: relationalStore.RdbStore): number {
         let num: number = -1;
-        const command: string = "SELECT rowid romanization FROM lexicontable WHERE anchors = 32 LIMIT 1;";
+        const command: string = "SELECT rowid romanization FROM core_lexicon WHERE anchors = 32 LIMIT 1;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);

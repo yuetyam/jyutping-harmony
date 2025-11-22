@@ -91,10 +91,19 @@ export struct AboutScreen {
                             text: $r('app.string.about_red_note')
                         })
                     }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://wj.qq.com/s2/14037245/fe08',
+                            icon: $r('sys.symbol.checkmark_circle'),
+                            text: $r('app.string.about_tencent_survey')
+                        })
+                    }
                 }
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                /*
                 ListItemGroup() {
                     ListItem() {
                         WebLinkView({
@@ -117,6 +126,7 @@ export struct AboutScreen {
                 }
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
+                */
             }
             .padding({ left: 16, right: 16 })
             .width('100%')

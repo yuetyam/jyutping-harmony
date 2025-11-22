@@ -253,6 +253,7 @@ export struct HomeScreen {
                     }
                 }
 
+                /*
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
                         Text($r("app.string.guide_abbreviated_input_heading"))
@@ -386,6 +387,7 @@ export struct HomeScreen {
                 .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
+                */
             }
             .padding({ left: 16, right: 16 })
             .width('100%')

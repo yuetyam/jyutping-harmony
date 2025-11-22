@@ -13,7 +13,7 @@ export class Converter {
     }
     private static t2s(code: number, store: relationalStore.RdbStore): number {
         let newCode: number = code;
-        const command: string = `SELECT simplified FROM t2stable WHERE traditional = ${code};`;
+        const command: string = `SELECT right FROM variant_sim WHERE left = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
@@ -30,7 +30,7 @@ export class Converter {
     }
     private static s2t(code: number, store: relationalStore.RdbStore): number {
         let newCode: number = code;
-        const command: string = `SELECT traditional FROM t2stable WHERE simplified = ${code} LIMIT 1;`;
+        const command: string = `SELECT left FROM variant_sim WHERE right = ${code} LIMIT 1;`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
