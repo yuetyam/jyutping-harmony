@@ -1,4 +1,5 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 
@@ -8,8 +9,8 @@ export default class EntryAbility extends UIAbility {
     onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
         try {
             this.context.getApplicationContext().setColorMode(ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET);
-        } catch (error) {
-            // TODO: Implement error handling.
+        } catch (err) {
+            hilog.error(DOMAIN, 'testTag', 'Failed to set colorMode. Cause: %{public}s', JSON.stringify(err));
         }
         hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
     }
@@ -30,7 +31,11 @@ export default class EntryAbility extends UIAbility {
             hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
 
             let windowClass: window.Window = windowStage.getMainWindowSync();
-            windowClass.setWindowLayoutFullScreen(true);
+            windowClass.setWindowLayoutFullScreen(true).then(() => {
+                console.debug('Succeeded in setting the window layout to full-screen mode.');
+            }).catch((err: BusinessError) => {
+                console.error(`Failed to set the window layout to full-screen mode. Code is ${err.code}, message is ${err.message}`);
+            });
 
             let type = window.AvoidAreaType.TYPE_SYSTEM;
             let avoidArea = windowClass.getWindowAvoidArea(type);
