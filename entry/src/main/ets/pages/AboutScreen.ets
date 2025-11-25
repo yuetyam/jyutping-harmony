@@ -54,7 +54,7 @@ export struct AboutScreen {
                     }
                     ListItem() {
                         WebLinkView({
-                            url: 'https://jyutping.app/privacy',
+                            url: 'https://jyutping.app/harmony/privacy',
                             icon: $r('sys.symbol.lock'),
                             text: $r('app.string.about_privacy_policy')
                         })
