@@ -1,4 +1,4 @@
-import { common, Want, bundleManager } from '@kit.AbilityKit';
+import { common, Want } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
@@ -52,9 +52,8 @@ export struct HomeScreen {
     @Local private gwongWanLexicons: GwongWanLexicon[] = [];
 
     private async copyAppDatabase(context: Context) {
-        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         let sourcePath: string = context.resourceDir + "/appdb.sqlite3";
-        let fileName: string = `appdb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let fileName: string = `appdb-20251125-tmp.sqlite3`;
         let destinationPath: string = context.databaseDir + "/rdb/app/" + fileName;
         try {
             if (fs.accessSync(destinationPath)) {
@@ -71,8 +70,7 @@ export struct HomeScreen {
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
-        let fileName: string = `appdb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let fileName: string = `appdb-20251125-tmp.sqlite3`;
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
@@ -117,7 +115,7 @@ export struct HomeScreen {
         // const identifier: string = "InputMethodExtensionAbility";
         try {
             let currentInputMethod = inputMethod.getCurrentInputMethod();
-            this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
+            // this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
         } catch (error) {
         }
     }
@@ -252,6 +250,11 @@ export struct HomeScreen {
                         })
                     }
                 }
+
+                ListItem() {
+                    Text("注：键盘需「完整体验模式」才能用到更丰富的词库").fontSize('14.vp')
+                }
+                .padding(8)
 
                 /*
                 ListItemGroup({ space: 8 }) {

@@ -1,6 +1,5 @@
 import { display } from '@kit.ArkUI';
 import { relationalStore } from '@kit.ArkData';
-import { bundleManager } from '@kit.AbilityKit';
 import { audio } from '@kit.AudioKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
 import { fileIo as fs } from '@kit.CoreFileKit';
@@ -112,9 +111,8 @@ export class InputController {
     }
 
     private async copyKeyboardDatabase(context: Context) {
-        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
         let sourcePath: string = context.resourceDir + "/imedb.sqlite3";
-        let fileName: string = `imedb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let fileName: string = `imedb-20251125-tmp.sqlite3`;
         let destinationPath: string = context.databaseDir + "/rdb/ime/" + fileName;
         try {
             if (fs.accessSync(destinationPath)) {
@@ -131,8 +129,7 @@ export class InputController {
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        let bundleInfo = await bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION);
-        let fileName: string = `imedb-${bundleInfo.versionName}-${bundleInfo.versionCode}-tmp.sqlite3`;
+        let fileName: string = `imedb-20251125-tmp.sqlite3`;
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
@@ -264,6 +261,7 @@ export class InputController {
             return;
         }
         this.markedText = this.bufferEvents.map(item => item.text).join("");
+        const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         if (this.memory) {
@@ -273,8 +271,7 @@ export class InputController {
         }
         if (this.store) {
             const items = await Researcher.search(this.bufferEvents, this.store);
-            newLexicons = newLexicons.concat(items);
-            const needsConversion: boolean = this.isMutilated;
+            newLexicons = newLexicons.concat(items).sort((a, b) => b.inputCount - a.inputCount);
             for (let index = 0; index < newLexicons.length; index++) {
                 const item = newLexicons[index];
                 let instance: Candidate = {
@@ -286,6 +283,19 @@ export class InputController {
                 };
                 newCandidates.push(instance);
             }
+        } else if (this.memory) {
+            for (let index = 0; index < newLexicons.length; index++) {
+                const item = newLexicons[index];
+                let instance: Candidate = {
+                    type: CandidateType.Cantonese,
+                    text: needsConversion ? Converter.convert(item.text, true, this.memory) : item.text,
+                    comment: item.romanization,
+                    lexicon: item,
+                    number: index,
+                };
+                newCandidates.push(instance);
+            }
+            this.prepareMemory();
         } else {
             this.prepareStore();
         }

@@ -13,7 +13,7 @@ export class Converter {
     }
     private static t2s(code: number, store: relationalStore.RdbStore): number {
         let newCode: number = code;
-        const command: string = `SELECT right FROM variant_sim WHERE left = ${code};`;
+        const command: string = `SELECT right FROM variant_sim WHERE left = ${code} LIMIT 1;`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
