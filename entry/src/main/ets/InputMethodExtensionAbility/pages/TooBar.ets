@@ -68,7 +68,7 @@ export default struct ToolBar {
                 .width(this.shapeLength)
                 .height(this.shapeLength)
             }
-            .width('50vp')
+            .width(this.buttonLength)
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
@@ -103,7 +103,7 @@ export default struct ToolBar {
             })
 
             CharacterSetSwitch({ isMutilated: controller.isMutilated })
-                .width('50vp')
+                .width(this.buttonLength)
                 .height('100%')
                 .onClick((event: ClickEvent) => {
                     controller.playModifierSound();

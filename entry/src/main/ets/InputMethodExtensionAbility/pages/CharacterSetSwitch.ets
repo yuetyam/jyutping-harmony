@@ -8,6 +8,7 @@ export default struct CharacterSetSwitch {
                     Stack({ alignContent: Alignment.Center }) {
                         Text("繁")
                             .fontSize(this.isMutilated ? 12: 16)
+                            .padding({ right: this.isMutilated ? 4 : 0 })
                     }
                     .backgroundColor(this.isMutilated ? Color.Transparent : $r('app.color.key_shallow'))
                     .borderRadius('13.vp')
@@ -20,6 +21,7 @@ export default struct CharacterSetSwitch {
                     Stack({ alignContent: Alignment.Center }) {
                         Text("简")
                             .fontSize(this.isMutilated ? 16: 12)
+                            .padding({ left: this.isMutilated ? 0 : 4 })
                     }
                     .backgroundColor(this.isMutilated ? $r('app.color.key_shallow') : Color.Transparent)
                     .borderRadius('13.vp')
@@ -31,7 +33,7 @@ export default struct CharacterSetSwitch {
             }
             .backgroundColor($r('app.color.key_emphatic'))
             .borderRadius('13.vp')
-            .width('50vp')
+            .width('48vp')
             .height('26vp')
         }
         .width('100%')

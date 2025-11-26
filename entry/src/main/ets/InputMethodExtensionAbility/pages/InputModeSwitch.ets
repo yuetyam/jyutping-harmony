@@ -9,10 +9,11 @@ export default struct InputModeSwitch {
                     Stack({ alignContent: Alignment.Center }) {
                         Text(this.isMutilated ? "粤" : "粵")
                             .fontSize(this.isCantoneseMode ? 17: 13)
+                            .padding({ right: this.isCantoneseMode ? 0 : 4 })
                     }
                     .backgroundColor(this.isCantoneseMode ? $r('app.color.key_shallow') : Color.Transparent)
                     .borderRadius('13.vp')
-                    .width('35vp')
+                    .width('36vp')
                     .height('100%')
                 }
                 .width('100%')
@@ -21,10 +22,11 @@ export default struct InputModeSwitch {
                     Stack({ alignContent: Alignment.Center }) {
                         Text("A")
                             .fontSize(this.isCantoneseMode ? 13: 17)
+                            .padding({ left: this.isCantoneseMode ? 4 : 0 })
                     }
                     .backgroundColor(this.isCantoneseMode ? Color.Transparent : $r('app.color.key_shallow'))
                     .borderRadius('13.vp')
-                    .width('35vp')
+                    .width('36vp')
                     .height('100%')
                 }
                 .width('100%')
