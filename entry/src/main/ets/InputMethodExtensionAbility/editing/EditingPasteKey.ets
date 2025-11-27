@@ -14,8 +14,10 @@ export default struct EditingPasteKey {
                 SymbolGlyph($r('sys.symbol.doc_text_badge_arrow_up'))
                     .fontSize(24)
                     .fontColor([$r('sys.color.ohos_id_color_primary')])
+                    .opacity(0)
                 Text($r('app.string.keyboard_editing_panel_paste'))
                     .fontSize(11)
+                    .opacity(0)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
             .borderRadius(8)

@@ -111,16 +111,17 @@ export class InputController {
     }
 
     private async copyKeyboardDatabase(context: Context) {
-        let sourcePath: string = context.resourceDir + "/imedb.sqlite3";
-        let fileName: string = `imedb-20251125-tmp.sqlite3`;
-        let destinationPath: string = context.databaseDir + "/rdb/ime/" + fileName;
+        const srcFileName: string = "imedb.sqlite3";
+        const desFileName: string = "imedb-20251125-tmp.sqlite3";
+        const srcPath: string = context.resourceDir + "/" + srcFileName;
+        const desPath: string = context.databaseDir + "/rdb/ime/" + desFileName;
         try {
-            if (fs.accessSync(destinationPath)) {
-                console.debug("keyboard database path: " + destinationPath);
+            if (fs.accessSync(desPath)) {
+                console.debug("keyboard database path: " + desPath);
             } else {
-                console.debug("src database path: " + sourcePath);
-                console.debug("des database path: " + destinationPath);
-                await fs.copyFile(sourcePath, destinationPath);
+                console.debug("src database path: " + srcPath);
+                console.debug("des database path: " + desPath);
+                await fs.copyFile(srcPath, desPath);
             }
         } catch (error) {
             let err: BusinessError = error as BusinessError;
@@ -129,7 +130,7 @@ export class InputController {
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        let fileName: string = `imedb-20251125-tmp.sqlite3`;
+        const fileName: string = `imedb-20251125-tmp.sqlite3`;
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
@@ -270,34 +271,21 @@ export class InputController {
             this.prepareMemory();
         }
         if (this.store) {
-            const items = await Researcher.search(this.bufferEvents, this.store);
-            newLexicons = newLexicons.concat(items).sort((a, b) => b.inputCount - a.inputCount);
-            for (let index = 0; index < newLexicons.length; index++) {
-                const item = newLexicons[index];
-                let instance: Candidate = {
-                    type: CandidateType.Cantonese,
-                    text: needsConversion ? Converter.convert(item.text, true, this.store) : item.text,
-                    comment: item.romanization,
-                    lexicon: item,
-                    number: index,
-                };
-                newCandidates.push(instance);
-            }
-        } else if (this.memory) {
-            for (let index = 0; index < newLexicons.length; index++) {
-                const item = newLexicons[index];
-                let instance: Candidate = {
-                    type: CandidateType.Cantonese,
-                    text: needsConversion ? Converter.convert(item.text, true, this.memory) : item.text,
-                    comment: item.romanization,
-                    lexicon: item,
-                    number: index,
-                };
-                newCandidates.push(instance);
-            }
-            this.prepareMemory();
+            const searched = await Researcher.search(this.bufferEvents, this.store);
+            newLexicons = newLexicons.concat(searched).sort((a, b) => b.inputCount - a.inputCount);
         } else {
             this.prepareStore();
+        }
+        for (let index = 0; index < newLexicons.length; index++) {
+            const item = newLexicons[index];
+            let instance: Candidate = {
+                type: CandidateType.Cantonese,
+                text: needsConversion ? Converter.convert(item.text, true, this.memory) : item.text,
+                comment: item.romanization,
+                lexicon: item,
+                number: index,
+            };
+            newCandidates.push(instance);
         }
         this.candidates = newCandidates;
     }
@@ -373,10 +361,16 @@ export class InputController {
         }
     }
     enterKeyAction(): void {
-        let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
-        this.inputClient?.sendKeyFunction(actionCode).catch(() => {
-            // TODO: Implement error handling.
-        })
+        if (this.isBuffering) {
+            const text = this.bufferEvents.map(event => event.text).join('');
+            this.insert(text);
+            this.clearBuffer();
+        } else {
+            let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
+            this.inputClient?.sendKeyFunction(actionCode).catch(() => {
+                console.error(`Failed to sendKeyFunction() in enterKeyAction(), actionCode: ${actionCode}`);
+            })
+        }
     }
     dismissKeyboard(): void {
         this.panel?.hide();

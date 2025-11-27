@@ -252,7 +252,9 @@ export struct HomeScreen {
                 }
 
                 ListItem() {
-                    Text("注：键盘需「完整体验模式」才能用到更丰富的词库").fontSize('14.vp')
+                    Text("重要：键盘需「完整体验模式」方可用到完整词库")
+                        .fontSize('14.vp')
+                        .lineHeight(20)
                 }
                 .padding(8)
 
