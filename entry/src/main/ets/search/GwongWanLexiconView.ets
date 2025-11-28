@@ -35,7 +35,7 @@ struct GwongWanUnitView {
             Row({ space: 16 }) {
                 Row({ space: 2 }) {
                     Text("讀音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.faancit)
@@ -44,7 +44,7 @@ struct GwongWanUnitView {
             }
             Row({ space: 2 }) {
                 Text("釋義")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.unit.interpretation)

@@ -25,7 +25,7 @@ struct ChoHokUnitView {
             Row({ space: 16 }) {
                 Row({ space: 2 }) {
                     Text("讀音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.pronunciation)
@@ -35,7 +35,7 @@ struct ChoHokUnitView {
             }
             Row({ space: 2 }) {
                 Text("轉寫")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.unit.romanization)
@@ -43,7 +43,7 @@ struct ChoHokUnitView {
             if (this.unit.homophones.length > 0) {
                 Row({ space: 2 }) {
                     Text("同音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.homophones.join(" "))

@@ -25,7 +25,7 @@ struct YingWaaUnitView {
             Row({ space: 16 }) {
                 Row({ space: 2 }) {
                     Text("讀音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.pronunciation)
@@ -37,7 +37,7 @@ struct YingWaaUnitView {
             }
             Row({ space: 2 }) {
                 Text("轉寫")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.unit.romanization)
@@ -45,7 +45,7 @@ struct YingWaaUnitView {
             if (this.unit.homophones.length > 0) {
                 Row({ space: 2 }) {
                     Text("同音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.homophones.join(" "))
@@ -54,7 +54,7 @@ struct YingWaaUnitView {
             if (this.unit.interpretation) {
                 Row({ space: 2 }) {
                     Text("釋義")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.interpretation)

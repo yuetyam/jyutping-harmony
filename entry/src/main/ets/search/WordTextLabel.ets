@@ -7,14 +7,14 @@ export struct WordTextLabel {
         Row({ space: 16 }) {
             Row({ space: 2 }) {
                 Text("文字")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.word)
             }
             if (this.word.length === 1) {
                 Text("U+" + this.word.codePointAt(0)?.toString(16).toUpperCase())
-                    .fontSize('13vp')
+                    .fontSize(13)
                     .opacity(0.75)
             }
             Blank()

@@ -18,7 +18,7 @@ export struct CantoneseLexiconView {
                 Divider()
                 Row({ space: 2 }) {
                     Text("英文")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.lexicon.unihanDefinition)

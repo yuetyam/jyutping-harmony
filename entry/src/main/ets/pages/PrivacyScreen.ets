@@ -11,20 +11,20 @@ export struct PrivacyScreen {
         List() {
             ListItem() {
                 Text("粤拼输入法隐私布告")
-                    .fontSize('20vp')
+                    .fontSize(20)
                     .fontWeight(FontWeight.Bold)
             }
             .padding(8)
             ListItemGroup() {
                 ListItem() {
                     Text(this.contentText.trimStart())
-                        .fontSize('14vp')
+                        .fontSize(14)
                 }
                 ListItem() {
                     Row() {
-                        Text("详情可参阅：").fontSize('11vp')
+                        Text("详情可参阅：").fontSize(11)
                         Button() {
-                            Text("粤拼输入法隐私政策").fontSize('11vp').foregroundColor($r('app.color.accent'))
+                            Text("粤拼输入法隐私政策").fontSize(11).foregroundColor($r('app.color.accent'))
                         }
                         .backgroundColor(Color.Transparent)
                         .onClick((event: ClickEvent) => {

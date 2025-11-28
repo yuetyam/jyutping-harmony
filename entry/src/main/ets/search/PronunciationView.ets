@@ -8,7 +8,7 @@ export struct PronunciationView {
         Column({ space: 6 }) {
             Row({ space: 2 }) {
                 Text("讀音")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.pronunciation.romanization)
@@ -16,7 +16,7 @@ export struct PronunciationView {
             if (this.pronunciation.homophones.length > 0) {
                 Row({ space: 2 }) {
                     Text("同音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.pronunciation.homophones.join(" "))
@@ -25,7 +25,7 @@ export struct PronunciationView {
             if (this.pronunciation.collocations.length > 0) {
                 Row({ space: 2 }) {
                     Text("詞例")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.pronunciation.collocations.slice(0, 5).join(" "))
@@ -35,7 +35,7 @@ export struct PronunciationView {
             ForEach(this.pronunciation.descriptions, (item: string) => {
                 Row({ space: 2 }) {
                     Text("釋義")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(item)

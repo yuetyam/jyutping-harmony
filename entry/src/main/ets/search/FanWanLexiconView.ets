@@ -25,14 +25,14 @@ struct FanWanUnitView {
         Column({ space: 6 }) {
             Row({ space: 2 }) {
                 Text("讀音")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.abstract)
             }
             Row({ space: 2 }) {
                 Text("轉寫")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.unit.romanization)
@@ -40,7 +40,7 @@ struct FanWanUnitView {
             if (this.unit.homophones.length > 0) {
                 Row({ space: 2 }) {
                     Text("同音")
-                        .fontSize('15vp')
+                        .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
                     Text(this.unit.homophones.join(" "))
@@ -48,7 +48,7 @@ struct FanWanUnitView {
             }
             Row({ space: 2 }) {
                 Text("釋義")
-                    .fontSize('15vp')
+                    .fontSize(15)
                     .opacity(0.9)
                 SeparatorMark()
                 Text(this.unit.interpretation)
