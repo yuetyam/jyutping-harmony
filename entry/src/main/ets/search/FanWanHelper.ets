@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { FanWanLexicon, FanWanUnit } from './FanWanUnit';
 
-// fanwantable(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, yamyeung TEXT NOT NULL, tone TEXT NOT NULL, rhyme TEXT NOT NULL, interpretation TEXT NOT NULL);
+// fanwan_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, yamyeung TEXT NOT NULL, tone TEXT NOT NULL, rhyme TEXT NOT NULL, interpretation TEXT NOT NULL);
 
 export class FanWanHelper {
     static search(text: string, store: relationalStore.RdbStore): FanWanLexicon[] {
@@ -26,7 +26,7 @@ export class FanWanHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): FanWanLexicon {
         const units: FanWanUnit[] = [];
-        const command: string = `SELECT * FROM fanwantable WHERE code = ${code};`;
+        const command: string = `SELECT * FROM fanwan_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);

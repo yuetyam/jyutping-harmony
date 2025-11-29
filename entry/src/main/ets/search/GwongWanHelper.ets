@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { GwongWanLexicon, GwongWanUnit } from './GwongWanUnit';
 
-// gwongwantable(code INTEGER NOT NULL, word TEXT NOT NULL, rhyme TEXT NOT NULL, subrhyme TEXT NOT NULL, subrhymeserial INTEGER NOT NULL, subrhymenumber INTEGER NOT NULL, upper TEXT NOT NULL, lower TEXT NOT NULL, initial TEXT NOT NULL, rounding TEXT NOT NULL, division TEXT NOT NULL, rhymeclass TEXT NOT NULL, repeating TEXT NOT NULL, tone TEXT NOT NULL, interpretation TEXT NOT NULL)
+// gwongwan_table(code INTEGER NOT NULL, word TEXT NOT NULL, rhyme TEXT NOT NULL, subrhyme TEXT NOT NULL, subrhymeserial INTEGER NOT NULL, subrhymenumber INTEGER NOT NULL, upper TEXT NOT NULL, lower TEXT NOT NULL, initial TEXT NOT NULL, rounding TEXT NOT NULL, division TEXT NOT NULL, rhymeclass TEXT NOT NULL, repeating TEXT NOT NULL, tone TEXT NOT NULL, interpretation TEXT NOT NULL)
 
 export class GwongWanHelper {
     static search(text: string, store: relationalStore.RdbStore): GwongWanLexicon[] {
@@ -26,7 +26,7 @@ export class GwongWanHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): GwongWanLexicon {
         const units: GwongWanUnit[] = [];
-        const command: string = `SELECT * FROM gwongwantable WHERE code = ${code};`;
+        const command: string = `SELECT * FROM gwongwan_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);

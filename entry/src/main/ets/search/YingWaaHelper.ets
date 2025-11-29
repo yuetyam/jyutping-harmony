@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { YingWaaLexicon, YingWaaUnit } from './YingWaaUnit';
 
-// yingwaatable(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, pronunciation TEXT NOT NULL, pronunciationmark TEXT NOT NULL, interpretation TEXT NOT NULL);
+// yingwaa_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, pronunciation TEXT NOT NULL, pronunciationmark TEXT NOT NULL, interpretation TEXT NOT NULL);
 
 export class YingWaaHelper {
     static search(text: string, store: relationalStore.RdbStore): YingWaaLexicon[] {
@@ -26,7 +26,7 @@ export class YingWaaHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): YingWaaLexicon {
         const units: YingWaaUnit[] = [];
-        const command: string = `SELECT * FROM yingwaatable WHERE code = ${code};`;
+        const command: string = `SELECT * FROM yingwaa_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
@@ -76,7 +76,7 @@ export class YingWaaHelper {
     }
     private static fetchHomophones(romanization: string, store: relationalStore.RdbStore): string[] {
         const homophones: string[] = [];
-        const command: string = "SELECT word FROM yingwaatable WHERE romanization = ? LIMIT 11;";
+        const command: string = "SELECT word FROM yingwaa_table WHERE romanization = ? LIMIT 11;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [romanization]);

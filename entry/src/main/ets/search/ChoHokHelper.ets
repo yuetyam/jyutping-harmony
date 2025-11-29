@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ChoHokLexicon, ChoHokUnit } from './ChoHokUnit';
 
-// chohoktable(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, tone TEXT NOT NULL, faancit TEXT NOT NULL);
+// chohok_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, tone TEXT NOT NULL, faancit TEXT NOT NULL);
 
 export class ChoHokHelper {
     static search(text: string, store: relationalStore.RdbStore): ChoHokLexicon[] {
@@ -26,7 +26,7 @@ export class ChoHokHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): ChoHokLexicon {
         const units: ChoHokUnit[] = [];
-        const command: string = `SELECT * FROM chohoktable WHERE code = ${code};`;
+        const command: string = `SELECT * FROM chohok_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
@@ -77,7 +77,7 @@ export class ChoHokHelper {
     }
     private static fetchHomophones(romanization: string, store: relationalStore.RdbStore): string[] {
         const homophones: string[] = [];
-        const command: string = "SELECT word FROM chohoktable WHERE romanization = ? LIMIT 11;";
+        const command: string = "SELECT word FROM chohok_table WHERE romanization = ? LIMIT 11;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [romanization]);

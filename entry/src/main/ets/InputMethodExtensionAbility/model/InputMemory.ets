@@ -16,12 +16,10 @@ export class InputMemory {
         return hash;
     }
 
-    static async search(events: InputKeyEvent[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
+    static search(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
         const text = events.map((event) => event.text).join("")
         const code = InputMemory.hashCode(text);
-        const searched = InputMemory.match(text, code, store);
-        const fallbackSearched = InputMemory.fallbackSearch(events, store);
-        return [...searched, ...fallbackSearched];
+        return InputMemory.match(text, code, store);
     }
     private static processSlices(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
         const eventLength: number = events.length;

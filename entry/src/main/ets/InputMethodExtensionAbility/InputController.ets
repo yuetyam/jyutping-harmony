@@ -110,9 +110,26 @@ export class InputController {
         });
     }
 
+    private async deleteOldDatabases(context: Context) {
+        const fileNames: string[] = ["imedb-20251125-tmp.sqlite3"];
+        const pathPrefix: string = context.databaseDir + "/rdb/ime/";
+        for (let index = 0; index < fileNames.length; index++) {
+            const name: string = fileNames[index];
+            const path: string = pathPrefix + name;
+            try {
+                if (fs.accessSync(path)) {
+                    fs.unlinkSync(path);
+                    console.debug("Successfully delete file " + name);
+                }
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error(`Failed to delete file ${name}, message: ${err.message}, code: ${err.code}`);
+            }
+        }
+    }
     private async copyKeyboardDatabase(context: Context) {
         const srcFileName: string = "imedb.sqlite3";
-        const desFileName: string = "imedb-20251125-tmp.sqlite3";
+        const desFileName: string = "imedb-20251129-tmp.sqlite3";
         const srcPath: string = context.resourceDir + "/" + srcFileName;
         const desPath: string = context.databaseDir + "/rdb/ime/" + desFileName;
         try {
@@ -127,10 +144,11 @@ export class InputController {
             let err: BusinessError = error as BusinessError;
             console.error("copyKeyboardDatabase() failed, message: " + err.message + ", code: " + err.code);
         }
+        this.deleteOldDatabases(context);
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        const fileName: string = `imedb-20251125-tmp.sqlite3`;
+        const fileName: string = "imedb-20251129-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
@@ -147,12 +165,15 @@ export class InputController {
                 this.store = rdbStore;
             });
     }
+    private isCoreStoreFunctional: boolean = false;
     private async prepareStore() {
         if (this.store) {
-            const code: number = Researcher.test(this.store);
-            if (code > 0) {
+            const rowID: number = Researcher.test(this.store);
+            if (rowID > 0) {
+                this.isCoreStoreFunctional = true;
                 return;
             }
+            this.isCoreStoreFunctional = false;
             try {
                 await this.store.close();
             } catch (error) {
@@ -266,13 +287,23 @@ export class InputController {
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         if (this.memory) {
-            newLexicons = await InputMemory.search(this.bufferEvents, this.memory);
+            if (this.isCoreStoreFunctional) {
+                newLexicons = InputMemory.search(this.bufferEvents, this.memory);
+            } else {
+                const memoryLexicons = InputMemory.search(this.bufferEvents, this.memory);
+                const fallbackLexicons = InputMemory.fallbackSearch(this.bufferEvents, this.memory);
+                newLexicons = [...memoryLexicons, ...fallbackLexicons];
+            }
         } else {
             this.prepareMemory();
         }
         if (this.store) {
             const searched = await Researcher.search(this.bufferEvents, this.store);
-            newLexicons = newLexicons.concat(searched).sort((a, b) => b.inputCount - a.inputCount);
+            if (searched.length > 0) {
+                this.isCoreStoreFunctional = true;
+                newLexicons = newLexicons.concat(searched);
+                // sort((a, b) => b.inputCount - a.inputCount);
+            }
         } else {
             this.prepareStore();
         }

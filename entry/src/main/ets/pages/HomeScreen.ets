@@ -51,26 +51,45 @@ export struct HomeScreen {
     @Local private fanWanLexicons: FanWanLexicon[] = [];
     @Local private gwongWanLexicons: GwongWanLexicon[] = [];
 
+    private async deleteOldDatabases(context: Context) {
+        const fileNames: string[] = ["appdb-20251125-tmp.sqlite3"];
+        const pathPrefix: string = context.databaseDir + "/rdb/app/";
+        for (let index = 0; index < fileNames.length; index++) {
+            const name: string = fileNames[index];
+            const path: string = pathPrefix + name;
+            try {
+                if (fs.accessSync(path)) {
+                    fs.unlinkSync(path);
+                    console.debug("Successfully delete file " + name);
+                }
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error(`Failed to delete file ${name}, message: ${err.message}, code: ${err.code}`);
+            }
+        }
+    }
     private async copyAppDatabase(context: Context) {
-        let sourcePath: string = context.resourceDir + "/appdb.sqlite3";
-        let fileName: string = `appdb-20251125-tmp.sqlite3`;
-        let destinationPath: string = context.databaseDir + "/rdb/app/" + fileName;
+        const srcFileName: string = "appdb.sqlite3";
+        const srcPath: string = context.resourceDir + "/" + srcFileName;
+        const desFileName: string = "appdb-20251129-tmp.sqlite3";
+        const desPath: string = context.databaseDir + "/rdb/app/" + desFileName;
         try {
-            if (fs.accessSync(destinationPath)) {
-                console.debug("app database path: " + destinationPath);
+            if (fs.accessSync(desPath)) {
+                console.debug("app database path: " + desPath);
             } else {
-                console.debug("src database path: " + sourcePath);
-                console.debug("des database path: " + destinationPath);
-                await fs.copyFile(sourcePath, destinationPath);
+                console.debug("src database path: " + srcPath);
+                console.debug("des database path: " + desPath);
+                await fs.copyFile(srcPath, desPath);
             }
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("copyAppDatabase() failed, message: " + err.message + ", code: " + err.code);
         }
+        this.deleteOldDatabases(context);
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        let fileName: string = `appdb-20251125-tmp.sqlite3`;
+        const fileName: string = "appdb-20251129-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
@@ -89,8 +108,8 @@ export struct HomeScreen {
     }
     private async prepareStore() {
         if (this.store) {
-            const code: number = CantoneseDataHelper.test(this.store);
-            if (code > 0) {
+            const rowID: number = CantoneseDataHelper.test(this.store);
+            if (rowID > 0) {
                 return;
             }
             try {
@@ -115,16 +134,13 @@ export struct HomeScreen {
         // const identifier: string = "InputMethodExtensionAbility";
         try {
             let currentInputMethod = inputMethod.getCurrentInputMethod();
-            // this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
+            this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
         } catch (error) {
         }
     }
+
     aboutToAppear(): void {
-        this.detectInputMethodState();
         this.prepareStore();
-    }
-    aboutToReuse(): void {
-        this.detectInputMethodState();
     }
 
     build() {
