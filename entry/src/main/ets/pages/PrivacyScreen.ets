@@ -54,9 +54,7 @@ export struct PrivacyScreen {
                 .backgroundColor($r('app.color.accent'))
                 .width('100%')
                 .onClick((event: ClickEvent) => {
-                    const options: preferences.Options = {
-                        name: "shared"
-                    };
+                    const options: preferences.Options = { name: "shared" };
                     try {
                         let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
                         sharedPreferences.putSync("privacy", "2025");

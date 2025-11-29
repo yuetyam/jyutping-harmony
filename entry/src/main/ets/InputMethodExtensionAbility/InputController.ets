@@ -1,5 +1,5 @@
 import { display } from '@kit.ArkUI';
-import { relationalStore } from '@kit.ArkData';
+import { preferences, relationalStore } from '@kit.ArkData';
 import { audio } from '@kit.AudioKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
 import { fileIo as fs } from '@kit.CoreFileKit';
@@ -121,6 +121,16 @@ export class InputController {
     @Trace isAudioFeedbackOn: boolean = true;
     updateAudioFeedbackState(isOn: boolean) {
         this.isAudioFeedbackOn = isOn;
+        const value: number = isOn ? 1 : 2;
+        try {
+            this.sharedPreferences?.putSync("audio", value);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the audio preferences")
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the audio preferences, message: " + err.message + ", code: " + err.code);
+        }
     }
 
     private async deleteOldDatabases(context: Context) {
@@ -233,8 +243,19 @@ export class InputController {
     @Trace isMutilated: boolean = false;
     toggleCharacterScriptVariant() {
         this.isMutilated = !(this.isMutilated);
+        const value: number = this.isMutilated ? 51 : 1;
+        try {
+            this.sharedPreferences?.putSync("charset", value);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the charset preferences")
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the charset preferences, message: " + err.message + ", code: " + err.code);
+        }
     }
 
+    private sharedPreferences: preferences.Preferences | undefined = undefined;
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
@@ -252,6 +273,17 @@ export class InputController {
             this.prepareStore();
             this.prepareMemory();
         }, 1000);
+        try {
+            const options: preferences.Options = { name: "kbsettings" };
+            this.sharedPreferences = preferences.getPreferencesSync(context, options);
+            const savedAudioFeedbackValue: number = this.sharedPreferences.getSync("audio", 1) as number;
+            this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
+            const savedCharacterStandardValue: number = this.sharedPreferences.getSync("charset", 1) as number;
+            this.isMutilated = (savedCharacterStandardValue == 51);
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
+        }
     }
     onDestroy(): void {
         this.releaseSoundPool();
@@ -324,7 +356,7 @@ export class InputController {
             const item = newLexicons[index];
             let instance: Candidate = {
                 type: CandidateType.Cantonese,
-                text: needsConversion ? Converter.convert(item.text, true, this.memory) : item.text,
+                text: needsConversion ? Converter.convert(item.text, true, (this.isCoreStoreFunctional ? this.store : this.memory)) : item.text,
                 comment: item.romanization,
                 lexicon: item,
                 number: index,

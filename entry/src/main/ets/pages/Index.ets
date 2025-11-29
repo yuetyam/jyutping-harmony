@@ -33,9 +33,7 @@ struct Index {
 
     aboutToAppear(): void {
         try {
-            const options: preferences.Options = {
-                name: "shared"
-            };
+            const options: preferences.Options = { name: "shared" };
             let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
             this.privacy = sharedPreferences.getSync("privacy", "0") as string;
         } catch (error) {
