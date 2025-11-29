@@ -199,6 +199,10 @@
     {
       "name": "keyboard_editing_panel_right_delete",
       "value": "Delete"
+    },
+    {
+      "name": "keyboard_settings_feedback_audio",
+      "value": "Sound Feedback"
     }
   ]
 }

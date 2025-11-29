@@ -25,16 +25,15 @@ export default struct SettingsPanel {
                 }
                 .width('50vp')
                 .height('100%')
-                .onClick((event?: ClickEvent) => {
-                    if (event) {
-                        controller.playModifierSound();
-                        controller.transformTo(controller.previousKeyboardForm);
-                    }
+                .onClick((event: ClickEvent) => {
+                    controller.playModifierSound();
+                    controller.transformTo(controller.previousKeyboardForm);
                 })
                 Blank()
                 Text('This page is scrollable')
                     .fontSize(12)
-                    .opacity(0.8)
+                    .opacity(0)
+                    // .opacity(0.8)
                 Blank()
                 Stack() {
                     Button() {
@@ -56,16 +55,35 @@ export default struct SettingsPanel {
                 }
                 .width('50vp')
                 .height('100%')
-                .onClick((event?: ClickEvent) => {
-                    if (event) {
-                        controller.playModifierSound();
-                        // TODO: Extend Keyboard Height
-                    }
+                .onClick((event: ClickEvent) => {
+                    controller.playModifierSound();
+                    // TODO: Extend Keyboard Height
                 })
+                .opacity(0)
             }
             .width('100%')
             .height('50vp')
             List({ space: 20 }) {
+                ListItemGroup() {
+                    ListItem() {
+                        Row() {
+                            Text($r('app.string.keyboard_settings_feedback_audio'))
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: controller.isAudioFeedbackOn })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    controller.updateAudioFeedbackState(isOn);
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
+                    }
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
+                /*
                 ListItemGroup() {
                     ListItem() {
                         Button() {
@@ -81,15 +99,9 @@ export default struct SettingsPanel {
                         }
                         .backgroundColor(Color.Transparent)
                         .width('100%')
-                        .onClick((event?: ClickEvent) => {
-                            if (event) {
-                                // TODO: Handler
-                            }
-                        })
+                        .onClick((event: ClickEvent) => {})
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         Button() {
                             Row() {
@@ -105,15 +117,9 @@ export default struct SettingsPanel {
                         }
                         .backgroundColor(Color.Transparent)
                         .width('100%')
-                        .onClick((event?: ClickEvent) => {
-                            if (event) {
-                                // TODO: Handler
-                            }
-                        })
+                        .onClick((event: ClickEvent) => {})
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         Button() {
                             Row() {
@@ -129,15 +135,9 @@ export default struct SettingsPanel {
                         }
                         .backgroundColor(Color.Transparent)
                         .width('100%')
-                        .onClick((event?: ClickEvent) => {
-                            if (event) {
-                                // TODO: Handler
-                            }
-                        })
+                        .onClick((event: ClickEvent) => {})
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         Button() {
                             Row() {
@@ -153,11 +153,7 @@ export default struct SettingsPanel {
                         }
                         .backgroundColor(Color.Transparent)
                         .width('100%')
-                        .onClick((event?: ClickEvent) => {
-                            if (event) {
-                                // TODO: Handler
-                            }
-                        })
+                        .onClick((event: ClickEvent) => {})
                     }
                 }
                 .backgroundColor(this.groupBackgroundColor)
@@ -178,9 +174,7 @@ export default struct SettingsPanel {
                         .padding({ left: 8, top: 4, right: 8, bottom: 4 })
                         .width('100%')
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         Row() {
                             Text("Haptic Feedback")
@@ -198,6 +192,7 @@ export default struct SettingsPanel {
                 }
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
+                */
             }
             .padding({ left: this.groupHorizontalPadding, right: this.groupHorizontalPadding })
             .width('100%')

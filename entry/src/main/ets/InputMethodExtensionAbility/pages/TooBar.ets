@@ -35,7 +35,6 @@ export default struct ToolBar {
                 controller.playModifierSound();
                 controller.transformTo(KeyboardForm.Settings);
             })
-            .opacity(0)
 
             Stack() {
                 Button() {

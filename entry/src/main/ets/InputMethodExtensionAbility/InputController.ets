@@ -83,6 +83,9 @@ export class InputController {
         priority: 99,
     };
     playInputSound() {
+        if (!this.isAudioFeedbackOn) {
+            return;
+        }
         this.soundPool?.play(this.inputSoundID, this.playParameters, (error, streamID: number) => {
             if (error) {
                 console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
@@ -92,6 +95,9 @@ export class InputController {
         });
     }
     playModifierSound() {
+        if (!this.isAudioFeedbackOn) {
+            return;
+        }
         this.soundPool?.play(this.modifierSoundID, this.playParameters, (error, streamID: number) => {
             if (error) {
                 console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
@@ -101,6 +107,9 @@ export class InputController {
         });
     }
     playDeleteSound() {
+        if (!this.isAudioFeedbackOn) {
+            return;
+        }
         this.soundPool?.play(this.deleteSoundID, this.playParameters, (error, streamID: number) => {
             if (error) {
                 console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
@@ -108,6 +117,10 @@ export class InputController {
                 this.deleteStreamID = streamID;
             }
         });
+    }
+    @Trace isAudioFeedbackOn: boolean = true;
+    updateAudioFeedbackState(isOn: boolean) {
+        this.isAudioFeedbackOn = isOn;
     }
 
     private async deleteOldDatabases(context: Context) {
