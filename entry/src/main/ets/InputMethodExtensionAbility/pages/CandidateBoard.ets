@@ -1,8 +1,8 @@
-import { Candidate } from "../model/Candidate"
-import { CircleShape } from "@kit.ArkUI";
-import controller from "../InputController";
-import CandidateView from "./CandidateView";
-import { KeyboardForm } from "../model/KeyboardForm";
+import { Candidate } from '../model/Candidate';
+import { CircleShape } from '@kit.ArkUI';
+import controller from '../InputController';
+import { KeyboardForm } from '../model/KeyboardForm';
+import CandidateAltView from './CandidateAltView';
 
 @ComponentV2
 export default struct CandidateBoard {
@@ -15,9 +15,10 @@ export default struct CandidateBoard {
                 Grid(this.scroller) {
                     ForEach(controller.candidates, (item: Candidate) => {
                         GridItem() {
-                            CandidateView({ candidate: item })
+                            CandidateAltView({ candidate: item })
                         }
                         .height('56vp')
+                        .width('100%')
                         .onClick((event: ClickEvent) => {
                             controller.playInputSound();
                             controller.selectCandidate(item);
@@ -25,13 +26,14 @@ export default struct CandidateBoard {
                         })
                     }, (item: Candidate) => item.text + item.comment)
                 }
-                .columnsTemplate(`repeat(auto-fit, 64)`)
+                .columnsTemplate(`repeat(auto-fit, 72)`)
                 .scrollBar(BarState.Off)
-                .width('calc(100% - 44vp)')
+                .width('calc(100% - 36vp)')
                 .height('100%')
             }
             .width('100%')
             .height('100%')
+            .justifyContent(FlexAlign.Start)
             Stack() {
                 Button() {
                     Image($r('app.media.chevron_up'))
