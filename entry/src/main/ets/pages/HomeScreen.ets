@@ -415,7 +415,7 @@ export struct HomeScreen {
             .height('100%')
         }
         .mode(NavigationMode.Stack)
-        .title($r('app.string.tab_bar_home'))
+        .title($r('app.string.home_screen_title'))
         .width('100%')
         .height('100%')
         .backgroundColor($r('app.color.window_background'))

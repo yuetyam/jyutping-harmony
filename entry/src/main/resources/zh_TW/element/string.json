@@ -1,6 +1,10 @@
 {
   "string": [
     {
+      "name": "home_screen_title",
+      "value": "首䈎"
+    },
+    {
       "name": "tab_bar_home",
       "value": "首䈎"
     },
