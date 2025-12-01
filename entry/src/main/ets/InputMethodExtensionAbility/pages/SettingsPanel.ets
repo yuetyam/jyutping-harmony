@@ -199,6 +199,6 @@ export default struct SettingsPanel {
             .height('calc(100% - 50vp)')
         }
         .width('100%')
-        .height(controller.keyboardHeight)
+        .height('100%')
     }
 }

@@ -21,13 +21,6 @@ export default struct CantoneseKeyboard {
             alignItems: ItemAlign.Center,
             justifyContent: FlexAlign.SpaceEvenly
         }) {
-            Row() {
-                Text(controller.markedText).fontSize(12).padding({ left: 4 })
-            }
-            .width('100%')
-            .height('12vp')
-            .justifyContent(FlexAlign.Start)
-            Divider()
             Stack() {
                 if (controller.isBuffering) {
                     CandidateBar()

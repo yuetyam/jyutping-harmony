@@ -298,7 +298,6 @@ export class InputController {
     }
     @Trace candidates: Candidate[] = [];
     private selectedCandidates: Candidate[] = [];
-    @Trace markedText: string = "";
     @Trace isBuffering: boolean = false;
     private bufferEvents: InputKeyEvent[] = [];
     get isBufferEmpty(): boolean {
@@ -308,7 +307,7 @@ export class InputController {
         }
         return !hasBuffer
     }
-    handle(event: InputKeyEvent): void {
+    handle(event: InputKeyEvent) {
         if (InputModeCompanion.isABC(this.inputMode)) {
             const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? event.text : event.text.toUpperCase();
             this.insert(text);
@@ -317,17 +316,26 @@ export class InputController {
             this.runInputSession();
         }
     }
+    private previewTextRange: inputMethodEngine.Range = { start: -1, end: -1 };
     private async runInputSession() {
         this.candidates = [];
         if (this.isBufferEmpty) {
-            this.markedText = "";
+            this.inputClient?.setPreviewText("", this.previewTextRange).catch(() => {
+                console.error("Failed to setPreviewText()");
+            });
+            this.inputClient?.finishTextPreview().catch(() => {
+                console.error("Failed to finishTextPreview()");
+            });
             this.selectedCandidates = [];
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Alphabetic);
             }
             return;
         }
-        this.markedText = this.bufferEvents.map(item => item.text).join("");
+        const previewText = this.bufferEvents.map(item => item.text).join("");
+        this.inputClient?.setPreviewText(previewText, this.previewTextRange).catch(() => {
+            console.error("Failed to setPreviewText()");
+        });
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
@@ -399,47 +407,53 @@ export class InputController {
             this.runInputSession();
         }
     }
-    process(text: string): void {
+    process(text: string) {
         this.inputClient?.insertText(text).catch(() => {
-            // TODO: Implement error handling.
+            console.error("Failed to insertText()");
         });
     }
-    insert(text: string): void {
+    insert(text: string) {
         this.inputClient?.insertText(text).catch(() => {
-            // TODO: Implement error handling.
+            console.error("Failed to insertText()");
         });
     }
-    backspace(length: number = 1): void {
+    backspace(length: number = 1) {
         if (this.isBufferEmpty) {
             this.inputClient?.deleteForward(length).catch(() => {
-                // TODO: Implement error handling.
+                console.error("Failed to deleteForward()");
             });
         } else {
             this.bufferEvents.pop();
             this.runInputSession();
         }
     }
-    clearBuffer(): void {
+    clearBuffer() {
         this.bufferEvents = [];
         this.runInputSession();
     }
-    rightDelete(length: number = 1): void {
+    rightDelete(length: number = 1) {
         this.inputClient?.deleteBackward(length).catch(() => {
-            // TODO: Implement error handling.
+            console.error("Failed to deleteBackward()");
         });
     }
-    space(): void {
+    space() {
         if (this.candidates.length > 0) {
             this.selectCandidateBy(0);
+        } else if (this.isBuffering) {
+            this.inputClient?.finishTextPreview().catch(() => {
+                console.error("Failed to finishTextPreview()");
+            });
+            this.clearBuffer();
         } else {
             let text = " ";
             this.insert(text);
         }
     }
-    enterKeyAction(): void {
+    enterKeyAction() {
         if (this.isBuffering) {
-            const text = this.bufferEvents.map(event => event.text).join('');
-            this.insert(text);
+            this.inputClient?.finishTextPreview().catch(() => {
+                console.error("Failed to finishTextPreview()");
+            });
             this.clearBuffer();
         } else {
             let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
@@ -448,24 +462,24 @@ export class InputController {
             })
         }
     }
-    dismissKeyboard(): void {
+    dismissKeyboard() {
         this.panel?.hide();
     }
 
     @Trace keyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
     @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
-    transformTo(destination: KeyboardForm): void {
+    transformTo(destination: KeyboardForm) {
         this.previousKeyboardForm = this.keyboardForm;
         this.keyboardForm = destination;
     }
 
     @Trace inputMode: InputMode = InputMode.Cantonese;
-    toggleInputMode(): void {
+    toggleInputMode() {
         this.inputMode = InputModeCompanion.isCantonese(this.inputMode) ? InputMode.ABC : InputMode.Cantonese;
     }
 
     @Trace keyboardCase: KeyboardCase = KeyboardCase.lowercased;
-    updateKeyboardCase(newCase: KeyboardCase): void {
+    updateKeyboardCase(newCase: KeyboardCase) {
         this.keyboardCase = newCase;
     }
     shift() {
@@ -475,7 +489,7 @@ export class InputController {
 
     @Trace keyHeight: Length = 53;
     @Trace keyboardHeight: Length = 268;
-    private initWindow(screen: display.Display): void {
+    private initWindow(screen: display.Display) {
         if(this.ctx === undefined) {
             return;
         }
@@ -485,8 +499,7 @@ export class InputController {
         const widthInPoint = displayWidth / density;
         const keyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
         const toolBarHeight = 56;
-        const bufferBarHeight = 13;
-        const keyboardHeight = (keyHeight * 4) + toolBarHeight + bufferBarHeight;
+        const keyboardHeight = (keyHeight * 4) + toolBarHeight;
         this.keyHeight = keyHeight;
         this.keyboardHeight = keyboardHeight;
         const panelHeight = keyboardHeight * density;
@@ -509,7 +522,7 @@ export class InputController {
             });
     }
 
-    private registerListener(): void {
+    private registerListener() {
         this.ability.on('inputStart', (kbController, inputClient) => {
             this.inputClient = inputClient;
             try {
@@ -527,13 +540,13 @@ export class InputController {
             this.keyboardCase = KeyboardCase.lowercased;
         })
     }
-    private unRegisterListener(): void {
+    private unRegisterListener() {
         this.ability.off('inputStart');
         this.ability.off('inputStop', () => {});
         this.ability.off('keyboardHide', () => {});
     }
 
-    performEditing(action: EditingAction): void {
+    performEditing(action: EditingAction) {
         switch (action) {
             case EditingAction.Paste:
                 this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.PASTE).catch(() => {

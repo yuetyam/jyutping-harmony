@@ -121,6 +121,6 @@ export default struct EditingPanel {
             .width('25%')
         }
         .width('100%')
-        .height(controller.keyboardHeight)
+        .height('100%')
     }
 }
