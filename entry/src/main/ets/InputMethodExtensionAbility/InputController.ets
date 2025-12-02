@@ -1,7 +1,7 @@
 import { display } from '@kit.ArkUI';
 import { preferences, relationalStore } from '@kit.ArkData';
 import { audio } from '@kit.AudioKit';
-import { BusinessError, pasteboard } from '@kit.BasicServicesKit'
+import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
@@ -300,6 +300,7 @@ export class InputController {
     private selectedCandidates: Candidate[] = [];
     @Trace isBuffering: boolean = false;
     private bufferEvents: InputKeyEvent[] = [];
+    private capitals: boolean[] = [];
     get isBufferEmpty(): boolean {
         const hasBuffer = this.bufferEvents.length > 0;
         if (this.isBuffering != hasBuffer) {
@@ -312,8 +313,13 @@ export class InputController {
             const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? event.text : event.text.toUpperCase();
             this.insert(text);
         } else {
+            const isCapitalized: boolean = KeyboardCaseCompanion.isCapitalized(this.keyboardCase);
+            this.capitals.push(isCapitalized);
             this.bufferEvents.push(event);
             this.runInputSession();
+        }
+        if (KeyboardCaseCompanion.isUppercased(this.keyboardCase)) {
+            this.updateKeyboardCase(KeyboardCase.lowercased);
         }
     }
     private previewTextRange: inputMethodEngine.Range = { start: -1, end: -1 };
@@ -332,8 +338,10 @@ export class InputController {
             }
             return;
         }
-        const previewText = this.bufferEvents.map(item => item.text).join("");
-        this.inputClient?.setPreviewText(previewText, this.previewTextRange).catch(() => {
+        const previewText = this.joinedBufferTexts();
+        this.inputClient?.setPreviewText(previewText, this.previewTextRange).then(() => {
+            // TODO: Check preview text changes
+        }).catch(() => {
             console.error("Failed to setPreviewText()");
         });
         const needsConversion: boolean = this.isMutilated;
@@ -373,6 +381,16 @@ export class InputController {
         }
         this.candidates = newCandidates;
     }
+    private joinedBufferTexts(): string {
+        if (this.capitals.includes(true) && (this.bufferEvents.length === this.capitals.length)) {
+            return this.bufferEvents.map((value: InputKeyEvent, index: number) => {
+                return this.capitals[index] ? value.text.toUpperCase() : value.text;
+            }).join("");
+        } else {
+            return this.bufferEvents.map(item => item.text).join("");
+        }
+    }
+
     selectCandidateBy(index: number) {
         if (this.candidates.length > index) {
             const selected = this.candidates[index];
@@ -423,11 +441,13 @@ export class InputController {
                 console.error("Failed to deleteForward()");
             });
         } else {
+            this.capitals.pop();
             this.bufferEvents.pop();
             this.runInputSession();
         }
     }
     clearBuffer() {
+        this.capitals = [];
         this.bufferEvents = [];
         this.runInputSession();
     }
@@ -451,7 +471,9 @@ export class InputController {
     }
     enterKeyAction() {
         if (this.isBuffering) {
-            this.inputClient?.finishTextPreview().catch(() => {
+            this.inputClient?.finishTextPreview().then(() => {
+                // TODO: Check input text changes
+            }).catch(() => {
                 console.error("Failed to finishTextPreview()");
             });
             this.clearBuffer();
@@ -484,6 +506,10 @@ export class InputController {
     }
     shift() {
         const newCase: KeyboardCase = KeyboardCaseCompanion.isCapitalized(this.keyboardCase) ? KeyboardCase.lowercased : KeyboardCase.uppercased;
+        this.updateKeyboardCase(newCase);
+    }
+    doubleShift() {
+        const newCase: KeyboardCase = KeyboardCaseCompanion.isCapsLocked(this.keyboardCase) ? KeyboardCase.lowercased : KeyboardCase.capsLocked;
         this.updateKeyboardCase(newCase);
     }
 
@@ -537,7 +563,7 @@ export class InputController {
         });
         this.ability.on('keyboardHide', () => {
             this.clearBuffer();
-            this.keyboardCase = KeyboardCase.lowercased;
+            this.updateKeyboardCase(KeyboardCase.lowercased);
         })
     }
     private unRegisterListener() {

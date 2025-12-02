@@ -1,9 +1,11 @@
-import controller from '../InputController'
-import { KeyboardCaseCompanion } from '../model/KeyboardCase'
+import controller from '../InputController';
+import { KeyboardCase } from '../model/KeyboardCase';
 
 @ComponentV2
 export default struct ShiftKey {
-    @Local private isTouching: boolean = false
+    @Local private isTouching: boolean = false;
+    @Local private timeBuffer: number = 0;
+    @Local private intervalID: number = -1;
     build() {
         Stack() {
             Flex({
@@ -11,7 +13,7 @@ export default struct ShiftKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Image(KeyboardCaseCompanion.isLowercased(controller.keyboardCase) ? $r('app.media.key_shift') : $r('app.media.key_shifting'))
+                Image(this.image(controller.keyboardCase))
                     .fillColor($r('sys.color.ohos_id_color_primary'))
                     .width('22vp')
                     .height('22vp')
@@ -41,8 +43,31 @@ export default struct ShiftKey {
                     break;
             }
         })
-        .onClick((event: ClickEvent) => {
-            controller.shift();
+        .onClick(() => {
+            clearInterval(this.intervalID);
+            const isDoubleTapping: boolean = (this.timeBuffer > 0 && this.timeBuffer < 4);
+            this.timeBuffer = 0;
+            if (isDoubleTapping) {
+                controller.doubleShift();
+            } else {
+                controller.shift();
+                this.intervalID = setInterval(() => {
+                    this.timeBuffer += 1;
+                    if (this.timeBuffer > 4) {
+                        clearInterval(this.intervalID);
+                    }
+                }, 100);
+            }
         })
+    }
+    private image(keyboardCase: KeyboardCase): Resource {
+        switch (keyboardCase) {
+            case KeyboardCase.lowercased:
+                return $r('app.media.key_shift');
+            case KeyboardCase.uppercased:
+                return $r('app.media.key_shifting');
+            case KeyboardCase.capsLocked:
+                return $r('app.media.key_capslock');
+        }
     }
 }

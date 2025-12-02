@@ -1,4 +1,4 @@
-import controller from '../InputController'
+import controller from '../InputController';
 
 @ComponentV2
 export default struct BackspaceKey {
