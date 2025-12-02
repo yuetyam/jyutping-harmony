@@ -40,26 +40,21 @@ export class InputController {
                 rendererFlags: 0
             }
             this.soundPool = await media.createSoundPool(14, audioRendererInfo);
-            let inputDescriptor = await this.ctx?.resourceManager.getRawFd('click.m4a').catch(() => {
-                // TODO: Implement error handling.
-            });
+            let inputDescriptor = await this.ctx?.resourceManager.getRawFd('click.m4a').catch(() => { console.error("Failed to get click.m4a") });
             if (inputDescriptor) {
                 this.inputSoundID = await this.soundPool.load(inputDescriptor.fd, inputDescriptor.offset, inputDescriptor.length);
             }
-            let clickDescriptor = await this.ctx?.resourceManager.getRawFd('modifier.m4a').catch(() => {
-                // TODO: Implement error handling.
-            });
+            let clickDescriptor = await this.ctx?.resourceManager.getRawFd('modifier.m4a').catch(() => { console.error("Failed to get modifier.m4a") });
             if (clickDescriptor) {
                 this.modifierSoundID = await this.soundPool.load(clickDescriptor.fd, clickDescriptor.offset, clickDescriptor.length);
             }
-            let deleteDescriptor = await this.ctx?.resourceManager.getRawFd('delete.m4a').catch(() => {
-                // TODO: Implement error handling.
-            });
+            let deleteDescriptor = await this.ctx?.resourceManager.getRawFd('delete.m4a').catch(() => { console.error("Failed to get delete.m4a") });
             if (deleteDescriptor) {
                 this.deleteSoundID = await this.soundPool.load(deleteDescriptor.fd, deleteDescriptor.offset, deleteDescriptor.length);
             }
-        } catch (e) {
-            console.error('createSoundPool error: ' + e);
+        } catch (error) {
+            let err = error as BusinessError;
+            console.error('Error in prepareSoundPool(), message: ' + err.message + ", code: " + err.code);
         }
     }
     private async releaseSoundPool() {
@@ -71,8 +66,9 @@ export class InputController {
             await this.soundPool?.stop(this.deleteStreamID);
             await this.soundPool?.unload(this.deleteSoundID);
             await this.soundPool?.release();
-        } catch (e) {
-            console.error('createSoundPool error: ' + e);
+        } catch (error) {
+            let err = error as BusinessError;
+            console.error('Error in releaseSoundPool(), message: ' + err.message + ", code: " + err.code);
         }
     }
     private playParameters: media.PlayParameters = {
@@ -83,40 +79,37 @@ export class InputController {
         priority: 99,
     };
     playInputSound() {
-        if (!this.isAudioFeedbackOn) {
-            return;
+        if (this.isAudioFeedbackOn) {
+            this.soundPool?.play(this.inputSoundID, this.playParameters, (error, streamID: number) => {
+                if (error) {
+                    console.error('Error in playInputSound(), message: ' + error.message + ", code: " + error.code);
+                } else {
+                    this.inputStreamID = streamID;
+                }
+            });
         }
-        this.soundPool?.play(this.inputSoundID, this.playParameters, (error, streamID: number) => {
-            if (error) {
-                console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
-            } else {
-                this.inputStreamID = streamID;
-            }
-        });
     }
     playModifierSound() {
-        if (!this.isAudioFeedbackOn) {
-            return;
+        if (this.isAudioFeedbackOn) {
+            this.soundPool?.play(this.modifierSoundID, this.playParameters, (error, streamID: number) => {
+                if (error) {
+                    console.error('Error in playModifierSound(), message: ' + error.message + ", code: " + error.code);
+                } else {
+                    this.modifierStreamID = streamID;
+                }
+            });
         }
-        this.soundPool?.play(this.modifierSoundID, this.playParameters, (error, streamID: number) => {
-            if (error) {
-                console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
-            } else {
-                this.modifierStreamID = streamID;
-            }
-        });
     }
     playDeleteSound() {
-        if (!this.isAudioFeedbackOn) {
-            return;
+        if (this.isAudioFeedbackOn) {
+            this.soundPool?.play(this.deleteSoundID, this.playParameters, (error, streamID: number) => {
+                if (error) {
+                    console.error('Error in playDeleteSound(), message: ' + error.message + ", code: " + error.code);
+                } else {
+                    this.deleteStreamID = streamID;
+                }
+            });
         }
-        this.soundPool?.play(this.deleteSoundID, this.playParameters, (error, streamID: number) => {
-            if (error) {
-                console.error(`play sound Error: errCode is ${error.code}, errMessage is ${error.message}`)
-            } else {
-                this.deleteStreamID = streamID;
-            }
-        });
     }
     @Trace isAudioFeedbackOn: boolean = true;
     updateAudioFeedbackState(isOn: boolean) {
@@ -125,7 +118,7 @@ export class InputController {
         try {
             this.sharedPreferences?.putSync("audio", value);
             this.sharedPreferences?.flush().catch(() => {
-                console.error("Failed to save value to the audio preferences")
+                console.error("Failed to save value to the audio preferences");
             });
         } catch (error) {
             let err: BusinessError = error as BusinessError;
@@ -263,7 +256,8 @@ export class InputController {
             let defaultDisplay = display.getDefaultDisplaySync();
             this.initWindow(defaultDisplay)
         } catch (error) {
-            // TODO: Implement error handling.
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to getDefaultDisplaySync(), message: " + err.message + ", code: " + err.code);
         }
         this.registerListener();
         this.prepareSoundPool();
@@ -545,9 +539,7 @@ export class InputController {
                     await this.panel.setUiContent('InputMethodExtensionAbility/pages/Index');
                 }
             })
-            .catch(() => {
-                // TODO: Implement error handling.
-            });
+            .catch(() => { console.error("Failed to createPanel()"); });
     }
 
     private registerListener() {
@@ -578,71 +570,43 @@ export class InputController {
     performEditing(action: EditingAction) {
         switch (action) {
             case EditingAction.Paste:
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.PASTE).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.PASTE).catch(() => { console.error("Failed to send PASTE action") });
                 break;
             case EditingAction.ClearSystemClipboard:
                 pasteboard.getSystemPasteboard().clearData();
                 break;
             case EditingAction.CopyAllText:
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
-                    // TODO: Implement error handling.
-                });
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.COPY).catch(() => {
-                    // TODO: Implement error handling.
-                });
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => { console.error("Failed to send SELECT_ALL action") });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.COPY).catch(() => { console.error("Failed to send COPY action") });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => { console.error("Failed to send CURSOR_DOWN action") });
                 break;
             case EditingAction.CutAllText:
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
-                    // TODO: Implement error handling.
-                });
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.CUT).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => { console.error("Failed to send SELECT_ALL action") });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.CUT).catch(() => { console.error("Failed to send CUT action") });
                 break;
             case EditingAction.ClearAllText:
-                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => {
-                    // TODO: Implement error handling.
-                });
-                this.inputClient?.deleteForward(1).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.sendExtendAction(inputMethodEngine.ExtendAction.SELECT_ALL).catch(() => { console.error("Failed to send SELECT_ALL action") });
+                this.inputClient?.deleteForward(1).catch(() => { console.error("Failed to deleteForward()") });
                 break;
             case EditingAction.ConvertAllText:
                 break;
             case EditingAction.MoveLeft:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_LEFT).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_LEFT).catch(() => { console.error("Failed to MoveLeft") });
                 break;
             case EditingAction.MoveRight:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_RIGHT).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_RIGHT).catch(() => { console.error("Failed to MoveRight") });
                 break;
             case EditingAction.MoveUp:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => { console.error("Failed to MoveUp") });
                 break;
             case EditingAction.MoveDown:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => { console.error("Failed to MoveDown") });
                 break;
             case EditingAction.JumpToStart:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_UP).catch(() => { console.error("Failed to JumpToStart") });
                 break;
             case EditingAction.JumpToEnd:
-                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => {
-                    // TODO: Implement error handling.
-                });
+                this.inputClient?.moveCursor(inputMethodEngine.Direction.CURSOR_DOWN).catch(() => { console.error("Failed to JumpToEnd") });
                 break;
             default:
                 break;

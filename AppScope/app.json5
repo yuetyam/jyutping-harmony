@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "org.jyutping.jyutping",
     "vendor": "Bing ZHEUNG",
-    "versionCode": 5,
-    "versionName": "1.0.1",
+    "versionCode": 7,
+    "versionName": "1.0.3",
     "icon": "$media:layered_image",
     "label": "$string:app_name"
   }
