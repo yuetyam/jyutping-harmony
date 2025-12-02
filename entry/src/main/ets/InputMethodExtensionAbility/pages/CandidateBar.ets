@@ -1,8 +1,8 @@
-import { Candidate } from "../model/Candidate"
-import { CircleShape } from "@kit.ArkUI";
-import controller from "../InputController";
-import CandidateView from "./CandidateView";
-import { KeyboardForm } from "../model/KeyboardForm";
+import { Candidate } from '../model/Candidate';
+import { CircleShape } from '@kit.ArkUI';
+import controller from '../InputController';
+import CandidateView from './CandidateView';
+import { KeyboardForm } from '../model/KeyboardForm';
 
 @ComponentV2
 export default struct CandidateBar {
@@ -11,20 +11,29 @@ export default struct CandidateBar {
     private scroller: Scroller = new Scroller();
     build() {
         Row() {
-            List({ scroller: this.scroller }) {
-                ForEach(controller.candidates, (item: Candidate) => {
-                    ListItem() {
-                        CandidateView({ candidate: item })
-                            .onClick((event: ClickEvent) => {
-                                controller.playInputSound();
-                                controller.selectCandidate(item);
-                                this.scroller.scrollToIndex(0);
-                            })
-                    }
-                }, (item: Candidate) => item.text + item.comment)
+            Stack() {
+                Text(controller.inlinePreEditText)
+                    .fontSize(11)
+                    .padding({ left: 8, bottom: 4 })
+                    .opacity(0.8)
+                List({ scroller: this.scroller }) {
+                    ForEach(controller.candidates, (item: Candidate) => {
+                        ListItem() {
+                            CandidateView({ candidate: item })
+                                .onClick(() => {
+                                    controller.playInputSound();
+                                    controller.selectCandidate(item);
+                                    this.scroller.scrollToIndex(0);
+                                })
+                        }
+                    }, (item: Candidate) => item.text + item.comment)
+                }
+                .listDirection(Axis.Horizontal)
+                .scrollBar(BarState.Off)
+                .width('100%')
+                .height('100%')
             }
-            .listDirection(Axis.Horizontal)
-            .scrollBar(BarState.Off)
+            .alignContent(Alignment.BottomStart)
             .width('calc(100% - 44vp)')
             .height('100%')
             Stack() {
@@ -41,7 +50,7 @@ export default struct CandidateBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.transformTo(KeyboardForm.CandidateBoard);
             })

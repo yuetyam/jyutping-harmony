@@ -322,16 +322,14 @@ export class InputController {
             this.updateKeyboardCase(KeyboardCase.lowercased);
         }
     }
-    private previewTextRange: inputMethodEngine.Range = { start: -1, end: -1 };
+    private isTextPreviewSupported: boolean = true;
+    @Trace inlinePreEditText: string = "";
     private async runInputSession() {
         this.candidates = [];
         if (this.isBufferEmpty) {
-            this.inputClient?.setPreviewText("", this.previewTextRange).catch(() => {
-                console.error("Failed to setPreviewText()");
-            });
-            this.inputClient?.finishTextPreview().catch(() => {
-                console.error("Failed to finishTextPreview()");
-            });
+            this.inputClient?.setPreviewText("", { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
+            this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
+            this.inlinePreEditText = "";
             this.selectedCandidates = [];
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Alphabetic);
@@ -339,11 +337,11 @@ export class InputController {
             return;
         }
         const previewText = this.joinedBufferTexts();
-        this.inputClient?.setPreviewText(previewText, this.previewTextRange).then(() => {
-            // TODO: Check preview text changes
-        }).catch(() => {
-            console.error("Failed to setPreviewText()");
-        });
+        if (this.isTextPreviewSupported) {
+            this.inputClient?.setPreviewText(previewText, { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
+        } else {
+            this.inlinePreEditText = previewText;
+        }
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
@@ -460,9 +458,12 @@ export class InputController {
         if (this.candidates.length > 0) {
             this.selectCandidateBy(0);
         } else if (this.isBuffering) {
-            this.inputClient?.finishTextPreview().catch(() => {
-                console.error("Failed to finishTextPreview()");
-            });
+            if (this.isTextPreviewSupported) {
+                this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
+            } else {
+                const text: string = this.joinedBufferTexts();
+                this.insert(text);
+            }
             this.clearBuffer();
         } else {
             let text = " ";
@@ -471,11 +472,12 @@ export class InputController {
     }
     enterKeyAction() {
         if (this.isBuffering) {
-            this.inputClient?.finishTextPreview().then(() => {
-                // TODO: Check input text changes
-            }).catch(() => {
-                console.error("Failed to finishTextPreview()");
-            });
+            if (this.isTextPreviewSupported) {
+                this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
+            } else {
+                const text: string = this.joinedBufferTexts();
+                this.insert(text);
+            }
             this.clearBuffer();
         } else {
             let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
@@ -552,9 +554,10 @@ export class InputController {
         this.ability.on('inputStart', (kbController, inputClient) => {
             this.inputClient = inputClient;
             try {
-                this.attribute = inputClient.getEditorAttributeSync()
+                this.attribute = inputClient.getEditorAttributeSync();
+                this.isTextPreviewSupported = this.attribute.isTextPreviewSupported;
             } catch (error) {
-                // TODO: Implement error handling.
+                console.error("Failed to getEditorAttributeSync()");
             }
             this.keyboardController = kbController;
         })
