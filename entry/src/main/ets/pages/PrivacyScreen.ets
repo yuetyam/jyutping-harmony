@@ -27,14 +27,14 @@ export struct PrivacyScreen {
                             Text("粤拼输入法隐私政策").fontSize(11).foregroundColor($r('app.color.accent'))
                         }
                         .backgroundColor(Color.Transparent)
-                        .onClick((event: ClickEvent) => {
-                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+                        .onClick(() => {
                             let want: Want = {
                                 action: 'ohos.want.action.viewData',
                                 entities: ['entity.system.browsable'],
                                 abilityName: 'MainAbility',
                                 uri: "https://jyutping.app/harmony/privacy"
                             }
+                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
                             context.startAbility(want).catch(() => {
                                 console.warn("Failed to open the Privacy Policy web page.")
                             });
@@ -53,7 +53,7 @@ export struct PrivacyScreen {
                 }
                 .backgroundColor($r('app.color.accent'))
                 .width('100%')
-                .onClick((event: ClickEvent) => {
+                .onClick(() => {
                     const options: preferences.Options = { name: "shared" };
                     try {
                         let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
@@ -61,7 +61,7 @@ export struct PrivacyScreen {
                         sharedPreferences.flush().then(() => {
                             this.privacy = "2025";
                         }).catch(() => {
-                            console.log("Failed to perform sharedPreferences.flush()")
+                            console.log("Failed to perform sharedPreferences.flush()");
                         });
                     } catch (error) {
                         let err: BusinessError = error as BusinessError;
@@ -69,7 +69,22 @@ export struct PrivacyScreen {
                     }
                 })
             }
-            .padding({ left: 8, right: 8, top: 16 })
+            .padding({ left: 8, right: 8, top: 20 })
+            ListItem() {
+                Button() {
+                    Text("不同意并退出")
+                        .fontColor($r('app.color.accent'))
+                        .padding(8)
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .width('100%')
+                .onClick(() => {
+                    (this.getUIContext().getHostContext() as common.UIAbilityContext).terminateSelf().catch(() => {
+                        console.log("Failed to terminateSelf()");
+                    });
+                })
+            }
+            .padding({ left: 8, right: 8, top: 20 })
         }
         .padding({ left: 16, right: 16, top: 72, bottom: 72 })
         .width('100%')
