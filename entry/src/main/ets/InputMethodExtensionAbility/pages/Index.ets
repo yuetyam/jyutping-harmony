@@ -7,6 +7,7 @@ import CandidateBoard from './CandidateBoard';
 import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
+import { EmojiKeyboard } from './EmojiKeyboard';
 import NumericKeyboard from './NumericKeyboard';
 import SettingsPanel from './SettingsPanel';
 import SymbolicKeyboard from './SymbolicKeyboard';
@@ -45,6 +46,8 @@ struct Index {
                     SettingsPanel()
                 } else if (controller.keyboardForm === KeyboardForm.CandidateBoard) {
                     CandidateBoard()
+                } else if (controller.keyboardForm === KeyboardForm.EmojiBoard) {
+                    EmojiKeyboard()
                 } else {
                     CantoneseKeyboard()
                 }

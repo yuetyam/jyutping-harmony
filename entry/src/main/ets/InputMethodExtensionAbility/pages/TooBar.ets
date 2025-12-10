@@ -11,6 +11,7 @@ export default struct ToolBar {
     private iconLength: Length = '24vp';
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
+
     build() {
         Flex({
             direction: FlexDirection.Row,
@@ -52,29 +53,13 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.transformTo(KeyboardForm.EmojiBoard);
             })
-            .opacity(0)
 
-            Stack() {
-                Button() {
-                    Image($r('app.media.button_emoji'))
-                        .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
-                }
-                .backgroundColor(Color.Transparent)
-                .clipShape(this.shape)
-                .width(this.shapeLength)
-                .height(this.shapeLength)
-            }
-            .width(this.buttonLength)
-            .height('100%')
-            .onClick((event: ClickEvent) => {
-                controller.playModifierSound();
+            InputModeSwitch({
+                isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode),
+                isMutilated: controller.isMutilated
             })
-            .opacity(0)
-
-            InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')
                 .height('100%')
                 .onClick((event: ClickEvent) => {
