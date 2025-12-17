@@ -12,7 +12,7 @@ export struct WordTextLabel {
                 SeparatorMark()
                 Text(this.word)
             }
-            if (this.word.length === 1) {
+            if (this.isSingular(this.word)) {
                 Text("U+" + this.word.codePointAt(0)?.toString(16).toUpperCase())
                     .fontSize(13)
                     .opacity(0.75)
@@ -20,5 +20,12 @@ export struct WordTextLabel {
             Blank()
         }
         .width('100%')
+    }
+    private isSingular(text: string): boolean {
+        let count: number = 0;
+        for (let _ of text) {
+            count += 1;
+        }
+        return count === 1;
     }
 }

@@ -6,23 +6,22 @@ import { YingWaaLexicon, YingWaaUnit } from './YingWaaUnit';
 
 export class YingWaaHelper {
     static search(text: string, store: relationalStore.RdbStore): YingWaaLexicon[] {
-        if (text.length > 0) {
-            const codes = new Set<number>();
-            for (let index = 0; index < text.length; index++) {
-                const code = text.codePointAt(index);
-                if (code) {
-                    codes.add(code);
-                }
-            }
-            const lexicons: YingWaaLexicon[] = [];
-            codes.forEach(code => {
-                const instance = YingWaaHelper.match(code, store);
-                lexicons.push(instance);
-            })
-            return lexicons.filter(item => item.isNotEmpty);
-        } else {
+        if (text.length < 1) {
             return [];
         }
+        const codes = new Set<number>();
+        for (const char of text) {
+            const code = char.codePointAt(0);
+            if (code) {
+                codes.add(code);
+            }
+        }
+        const lexicons: YingWaaLexicon[] = [];
+        codes.forEach(code => {
+            const instance = YingWaaHelper.match(code, store);
+            lexicons.push(instance);
+        })
+        return lexicons.filter(item => item.isNotEmpty);
     }
     static match(code: number, store: relationalStore.RdbStore): YingWaaLexicon {
         const units: YingWaaUnit[] = [];

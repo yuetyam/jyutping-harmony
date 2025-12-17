@@ -69,7 +69,7 @@ export struct PrivacyScreen {
                     }
                 })
             }
-            .padding({ left: 8, right: 8, top: 20 })
+            .padding({ left: 8, right: 8, top: 28 })
             ListItem() {
                 Button() {
                     Text("不同意并退出")

@@ -9,9 +9,16 @@ export class CantoneseDataHelper {
             return [];
         }
         const primary = CantoneseDataHelper.match(text, store);
-        let characters = Array.from(text);
-        let otherLexicons = characters.map((item) => CantoneseDataHelper.match(item, store))
-        return [primary, ...otherLexicons];
+        const characters: string[] = [];
+        for (const char of text) {
+            characters.push(char);
+        }
+        if (characters.length === 1) {
+            return [primary];
+        } else {
+            const otherLexicons = characters.map((item) => CantoneseDataHelper.match(item, store));
+            return [primary, ...otherLexicons];
+        }
     }
     private static match(text: string, store: relationalStore.RdbStore): CantoneseLexicon {
         const romanizations = CantoneseDataHelper.fetchRomanizations(text, store);
@@ -19,7 +26,7 @@ export class CantoneseDataHelper {
             const homophones = CantoneseDataHelper.fetchHomophones(romanization, store).filter(item => item !== text);
             const collocations = CantoneseDataHelper.fetchCollocations(text, romanization, store);
             const descriptions = CantoneseDataHelper.fetchDescriptions(text, romanization, store);
-            let pronunciation: Pronunciation = {
+            const pronunciation: Pronunciation = {
                 romanization: romanization,
                 homophones: homophones,
                 collocations: collocations,
@@ -113,7 +120,11 @@ export class CantoneseDataHelper {
     }
     private static fetchDefinition(text: string, store: relationalStore.RdbStore): string | undefined {
         let definition: string | undefined = undefined;
-        if (text.length != 1) {
+        let charCount: number = 0;
+        for (let _ of text) {
+            charCount += 1;
+        }
+        if (charCount !== 1) {
             return definition;
         }
         const code = text.codePointAt(0);

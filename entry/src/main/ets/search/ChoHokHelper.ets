@@ -6,23 +6,22 @@ import { ChoHokLexicon, ChoHokUnit } from './ChoHokUnit';
 
 export class ChoHokHelper {
     static search(text: string, store: relationalStore.RdbStore): ChoHokLexicon[] {
-        if (text.length > 0) {
-            const codes = new Set<number>();
-            for (let index = 0; index < text.length; index++) {
-                const code = text.codePointAt(index);
-                if (code) {
-                    codes.add(code);
-                }
-            }
-            const lexicons: ChoHokLexicon[] = [];
-            codes.forEach(code => {
-                const instance = ChoHokHelper.match(code, store);
-                lexicons.push(instance);
-            })
-            return lexicons.filter(item => item.isNotEmpty);
-        } else {
+        if (text.length < 1) {
             return [];
         }
+        const codes = new Set<number>();
+        for (const char of text) {
+            const code = char.codePointAt(0);
+            if (code) {
+                codes.add(code);
+            }
+        }
+        const lexicons: ChoHokLexicon[] = [];
+        codes.forEach(code => {
+            const instance = ChoHokHelper.match(code, store);
+            lexicons.push(instance);
+        })
+        return lexicons.filter(item => item.isNotEmpty);
     }
     static match(code: number, store: relationalStore.RdbStore): ChoHokLexicon {
         const units: ChoHokUnit[] = [];

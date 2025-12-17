@@ -4,13 +4,15 @@ import { BusinessError } from '@kit.BasicServicesKit';
 export class Converter {
     static convert(text: string, simplify: boolean, store: relationalStore.RdbStore | undefined): string {
         if (store) {
-            const newCodes: number[] = [];
-            for (let index = 0; index < text.length; index++) {
-                const code = text.codePointAt(index) ?? 0;
-                const newCode = simplify ? Converter.t2s(code, store) : Converter.s2t(code, store);
-                newCodes.push(newCode);
+            const codePoints: number[] = [];
+            for (const char of text) {
+                const code = char.codePointAt(0);
+                if (code) {
+                    const newCode = simplify ? Converter.t2s(code, store) : Converter.s2t(code, store);
+                    codePoints.push(newCode);
+                }
             }
-            return String.fromCodePoint(...newCodes);
+            return String.fromCodePoint(...codePoints);
         } else {
             return text;
         }
