@@ -1,17 +1,17 @@
 import { common, Want } from '@kit.AbilityKit';
 
 @ComponentV2
-export struct WebLinkView {
-    @Param @Require @Once url: string;
-    @Param @Require @Once icon: Resource;
-    @Param @Require @Once text: Resource | string;
+export struct QQWebLinkView {
     build() {
         Button() {
             Row({ space: 12 }) {
-                SymbolGlyph(this.icon)
+                SymbolGlyph($r('sys.symbol.person_2'))
                     .fontSize(20)
                     .fontColor([$r('app.color.accent')])
-                Text(this.text)
+                Text($r('app.string.about_qq'))
+                Text('( 293148593 )')
+                    .fontSize(13)
+                    .opacity(0.85)
                 Blank()
                 SymbolGlyph($r('sys.symbol.arrow_right_up_and_square'))
                     .fontColor([$r('sys.color.ohos_id_color_primary')])
@@ -27,7 +27,7 @@ export struct WebLinkView {
                 action: 'ohos.want.action.viewData',
                 entities: ['entity.system.browsable'],
                 abilityName: 'MainAbility',
-                uri: this.url
+                uri: 'https://jq.qq.com/?k=4PR17m3t'
             }
             context.startAbility(want).catch(() => {
                 // TODO: Implement error handling.

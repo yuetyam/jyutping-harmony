@@ -1,4 +1,5 @@
 import { bundleManager } from '@kit.AbilityKit';
+import { QQWebLinkView } from './QQWebLinkView';
 import { WebLinkView } from './WebLinkView';
 
 @Component
@@ -75,11 +76,7 @@ export struct AboutScreen {
 
                 ListItemGroup() {
                     ListItem() {
-                        WebLinkView({
-                            url: 'https://jq.qq.com/?k=4PR17m3t',
-                            icon: $r('sys.symbol.person_2'),
-                            text: $r('app.string.about_qq')
-                        })
+                        QQWebLinkView()
                     }
                     ListItem() {
                         Divider()

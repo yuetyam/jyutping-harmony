@@ -80,7 +80,7 @@ export class Researcher {
         const lexicons: Lexicon[] = [];
         const code = Researcher.hashCode(text);
         const limit = -1;
-        const command: string = "SELECT rowid, word, romanization FROM core_lexicon WHERE ping = ? LIMIT ?;";
+        const command: string = "SELECT rowid, word, romanization FROM core_lexicon WHERE spell = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
