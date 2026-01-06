@@ -44,10 +44,8 @@ export default struct EditingConversionKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.performEditing(EditingAction.ConvertAllText);
-            }
+        .onClick(() => {
+            controller.performEditing(EditingAction.ConvertAllText);
         })
     }
 }

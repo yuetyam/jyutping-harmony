@@ -169,6 +169,10 @@
       "value": "键盘按键振动"
     },
     {
+      "name": "permission_read_pasteboard_reason",
+      "value": "读出剪贴板文字内容以输入"
+    },
+    {
       "name": "keyboard_editing_panel_back",
       "value": "返回"
     },

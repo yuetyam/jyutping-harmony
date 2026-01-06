@@ -169,6 +169,10 @@
       "value": "Keyboard Haptic Feedback"
     },
     {
+      "name": "permission_read_pasteboard_reason",
+      "value": "Read text from Pasteboard to input"
+    },
+    {
       "name": "keyboard_editing_panel_back",
       "value": "Back"
     },

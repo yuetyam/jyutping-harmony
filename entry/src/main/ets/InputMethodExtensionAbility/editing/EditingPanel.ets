@@ -13,9 +13,9 @@ import EditingMoveDownKey from './EditingMoveDownKey';
 import EditingMoveLeftKey from './EditingMoveLeftKey';
 import EditingMoveRightKey from './EditingMoveRight';
 import EditingMoveUpKey from './EditingMoveUp';
-import EditingPasteKey from './EditingPasteKey';
 import EditingRightDeleteKey from './EditingRightDeleteKey';
 import EditingSpaceKey from './EditingSpaceKey';
+import EditingSystemPasteKey from './EditingSystemPasteKey';
 
 @ComponentV2
 export default struct EditingPanel {
@@ -58,7 +58,7 @@ export default struct EditingPanel {
                     EditingClipboardClearKey()
                         .width('100%')
                         .height('100%')
-                    EditingPasteKey()
+                    EditingSystemPasteKey()
                         .width('100%')
                         .height('100%')
                 }
