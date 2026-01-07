@@ -52,7 +52,7 @@ export struct HomeScreen {
     @Local private gwongWanLexicons: GwongWanLexicon[] = [];
 
     private async deleteOldDatabases(context: Context) {
-        const fileNames: string[] = ["appdb-20251125-tmp.sqlite3", "appdb-20251129-tmp.sqlite3"];
+        const fileNames: string[] = ["appdb-20251125-tmp.sqlite3", "appdb-20251129-tmp.sqlite3", "appdb-20251217-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/app/";
         for (let index = 0; index < fileNames.length; index++) {
             const name: string = fileNames[index];
@@ -69,14 +69,14 @@ export struct HomeScreen {
         }
     }
     private async copyAppDatabase(context: Context) {
-        const srcFileName: string = "appdb.sqlite3";
-        const srcPath: string = context.resourceDir + "/" + srcFileName;
-        const desFileName: string = "appdb-20251217-tmp.sqlite3";
+        const desFileName: string = "appdb-20260107-tmp.sqlite3";
         const desPath: string = context.databaseDir + "/rdb/app/" + desFileName;
         try {
             if (fs.accessSync(desPath)) {
                 console.debug("app database path: " + desPath);
             } else {
+                const srcFileName: string = "appdb.sqlite3";
+                const srcPath: string = context.resourceDir + "/" + srcFileName;
                 console.debug("src database path: " + srcPath);
                 console.debug("des database path: " + desPath);
                 await fs.copyFile(srcPath, desPath);
@@ -89,7 +89,7 @@ export struct HomeScreen {
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        const fileName: string = "appdb-20251217-tmp.sqlite3";
+        const fileName: string = "appdb-20260107-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,
