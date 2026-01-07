@@ -32,6 +32,7 @@ export default struct EditingMoveUpKey {
                 case TouchType.Down:
                     this.isTouching = true;
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     break;
                 case TouchType.Move:
                     break;

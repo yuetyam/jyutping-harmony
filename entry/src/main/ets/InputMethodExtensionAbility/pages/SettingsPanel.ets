@@ -27,6 +27,7 @@ export default struct SettingsPanel {
                 .height('100%')
                 .onClick((event: ClickEvent) => {
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     controller.transformTo(controller.previousKeyboardForm);
                 })
                 Blank()
@@ -57,6 +58,7 @@ export default struct SettingsPanel {
                 .height('100%')
                 .onClick((event: ClickEvent) => {
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     // TODO: Extend Keyboard Height
                 })
                 .opacity(0)
@@ -74,6 +76,25 @@ export default struct SettingsPanel {
                                 .switchPointColor(Color.White)
                                 .onChange((isOn: boolean) => {
                                     controller.updateAudioFeedbackState(isOn);
+                                    controller.playModifierSound();
+                                    controller.triggerHapticFeedback();
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Row() {
+                            Text($r('app.string.keyboard_settings_feedback_haptic'))
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: controller.isHapticFeedbackOn })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    controller.updateHapticFeedbackState(isOn);
+                                    controller.playModifierSound();
+                                    controller.triggerHapticFeedback();
                                 })
                         }
                         .padding({ left: 8, top: 4, right: 8, bottom: 4 })

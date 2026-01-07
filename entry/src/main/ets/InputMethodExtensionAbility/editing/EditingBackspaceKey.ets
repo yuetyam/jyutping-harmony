@@ -35,6 +35,7 @@ export default struct EditingBackspaceKey {
                 case TouchType.Down:
                     this.isTouching = true;
                     controller.playDeleteSound();
+                    controller.triggerHapticFeedback();
                     break;
                 case TouchType.Move:
                     break;

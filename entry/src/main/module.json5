@@ -52,6 +52,12 @@
         "type": "inputMethod",
         "exported": true
       }
+    ],
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.VIBRATE",
+        "reason": "$string:permission_vibrate_reason"
+      }
     ]
   }
 }

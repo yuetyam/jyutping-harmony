@@ -211,6 +211,10 @@
     {
       "name": "keyboard_settings_feedback_audio",
       "value": "按鍵聲音"
+    },
+    {
+      "name": "keyboard_settings_feedback_haptic",
+      "value": "按鍵振動"
     }
   ]
 }

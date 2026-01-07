@@ -3,6 +3,7 @@ import controller from '../InputController'
 @ComponentV2
 export default struct LeftKey {
     private keyText: string = "，";
+    @Local private isTouching: boolean = false;
 
     build() {
         Stack() {
@@ -13,7 +14,7 @@ export default struct LeftKey {
             }) {
                 Text(this.keyText).fontSize(20)
             }
-            .backgroundColor($r('app.color.key_shallow'))
+            .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
             .shadow({
                 radius: 1,
@@ -25,10 +26,22 @@ export default struct LeftKey {
         }
         .width('100%')
         .height('100%')
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                controller.insert(this.keyText);
+        .onTouch((event: TouchEvent) => {
+            switch (event.type) {
+                case TouchType.Down:
+                    this.isTouching = true;
+                    controller.playInputSound();
+                    controller.triggerHapticFeedback();
+                    break;
+                case TouchType.Move:
+                    break;
+                default:
+                    this.isTouching = false;
+                    break;
             }
+        })
+        .onClick(() => {
+            controller.insert(this.keyText);
         })
     }
 }

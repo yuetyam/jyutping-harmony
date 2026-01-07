@@ -35,6 +35,7 @@ export default struct ShiftKey {
                 case TouchType.Down:
                     this.isTouching = true;
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     break;
                 case TouchType.Move:
                     break;

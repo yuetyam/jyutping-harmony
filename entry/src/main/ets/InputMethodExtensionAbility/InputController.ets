@@ -5,6 +5,7 @@ import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
+import { vibrator } from '@kit.SensorServiceKit';
 import { InputKeyEvent } from './model/InputKeyEvent';
 import { InputMode, InputModeCompanion } from './model/InputMode';
 import { KeyboardForm } from './model/KeyboardForm';
@@ -16,6 +17,7 @@ import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
 import { InputMemory } from './model/InputMemory';
 import { Lexicon } from './model/Lexicon';
 import { Converter } from './model/Converter';
+import { HapticEffectId, HapticType } from './model/HapticType';
 
 @ObservedV2
 export class InputController {
@@ -123,6 +125,57 @@ export class InputController {
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the audio preferences, message: " + err.message + ", code: " + err.code);
+        }
+    }
+
+    triggerHapticFeedback(type: HapticType = HapticType.Hard) {
+        if (!(this.isHapticFeedbackOn)) {
+            return;
+        }
+        try {
+            const effectId = HapticEffectId.of(type);
+            vibrator.isSupportEffect(effectId, (error: BusinessError, state: boolean) => {
+                if (error) {
+                    console.error(`Failed to query effect. Code: ${error.code}, message: ${error.message}`);
+                    return;
+                }
+                if (state) {
+                    try {
+                        vibrator.startVibration({
+                            type: 'preset',
+                            effectId: effectId,
+                            count: 1,
+                        }, {
+                            usage: 'notification'
+                        }, (error: BusinessError) => {
+                            if (error) {
+                                console.error(`Failed to start vibration. Code: ${error.code}, message: ${error.message}`);
+                                return;
+                            }
+                        });
+                    } catch (caughtError) {
+                        let err: BusinessError = caughtError as BusinessError;
+                        console.error(`An unexpected error occurred. Code: ${err.code}, message: ${err.message}`);
+                    }
+                }
+            })
+        } catch (caughtError) {
+            let err: BusinessError = caughtError as BusinessError;
+            console.error(`An unexpected error occurred. Code: ${err.code}, message: ${err.message}`);
+        }
+    }
+    @Trace isHapticFeedbackOn: boolean = true;
+    updateHapticFeedbackState(isOn: boolean) {
+        this.isHapticFeedbackOn = isOn;
+        const value: number = isOn ? 1 : 2;
+        try {
+            this.sharedPreferences?.putSync("haptic", value);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the haptic preferences");
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the haptic preferences, message: " + err.message + ", code: " + err.code);
         }
     }
 
@@ -272,6 +325,8 @@ export class InputController {
             this.sharedPreferences = preferences.getPreferencesSync(context, options);
             const savedAudioFeedbackValue: number = this.sharedPreferences.getSync("audio", 1) as number;
             this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
+            const savedHapticFeedbackValue: number = this.sharedPreferences.getSync("haptic", 1) as number;
+            this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
             const savedCharacterStandardValue: number = this.sharedPreferences.getSync("charset", 1) as number;
             this.isMutilated = (savedCharacterStandardValue == 51);
         } catch (error) {
@@ -559,6 +614,8 @@ export class InputController {
         this.ability.on('keyboardHide', () => {
             this.clearBuffer();
             this.updateKeyboardCase(KeyboardCase.lowercased);
+            this.transformTo(KeyboardForm.Alphabetic);
+            this.inputMode = InputMode.Cantonese;
         })
     }
     private unRegisterListener() {

@@ -33,6 +33,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.Settings);
             })
 
@@ -52,6 +53,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
             })
             .opacity(0)
 
@@ -71,6 +73,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
             })
             .opacity(0)
 
@@ -79,6 +82,7 @@ export default struct ToolBar {
                 .height('100%')
                 .onClick((event: ClickEvent) => {
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     controller.toggleInputMode();
                 })
 
@@ -98,6 +102,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.EditingPanel);
             })
 
@@ -106,6 +111,7 @@ export default struct ToolBar {
                 .height('100%')
                 .onClick((event: ClickEvent) => {
                     controller.playModifierSound();
+                    controller.triggerHapticFeedback();
                     controller.toggleCharacterScriptVariant();
                 })
 
@@ -125,6 +131,7 @@ export default struct ToolBar {
             .height('100%')
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
                 controller.dismissKeyboard();
             })
         }

@@ -12,6 +12,8 @@ export default struct EditingSystemPasteKey {
                             try {
                                 const text = pasteboard.getSystemPasteboard().getDataSync().getPrimaryText();
                                 controller.insert(text);
+                                controller.playInputSound();
+                                controller.triggerHapticFeedback();
                             } catch (caughtError) {
                                 let err: BusinessError = caughtError as BusinessError;
                                 console.error("Failed to paste pasteboard text, message: " + err.message + ", code: " + err.code);

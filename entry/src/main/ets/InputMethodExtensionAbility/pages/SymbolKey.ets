@@ -33,6 +33,7 @@ export default struct SymbolKey {
                 case TouchType.Down:
                     this.isTouching = true;
                     controller.playInputSound();
+                    controller.triggerHapticFeedback();
                     break;
                 case TouchType.Move:
                     break;

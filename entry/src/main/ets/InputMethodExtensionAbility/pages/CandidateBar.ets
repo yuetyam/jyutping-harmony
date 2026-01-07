@@ -22,6 +22,7 @@ export default struct CandidateBar {
                             CandidateView({ candidate: item })
                                 .onClick(() => {
                                     controller.playInputSound();
+                                    controller.triggerHapticFeedback();
                                     controller.selectCandidate(item);
                                     this.scroller.scrollToIndex(0);
                                 })
@@ -52,6 +53,7 @@ export default struct CandidateBar {
             .height('100%')
             .onClick(() => {
                 controller.playModifierSound();
+                controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.CandidateBoard);
             })
         }

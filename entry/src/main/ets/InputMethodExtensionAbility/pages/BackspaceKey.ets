@@ -34,6 +34,7 @@ export default struct BackspaceKey {
                 case TouchType.Down:
                     this.isTouching = true;
                     controller.playDeleteSound();
+                    controller.triggerHapticFeedback();
                     break;
                 case TouchType.Move:
                     break;
