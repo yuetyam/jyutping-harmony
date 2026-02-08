@@ -19,9 +19,7 @@ export struct CantoneseScreen {
                             }
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.character_square'),
@@ -38,14 +36,20 @@ export struct CantoneseScreen {
                 ListItemGroup() {
                     ListItem() {
                         WebLinkView({
-                            url: 'https://www.polyu.edu.hk/cbs/pronunciation',
+                            url: 'https://www.polyu.edu.hk/clc/pronunciation',
                             icon: $r('sys.symbol.worldclock'),
                             text: '懶音診療室 - PolyU'
                         })
                     }
+                    ListItem() { Divider() }
                     ListItem() {
-                        Divider()
+                        WebLinkView({
+                            url: 'https://www.polyu.edu.hk/clc/typo',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '消滅錯別字 - PolyU'
+                        })
                     }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://jyutping.org/blog/particles',
@@ -53,9 +57,7 @@ export struct CantoneseScreen {
                             text: '粵語語氣詞'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://www.classicalchineseliterature.org',
@@ -63,9 +65,7 @@ export struct CantoneseScreen {
                             text: '中國古詩文精讀'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://hambaanglaang.hk',
@@ -73,9 +73,7 @@ export struct CantoneseScreen {
                             text: '冚唪唥粵文'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://www.resonatehk.com',

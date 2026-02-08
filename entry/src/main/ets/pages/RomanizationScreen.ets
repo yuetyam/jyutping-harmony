@@ -19,9 +19,7 @@ export struct RomanizationScreen {
                             }
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.list_bullet'),
@@ -31,9 +29,7 @@ export struct RomanizationScreen {
                             }
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         NavigationLabel({
                             icon: $r('sys.symbol.bell'),
@@ -55,9 +51,7 @@ export struct RomanizationScreen {
                             text: '粵音資料集叢'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://words.hk',
@@ -65,9 +59,7 @@ export struct RomanizationScreen {
                             text: '粵典'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://humanum.arts.cuhk.edu.hk/Lexis/lexi-can',
@@ -75,14 +67,20 @@ export struct RomanizationScreen {
                             text: '粵語審音配詞字庫'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://shyyp.net/hant',
                             icon: $r('sys.symbol.doc_text_badge_magnifyingglass'),
                             text: '羊羊粵語'
+                        })
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://www.jyutjyu.com',
+                            icon: $r('sys.symbol.doc_text_badge_magnifyingglass'),
+                            text: '粵語辭叢'
                         })
                     }
                 }
@@ -97,9 +95,8 @@ export struct RomanizationScreen {
                             text: '粵拼 Jyutping'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    /*
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://www.ilc.cuhk.edu.hk/workshop/Chinese/Cantonese/Romanization',
@@ -107,9 +104,7 @@ export struct RomanizationScreen {
                             text: '粵語拼音速遞 - CUHK'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://www.ilc.cuhk.edu.hk/workshop/Chinese/Cantonese/OnlineTutorial',
@@ -117,14 +112,31 @@ export struct RomanizationScreen {
                             text: '粵語網路課堂 - CUHK'
                         })
                     }
-                    ListItem() {
-                        Divider()
-                    }
+                    */
+                    ListItem() { Divider() }
                     ListItem() {
                         WebLinkView({
                             url: 'https://www.polyu.edu.hk/clc/cantonese/home',
                             icon: $r('sys.symbol.worldclock'),
                             text: '翻轉粵語教室 - PolyU'
+                        })
+                    }
+                    /*
+                    ListItem() { Divider() }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://chaaklau.github.io/zidou',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: 'Zidou - 粵拼版 Wordle'
+                        })
+                    }
+                    */
+                    ListItem() { Divider() }
+                    ListItem() {
+                        WebLinkView({
+                            url: 'https://lukhap.jonathanl.dev',
+                            icon: $r('sys.symbol.worldclock'),
+                            text: '六合 | 粵拼版 Wordle'
                         })
                     }
                 }
