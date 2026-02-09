@@ -13,6 +13,11 @@ export class Syllable {
         this.alias = this.matchedInputKeys(aliasCode);
         this.origin = this.matchedInputKeys(originCode);
     }
+    equals(other: Object | null | undefined): boolean {
+        if (this === other) return true;
+        if (!(other instanceof Syllable)) return false;
+        return this.aliasCode === other.aliasCode && this.originCode === other.originCode;
+    }
     private matchedInputKeys(value: number): VirtualInputKey[] {
         let num = value;
         const codes: number[] = [];
@@ -45,14 +50,14 @@ export class Segmenter {
         }
         return originCode;
     }
-    private static splitLeading(events: VirtualInputKey[], store: relationalStore.RdbStore): Syllable[] {
-        const maxLength = Math.min(events.length, 6);
-        if (maxLength == 0) {
+    private static splitLeading(keys: VirtualInputKey[], store: relationalStore.RdbStore): Syllable[] {
+        const maxLength = Math.min(keys.length, 6);
+        if (maxLength === 0) {
             return [];
         }
         const syllables: Syllable[] = [];
-        for (let num = maxLength - 1; num >= 0; num--) {
-            const code = events.slice(0, num).reduce((acc, event) => acc * 100 + event.code, 0);
+        for (let num = maxLength; num >= 1; num--) {
+            const code = keys.slice(0, num).reduce((acc, event) => acc * 100 + event.code, 0);
             const originCode: number = Segmenter.match(code, store) ?? 0;
             if (originCode > 0) {
                 const syllable = new Syllable(code, originCode);
@@ -61,25 +66,25 @@ export class Segmenter {
         }
         return syllables;
     }
-    private static split(events: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
-        const leadingTokens = Segmenter.splitLeading(events, store);
-        if (leadingTokens.length === 0) {
+    private static split(keys: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
+        const headSyllables = Segmenter.splitLeading(keys, store);
+        if (headSyllables.length === 0) {
             return [];
         }
-        const eventCount = events.length;
-        const segmentation: Segmentation = leadingTokens.map((token) => [token]);
+        const inputLength = keys.length;
+        const segmentation: Segmentation = headSyllables.map((syllable) => [syllable]);
         let previousSubelementCount = segmentation.reduce((acc, scheme) => acc + scheme.length, 0);
         let shouldContinue: boolean = true;
         while (shouldContinue) {
             for (const scheme of segmentation) {
-                const schemeEventCount = scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0)
-                if (schemeEventCount >= eventCount) {
+                const schemeKeyCount = scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0)
+                if (schemeKeyCount >= inputLength) {
                     continue
                 }
-                const tailEvents = events.slice(schemeEventCount, undefined);
-                const tailTokens = Segmenter.splitLeading(tailEvents, store);
-                if (tailTokens.length > 0) {
-                    const newSegmentation: Segmentation = tailTokens.map((token) => [token]);
+                const tailKeys = keys.slice(schemeKeyCount, undefined);
+                const tailSyllables = Segmenter.splitLeading(tailKeys, store);
+                if (tailSyllables.length > 0) {
+                    const newSegmentation: Segmentation = tailSyllables.map((syllable) => [syllable]);
                     for (const element of newSegmentation) {
                         segmentation.push(element);
                     }
@@ -89,12 +94,12 @@ export class Segmenter {
             if (currentSubelementCount !== previousSubelementCount) {
                 previousSubelementCount = currentSubelementCount;
             } else {
-                shouldContinue = false;
+                break;
             }
         }
         return segmentation;
     }
-    static segment(events: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
-        return Segmenter.split(events, store);
+    static segment(keys: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
+        return Segmenter.split(keys, store);
     }
 }
