@@ -3,7 +3,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { Candidate } from "./Candidate";
 import { FallbackLexiconHelper } from "./FallbackLexiconHelper";
 import { FallbackT2SHelper } from "./FallbackT2SHelper";
-import { InputKeyEvent } from "./InputKeyEvent";
+import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 
@@ -16,12 +16,12 @@ export class InputMemory {
         return hash;
     }
 
-    static search(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+    static search(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const text = events.map((event) => event.text).join("")
         const code = InputMemory.hashCode(text);
         return InputMemory.match(text, code, store);
     }
-    private static processSlices(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+    private static processSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const eventLength: number = events.length;
         const range = [...Array(eventLength)].map((value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {
@@ -157,10 +157,10 @@ export class InputMemory {
 
     // Fallback searching
 
-    static fallbackSearch(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+    static fallbackSearch(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         return InputMemory.fallBackProcessSlices(events, store);
     }
-    private static fallBackProcessSlices(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+    private static fallBackProcessSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const eventLength: number = events.length;
         const range = [...Array(eventLength)].map((value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {

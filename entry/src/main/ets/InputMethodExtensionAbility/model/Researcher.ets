@@ -1,6 +1,6 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from '@kit.BasicServicesKit';
-import { InputKeyEvent } from "./InputKeyEvent";
+import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 
@@ -20,15 +20,15 @@ export class Researcher {
             return numbers.reduce((acc, num) => acc * 100 + num, 0);
         }
     }
-    private static anchorsCode(events: InputKeyEvent[]): number {
-        const codes = events.map((event) => event === InputKeyEvent.letterY ? InputKeyEvent.letterJ.code : event.code)
+    private static anchorsCode(events: VirtualInputKey[]): number {
+        const codes = events.map((event) => event === VirtualInputKey.letterY ? VirtualInputKey.letterJ.code : event.code)
         return Researcher.radix100Combined(codes);
     }
-    static async search(events: InputKeyEvent[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
+    static async search(events: VirtualInputKey[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
         return Researcher.processSlices(events, store);
     }
 
-    private static processSlices(events: InputKeyEvent[], store: relationalStore.RdbStore): Lexicon[] {
+    private static processSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const eventLength: number = events.length;
         const range = [...Array(eventLength)].map((value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {
@@ -41,7 +41,7 @@ export class Researcher {
         return items;
     }
 
-    private static anchorsMatch(events: InputKeyEvent[], text: string, store: relationalStore.RdbStore): Lexicon[] {
+    private static anchorsMatch(events: VirtualInputKey[], text: string, store: relationalStore.RdbStore): Lexicon[] {
         const code = Researcher.anchorsCode(events);
         if (code === 0) {
             return [];

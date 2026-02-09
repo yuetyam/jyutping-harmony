@@ -1,10 +1,10 @@
 import controller from '../InputController';
-import { InputKeyEvent } from '../model/InputKeyEvent';
+import { VirtualInputKey } from '../model/VirtualInputKey';
 import { KeyboardCaseCompanion } from '../model/KeyboardCase';
 
 @ComponentV2
 export default struct LetterKey {
-    @Param @Require @Once event: InputKeyEvent;
+    @Param @Require @Once virtual: VirtualInputKey;
     @Local private isTouching: boolean = false;
     build() {
         Stack() {
@@ -13,7 +13,7 @@ export default struct LetterKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(this.event.text)
+                Text(this.virtual.text)
                     .textCase(KeyboardCaseCompanion.isLowercased(controller.keyboardCase) ? TextCase.Normal : TextCase.UpperCase)
                     .fontSize(22)
             }
@@ -45,7 +45,7 @@ export default struct LetterKey {
         })
         .onClick((event?: ClickEvent) => {
             if (event) {
-                controller.handle(this.event)
+                controller.handle(this.virtual)
             }
         })
     }

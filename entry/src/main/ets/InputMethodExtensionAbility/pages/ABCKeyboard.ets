@@ -1,5 +1,5 @@
 import controller from '../InputController';
-import { InputKeyEvent } from '../model/InputKeyEvent';
+import { VirtualInputKey } from '../model/VirtualInputKey';
 import { KeyboardForm } from '../model/KeyboardForm';
 import ABCLeftKey from './ABCLeftKey';
 import ABCRightKey from './ABCRightKey';
@@ -24,31 +24,31 @@ export default struct ABCKeyboard {
                 .width('100%')
                 .height('56vp')
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                LetterKey({ event: InputKeyEvent.letterQ })
-                LetterKey({ event: InputKeyEvent.letterW })
-                LetterKey({ event: InputKeyEvent.letterE })
-                LetterKey({ event: InputKeyEvent.letterR })
-                LetterKey({ event: InputKeyEvent.letterT })
-                LetterKey({ event: InputKeyEvent.letterY })
-                LetterKey({ event: InputKeyEvent.letterU })
-                LetterKey({ event: InputKeyEvent.letterI })
-                LetterKey({ event: InputKeyEvent.letterO })
-                LetterKey({ event: InputKeyEvent.letterP })
+                LetterKey({ virtual: VirtualInputKey.letterQ })
+                LetterKey({ virtual: VirtualInputKey.letterW })
+                LetterKey({ virtual: VirtualInputKey.letterE })
+                LetterKey({ virtual: VirtualInputKey.letterR })
+                LetterKey({ virtual: VirtualInputKey.letterT })
+                LetterKey({ virtual: VirtualInputKey.letterY })
+                LetterKey({ virtual: VirtualInputKey.letterU })
+                LetterKey({ virtual: VirtualInputKey.letterI })
+                LetterKey({ virtual: VirtualInputKey.letterO })
+                LetterKey({ virtual: VirtualInputKey.letterP })
             }
             .width('100%')
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 Blank().width('5%')
-                LetterKey({ event: InputKeyEvent.letterA }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterS }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterD }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterF }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterG }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterH }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterJ }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterK }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterL }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterA }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterS }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterD }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterF }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterG }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterH }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterJ }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterK }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterL }).width('10%')
                 Blank().width('5%')
             }
             .width('100%')
@@ -57,13 +57,13 @@ export default struct ABCKeyboard {
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 ShiftKey().width('13%')
                 Blank().width('2%')
-                LetterKey({ event: InputKeyEvent.letterZ }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterX }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterC }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterV }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterB }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterN }).width('10%')
-                LetterKey({ event: InputKeyEvent.letterM }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterZ }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterX }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterC }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterV }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterB }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterN }).width('10%')
+                LetterKey({ virtual: VirtualInputKey.letterM }).width('10%')
                 Blank().width('2%')
                 BackspaceKey().width('13%')
             }

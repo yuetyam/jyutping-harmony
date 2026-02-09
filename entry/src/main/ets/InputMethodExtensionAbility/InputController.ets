@@ -6,7 +6,6 @@ import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
 import { vibrator } from '@kit.SensorServiceKit';
-import { InputKeyEvent } from './model/InputKeyEvent';
 import { InputMode, InputModeCompanion } from './model/InputMode';
 import { KeyboardForm } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
@@ -18,6 +17,8 @@ import { InputMemory } from './model/InputMemory';
 import { Lexicon } from './model/Lexicon';
 import { Converter } from './model/Converter';
 import { HapticEffectId, HapticType } from './model/HapticType';
+import { VirtualInputKey } from './model/VirtualInputKey';
+import { BasicInputEvent } from './model/BasicInputEvent';
 
 @ObservedV2
 export class InputController {
@@ -348,8 +349,7 @@ export class InputController {
     @Trace candidates: Candidate[] = [];
     private selectedCandidates: Candidate[] = [];
     @Trace isBuffering: boolean = false;
-    private bufferEvents: InputKeyEvent[] = [];
-    private capitals: boolean[] = [];
+    private bufferEvents: BasicInputEvent[] = [];
     get isBufferEmpty(): boolean {
         const hasBuffer = this.bufferEvents.length > 0;
         if (this.isBuffering != hasBuffer) {
@@ -357,14 +357,13 @@ export class InputController {
         }
         return !hasBuffer
     }
-    handle(event: InputKeyEvent) {
+    handle(key: VirtualInputKey) {
         if (InputModeCompanion.isABC(this.inputMode)) {
-            const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? event.text : event.text.toUpperCase();
+            const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? key.text : key.text.toUpperCase();
             this.insert(text);
         } else {
-            const isCapitalized: boolean = KeyboardCaseCompanion.isCapitalized(this.keyboardCase);
-            this.capitals.push(isCapitalized);
-            this.bufferEvents.push(event);
+            const newEvent = new BasicInputEvent(key, this.keyboardCase);
+            this.bufferEvents.push(newEvent);
             this.runInputSession();
         }
         if (KeyboardCaseCompanion.isUppercased(this.keyboardCase)) {
@@ -394,19 +393,20 @@ export class InputController {
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
+        const keys = this.bufferEvents.map(event => event.key);
         if (this.memory) {
             if (this.isCoreStoreFunctional) {
-                newLexicons = InputMemory.search(this.bufferEvents, this.memory);
+                newLexicons = InputMemory.search(keys, this.memory);
             } else {
-                const memoryLexicons = InputMemory.search(this.bufferEvents, this.memory);
-                const fallbackLexicons = InputMemory.fallbackSearch(this.bufferEvents, this.memory);
+                const memoryLexicons = InputMemory.search(keys, this.memory);
+                const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
                 newLexicons = [...memoryLexicons, ...fallbackLexicons];
             }
         } else {
             this.prepareMemory();
         }
         if (this.store) {
-            const searched = await Researcher.search(this.bufferEvents, this.store);
+            const searched = await Researcher.search(keys, this.store);
             if (searched.length > 0) {
                 this.isCoreStoreFunctional = true;
                 newLexicons = newLexicons.concat(searched);
@@ -429,13 +429,7 @@ export class InputController {
         this.candidates = newCandidates;
     }
     private joinedBufferTexts(): string {
-        if (this.capitals.includes(true) && (this.bufferEvents.length === this.capitals.length)) {
-            return this.bufferEvents.map((value: InputKeyEvent, index: number) => {
-                return this.capitals[index] ? value.text.toUpperCase() : value.text;
-            }).join("");
-        } else {
-            return this.bufferEvents.map(item => item.text).join("");
-        }
+        return this.bufferEvents.map(event => KeyboardCaseCompanion.isLowercased(event.kbCase) ? event.key.text : event.key.text.toUpperCase()).join("");
     }
 
     selectCandidateBy(index: number) {
@@ -488,13 +482,11 @@ export class InputController {
                 console.error("Failed to deleteForward()");
             });
         } else {
-            this.capitals.pop();
             this.bufferEvents.pop();
             this.runInputSession();
         }
     }
     clearBuffer() {
-        this.capitals = [];
         this.bufferEvents = [];
         this.runInputSession();
     }

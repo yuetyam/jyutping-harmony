@@ -1,26 +1,26 @@
 import { BusinessError } from '@kit.BasicServicesKit';
-import { InputKeyEvent } from "./InputKeyEvent";
+import { VirtualInputKey } from "./VirtualInputKey";
 import { relationalStore } from "@kit.ArkData";
 
 export class Syllable {
     readonly aliasCode: number;
     readonly originCode: number;
-    readonly alias: InputKeyEvent[];
-    readonly origin: InputKeyEvent[];
+    readonly alias: VirtualInputKey[];
+    readonly origin: VirtualInputKey[];
     constructor(aliasCode: number, originCode: number) {
         this.aliasCode = aliasCode;
         this.originCode = originCode;
-        this.alias = this.matchedEvents(aliasCode);
-        this.origin = this.matchedEvents(originCode);
+        this.alias = this.matchedInputKeys(aliasCode);
+        this.origin = this.matchedInputKeys(originCode);
     }
-    private matchedEvents(value: number): InputKeyEvent[] {
+    private matchedInputKeys(value: number): VirtualInputKey[] {
         let num = value;
         const codes: number[] = [];
         while (num > 0) {
             codes.push(num % 100);
             num = Math.floor(num / 100);
         }
-        return codes.reverse().map((code) => InputKeyEvent.matchEvent(code)).filter(Boolean) as InputKeyEvent[];
+        return codes.reverse().map((code) => VirtualInputKey.matchVirtualKey(code)).filter(Boolean) as VirtualInputKey[];
     }
 }
 
@@ -29,7 +29,7 @@ export type Segmentation = Scheme[];
 
 export class Segmenter {
     private static match(code: number, store: relationalStore.RdbStore): number | undefined {
-        const command: string = `SELECT origincode FROM syllabletable WHERE aliascode = ${code} LIMIT 1;`;
+        const command: string = `SELECT origin_code FROM syllable_table WHERE alias_code = ${code} LIMIT 1;`;
         let res: relationalStore.ResultSet | undefined = undefined;
         let originCode: number | undefined = undefined;
         try {
@@ -45,7 +45,7 @@ export class Segmenter {
         }
         return originCode;
     }
-    private static splitLeading(events: InputKeyEvent[], store: relationalStore.RdbStore): Syllable[] {
+    private static splitLeading(events: VirtualInputKey[], store: relationalStore.RdbStore): Syllable[] {
         const maxLength = Math.min(events.length, 6);
         if (maxLength == 0) {
             return [];
@@ -61,7 +61,7 @@ export class Segmenter {
         }
         return syllables;
     }
-    private static split(events: InputKeyEvent[], store: relationalStore.RdbStore): Segmentation {
+    private static split(events: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
         const leadingTokens = Segmenter.splitLeading(events, store);
         if (leadingTokens.length === 0) {
             return [];
@@ -94,7 +94,7 @@ export class Segmenter {
         }
         return segmentation;
     }
-    static segment(events: InputKeyEvent[], store: relationalStore.RdbStore): Segmentation {
+    static segment(events: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
         return Segmenter.split(events, store);
     }
 }
