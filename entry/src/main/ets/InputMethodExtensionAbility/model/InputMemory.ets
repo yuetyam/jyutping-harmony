@@ -16,21 +16,10 @@ export class InputMemory {
         return hash;
     }
 
-    static search(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        const text = events.map((event) => event.text).join("")
+    static search(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
+        const text = keys.map((key) => key.text).join("")
         const code = InputMemory.hashCode(text);
         return InputMemory.match(text, code, store);
-    }
-    private static processSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        const eventLength: number = events.length;
-        const range = [...Array(eventLength)].map((value: number, index: number) => index);
-        let items: Lexicon[] = range.flatMap(num => {
-            const leadingEvents = events.slice(0, eventLength - num);
-            const leadingText = leadingEvents.map((event) => event.text).join("")
-            const code = InputMemory.hashCode(leadingText);
-            return InputMemory.match(leadingText, code, store);
-        })
-        return items;
     }
     private static match(text: string, code: number, store: relationalStore.RdbStore): Lexicon[] {
         const inputCount = text.length;
@@ -157,15 +146,15 @@ export class InputMemory {
 
     // Fallback searching
 
-    static fallbackSearch(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        return InputMemory.fallBackProcessSlices(events, store);
+    static fallbackSearch(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
+        return InputMemory.fallBackProcessSlices(keys, store);
     }
-    private static fallBackProcessSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        const eventLength: number = events.length;
-        const range = [...Array(eventLength)].map((value: number, index: number) => index);
+    private static fallBackProcessSlices(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
+        const inputLength: number = keys.length;
+        const range = [...Array(inputLength)].map((value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {
-            const leadingEvents = events.slice(0, eventLength - num);
-            const leadingText = leadingEvents.map((event) => event.text).join("")
+            const leadingKeys = keys.slice(0, inputLength - num);
+            const leadingText = leadingKeys.map((key) => key.text).join("")
             const code = InputMemory.hashCode(leadingText);
             return InputMemory.fallBackMatch(leadingText, code, store);
         })

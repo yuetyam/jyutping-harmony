@@ -20,33 +20,33 @@ export class Researcher {
             return numbers.reduce((acc, num) => acc * 100 + num, 0);
         }
     }
-    private static anchorsCode(events: VirtualInputKey[]): number {
-        const codes = events.map((event) => event === VirtualInputKey.letterY ? VirtualInputKey.letterJ.code : event.code)
+    private static anchorsCode(keys: VirtualInputKey[]): number {
+        const codes = keys.map((key) => (key === VirtualInputKey.letterY) ? VirtualInputKey.letterJ.code : key.code)
         return Researcher.radix100Combined(codes);
     }
-    static async search(events: VirtualInputKey[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
-        return Researcher.processSlices(events, store);
-    }
 
-    private static processSlices(events: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        const eventLength: number = events.length;
-        const range = [...Array(eventLength)].map((value: number, index: number) => index);
+    static async search(keys: VirtualInputKey[], store: relationalStore.RdbStore): Promise<Lexicon[]> {
+        return Researcher.processSlices(keys, store);
+    }
+    private static processSlices(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
+        const inputLength: number = keys.length;
+        const range = [...Array(inputLength)].map((value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {
-            const leadingEvents = events.slice(0, eventLength - num);
-            const leadingText = leadingEvents.map((event) => event.text).join("")
-            const pingMatched = Researcher.hashMatch(leadingText, store);
-            const anchorsMatched = Researcher.anchorsMatch(leadingEvents, leadingText, store);
-            return [...pingMatched, ...anchorsMatched];
+            const leadingKeys = keys.slice(0, inputLength - num);
+            const leadingText = leadingKeys.map((key) => key.text).join("")
+            const spellMatched = Researcher.hashMatch(leadingText, store);
+            const anchorsMatched = Researcher.anchorsMatch(leadingKeys, leadingText, store);
+            return [...spellMatched, ...anchorsMatched];
         })
         return items;
     }
 
-    private static anchorsMatch(events: VirtualInputKey[], text: string, store: relationalStore.RdbStore): Lexicon[] {
-        const code = Researcher.anchorsCode(events);
+    private static anchorsMatch(keys: VirtualInputKey[], text: string, store: relationalStore.RdbStore): Lexicon[] {
+        const code = Researcher.anchorsCode(keys);
         if (code === 0) {
             return [];
         }
-        const inputCount = events.length;
+        const inputCount = keys.length;
         const lexicons: Lexicon[] = [];
         const limit = 50;
         const command: string = "SELECT rowid, word, romanization FROM core_lexicon WHERE anchors = ? LIMIT ?;";
