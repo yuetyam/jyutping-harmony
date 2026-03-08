@@ -1,6 +1,6 @@
 import { BusinessError } from '@kit.BasicServicesKit';
-import { VirtualInputKey } from "./VirtualInputKey";
 import { relationalStore } from "@kit.ArkData";
+import { VirtualInputKey } from "./VirtualInputKey";
 
 export class Syllable {
     readonly aliasCode: number;
@@ -72,34 +72,78 @@ export class Segmenter {
             return [];
         }
         const inputLength = keys.length;
-        const segmentation: Segmentation = headSyllables.map((syllable) => [syllable]);
-        let previousSubelementCount = segmentation.reduce((acc, scheme) => acc + scheme.length, 0);
-        let shouldContinue: boolean = true;
-        while (shouldContinue) {
-            for (const scheme of segmentation) {
-                const schemeKeyCount = scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0)
-                if (schemeKeyCount >= inputLength) {
-                    continue
+        const segmentation: Segmentation = [];
+        let pending: Scheme[] = headSyllables.map((syllable) => [syllable]);
+        while (pending.length > 0) {
+            const nextPending: Scheme[] = [];
+            for (const scheme of pending) {
+                segmentation.push(scheme);
+                const handledLength = scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0);
+                if (handledLength >= inputLength) {
+                    continue;
                 }
-                const tailKeys = keys.slice(schemeKeyCount, undefined);
+                const tailKeys = keys.slice(handledLength);
                 const tailSyllables = Segmenter.splitLeading(tailKeys, store);
-                if (tailSyllables.length > 0) {
-                    const newSegmentation: Segmentation = tailSyllables.map((syllable) => [syllable]);
-                    for (const element of newSegmentation) {
-                        segmentation.push(element);
-                    }
+                for (const syllable of tailSyllables) {
+                    nextPending.push([...scheme, syllable]);
                 }
             }
-            const currentSubelementCount = segmentation.reduce((acc, scheme) => acc + scheme.length, 0);
-            if (currentSubelementCount !== previousSubelementCount) {
-                previousSubelementCount = currentSubelementCount;
-            } else {
-                break;
-            }
+            pending = nextPending;
         }
-        return segmentation;
+        return segmentation
+            .filter((scheme) => Segmenter.valid(scheme))
+            .sort((lhs, rhs) => {
+                const lhsKeyCount = lhs.map((syllable) => syllable.alias.length).reduce((acc, i) => acc + i, 0);
+                const rhsKeyCount = rhs.map((syllable) => syllable.alias.length).reduce((acc, i) => acc + i, 0);
+                return (lhsKeyCount === rhsKeyCount) ? (lhs.length - rhs.length) : (rhsKeyCount - lhsKeyCount);
+            });
     }
     static segment(keys: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
-        return Segmenter.split(keys, store);
+        switch (keys.length) {
+            case 0: return [];
+            case 1:
+                switch (keys[0]) {
+                    case VirtualInputKey.letterA: return Segmenter.letterA;
+                    case VirtualInputKey.letterO: return Segmenter.letterO;
+                    case VirtualInputKey.letterM: return Segmenter.letterM;
+                    default: return [];
+                }
+            case 4:
+                const combinedCode = keys.reduce((acc, key) => acc * 100 + key.code, 0);
+                switch (combinedCode) {
+                    case 32203220: return Segmenter.mama;
+                    case 32203228: return Segmenter.mami;
+                    default: return Segmenter.split(keys, store);
+                }
+            default:
+                return Segmenter.split(keys, store);
+        }
+    }
+    private static readonly letterA: Segmentation = [[new Syllable(20, 2020)]];
+    private static readonly letterO: Segmentation = [[new Syllable(34, 34)]];
+    private static readonly letterM: Segmentation = [[new Syllable(32, 32)]];
+    private static readonly mama: Segmentation = [[
+        new Syllable(3220, 322020),
+        new Syllable(3220, 322020)
+    ]];
+    private static readonly mami: Segmentation = [[
+        new Syllable(3220, 322020),
+        new Syllable(3228, 3228)
+    ]];
+    private static valid(scheme: Scheme): boolean {
+        switch (scheme.length) {
+            case 0: return false;
+            case 1: return true;
+            default: break;
+        }
+        const tailLetterA = scheme.slice(0, -2).find((syllable) => syllable.origin[syllable.origin.length - 1] === VirtualInputKey.letterA)
+        if (tailLetterA == undefined) { return true; }
+        const originText = scheme.flatMap((syllable) => syllable.origin).map((key) => key.text).join("");
+        const originNumber = originText.match("am(m|ng)")?.length ?? 0;
+        if (originNumber === 0) { return true; }
+        const aliasText = scheme.flatMap((syllable) => syllable.alias).map((key) => key.text).join("");
+        const aliasNumber = aliasText.match("am(m|ng)")?.length ?? 0;
+        if (aliasNumber === 0) { return false; }
+        return originNumber === aliasNumber;
     }
 }

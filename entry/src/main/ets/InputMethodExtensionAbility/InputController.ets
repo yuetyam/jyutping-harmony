@@ -19,6 +19,7 @@ import { Converter } from './model/Converter';
 import { HapticEffectId, HapticType } from './model/HapticType';
 import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
+import { Segmenter } from './model/Segmenter';
 
 @ObservedV2
 export class InputController {
@@ -406,7 +407,8 @@ export class InputController {
             this.prepareMemory();
         }
         if (this.store) {
-            const searched = await Researcher.search(keys, this.store);
+            const segmentation = Segmenter.segment(keys, this.store);
+            const searched = await Researcher.search(keys, segmentation, this.store);
             if (searched.length > 0) {
                 this.isCoreStoreFunctional = true;
                 newLexicons = newLexicons.concat(searched);
