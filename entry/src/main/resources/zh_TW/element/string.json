@@ -29,6 +29,22 @@
       "value": "輸入法管理"
     },
     {
+      "name": "full_mode_notes_title",
+      "value": "以下功能需要「完整體驗模式」"
+    },
+    {
+      "name": "full_mode_notes_row1",
+      "value": "1. 完整詞庫"
+    },
+    {
+      "name": "full_mode_notes_row2",
+      "value": "2. 兼容各種習慣拼法"
+    },
+    {
+      "name": "full_mode_notes_row3",
+      "value": "3. 按鍵聲音以及振動"
+    },
+    {
       "name": "guide_abbreviated_input_heading",
       "value": "簡拼"
     },
@@ -206,15 +222,11 @@
     },
     {
       "name": "keyboard_editing_panel_right_delete",
-      "value": "刪除"
+      "value": "向右刪除"
     },
     {
       "name": "keyboard_settings_feedback_audio",
       "value": "按鍵聲音"
-    },
-    {
-      "name": "keyboard_settings_feedback_haptic",
-      "value": "按鍵振動"
     }
   ]
 }

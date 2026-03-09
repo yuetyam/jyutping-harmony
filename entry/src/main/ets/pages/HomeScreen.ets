@@ -266,13 +266,26 @@ export struct HomeScreen {
                         })
                     }
                 }
-
-                ListItem() {
-                    Text("重要：键盘需「完整体验模式」方可用到完整词库")
-                        .fontSize(14)
-                        .lineHeight(20)
+                ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Text($r("app.string.full_mode_notes_title"))
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r("app.string.full_mode_notes_row1"))
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r("app.string.full_mode_notes_row2"))
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r("app.string.full_mode_notes_row3"))
+                    }
                 }
                 .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
 
                 /*
                 ListItemGroup({ space: 8 }) {

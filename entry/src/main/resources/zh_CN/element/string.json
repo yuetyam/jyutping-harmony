@@ -29,6 +29,22 @@
       "value": "输入法管理"
     },
     {
+      "name": "full_mode_notes_title",
+      "value": "以下功能需要「完整体验模式」"
+    },
+    {
+      "name": "full_mode_notes_row1",
+      "value": "1. 完整词库"
+    },
+    {
+      "name": "full_mode_notes_row2",
+      "value": "2. 兼容各种习惯拼法"
+    },
+    {
+      "name": "full_mode_notes_row3",
+      "value": "3. 按键声音以及振动"
+    },
+    {
       "name": "guide_abbreviated_input_heading",
       "value": "简拼"
     },
@@ -206,7 +222,7 @@
     },
     {
       "name": "keyboard_editing_panel_right_delete",
-      "value": "刪除"
+      "value": "向右刪除"
     },
     {
       "name": "keyboard_settings_feedback_audio",

@@ -39,12 +39,20 @@ export class Researcher {
         return items;
     }
     static async suggest(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore): Promise<Lexicon[]> {
+        if (segmentation.length < 1) {
+            return Researcher.processSlices(keys, store);
+        }
         const inputLength = keys.length;
         const text = keys.map((key) => key.text).join("");
         const spellMatched = Researcher.hashMatch(text, store);
         const anchorsMatched = Researcher.anchorsMatch(keys, text, store);
         const queried = Researcher.query(inputLength, segmentation, store);
-        return [...spellMatched, ...anchorsMatched, ...queried];
+        const shouldProcessSlices: boolean = (spellMatched.length < 1) && (anchorsMatched.length < 1) && (queried.length < 1);
+        if (shouldProcessSlices) {
+            return Researcher.processSlices(keys, store);
+        } else {
+            return [...spellMatched, ...anchorsMatched, ...queried];
+        }
     }
     private static query(inputLength: number, segmentation: Segmentation, store: relationalStore.RdbStore): Lexicon[] {
         const idealSchemes = segmentation.filter((scheme) => scheme.flatMap((syllable) => syllable.alias).length === inputLength);

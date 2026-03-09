@@ -29,6 +29,22 @@
       "value": "Manage keyboards"
     },
     {
+      "name": "full_mode_notes_title",
+      "value": "The following features require “Full Mode”:"
+    },
+    {
+      "name": "full_mode_notes_row1",
+      "value": "1. Full keyboard lexicons"
+    },
+    {
+      "name": "full_mode_notes_row2",
+      "value": "2. Habitual spelling compatibility"
+    },
+    {
+      "name": "full_mode_notes_row3",
+      "value": "3. Sound and haptic feedbacks"
+    },
+    {
       "name": "guide_abbreviated_input_heading",
       "value": "Quick Input with Initials"
     },
@@ -178,7 +194,7 @@
     },
     {
       "name": "keyboard_editing_panel_backspace",
-      "value": "Delete"
+      "value": "Backspace"
     },
     {
       "name": "keyboard_editing_panel_clear",
