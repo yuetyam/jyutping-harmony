@@ -6,6 +6,7 @@ import { FallbackT2SHelper } from "./FallbackT2SHelper";
 import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
+import { Segmentation, Scheme } from "./Segmenter";
 
 export class InputMemory {
     private static hashCode(str: string): number {
@@ -40,6 +41,86 @@ export class InputMemory {
                     input: text,
                     inputCount: inputCount,
                     number: num,
+                };
+                lexicons.push(instance);
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            res?.close();
+        }
+        return lexicons;
+    }
+
+    static suggest(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore): Lexicon[] {
+        const inputLength = keys.length;
+        const text = keys.map((key) => key.text).join("");
+        const pingCode = InputMemory.hashCode(text);
+        const spellMatched = InputMemory.pingMatch(pingCode, text, inputLength, store);
+        const anchorsMatched = InputMemory.shortcutMatch(keys, text, store);
+        const queried = segmentation
+            .filter((scheme) => scheme.flatMap((syllable) => syllable.alias).length === inputLength)
+            .flatMap((scheme) => InputMemory.perform(scheme, text, inputLength, store));
+        return [...spellMatched, ...anchorsMatched, ...queried];
+    }
+    private static perform(scheme: Scheme, input: string, inputLength: number, store: relationalStore.RdbStore): Lexicon[] {
+        const originKeys = scheme.flatMap((syllable) => syllable.origin);
+        const originText = originKeys.map((key) => key.text).join("");
+        const code = InputMemory.hashCode(originText);
+        return InputMemory.pingMatch(code, input, inputLength, store);
+    }
+    private static pingMatch(code: number, input: string, inputCount: number, store: relationalStore.RdbStore): Lexicon[] {
+        const lexicons: Lexicon[] = [];
+        const limit = -1;
+        const command: string = "SELECT rowid, word, romanization FROM memory WHERE ping = ? ORDER BY frequency DESC LIMIT ?;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [code, limit]);
+            while (res.goToNextRow()) {
+                const rowID = res.getLong(0);
+                const word = res.getString(1);
+                const romanization = res.getString(2);
+                const instance: Lexicon = {
+                    type: LexiconType.Cantonese,
+                    text: word,
+                    romanization: romanization,
+                    input: input,
+                    inputCount: inputCount,
+                    number: rowID,
+                };
+                lexicons.push(instance);
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            res?.close();
+        }
+        return lexicons;
+    }
+    private static shortcutMatch(keys: VirtualInputKey[], input: string, store: relationalStore.RdbStore): Lexicon[] {
+        const anchorsText = keys.map((key) => (key === VirtualInputKey.letterY) ? VirtualInputKey.letterJ.text : key.text).join("");
+        const code = InputMemory.hashCode(anchorsText);
+        if (code < 1) { return []; }
+        const inputCount = keys.length;
+        const lexicons: Lexicon[] = [];
+        const limit = 5;
+        const command: string = "SELECT rowid, word, romanization FROM memory WHERE shortcut = ? ORDER BY frequency DESC LIMIT ?;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [code, limit]);
+            while (res.goToNextRow()) {
+                const rowID = res.getLong(0);
+                const word = res.getString(1);
+                const romanization = res.getString(2);
+                const instance: Lexicon = {
+                    type: LexiconType.Cantonese,
+                    text: word,
+                    romanization: romanization,
+                    input: input,
+                    inputCount: inputCount,
+                    number: rowID,
                 };
                 lexicons.push(instance);
             }

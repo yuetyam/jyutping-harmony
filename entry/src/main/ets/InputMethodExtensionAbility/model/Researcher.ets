@@ -38,7 +38,7 @@ export class Researcher {
         })
         return items;
     }
-    static async search(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore): Promise<Lexicon[]> {
+    static async suggest(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore): Promise<Lexicon[]> {
         const inputLength = keys.length;
         const text = keys.map((key) => key.text).join("");
         const spellMatched = Researcher.hashMatch(text, store);
@@ -83,7 +83,7 @@ export class Researcher {
         try {
             res = store.querySqlSync(command, [code, limit]);
             while (res.goToNextRow()) {
-                const number = res.getLong(0);
+                const rowID = res.getLong(0);
                 const word = res.getString(1);
                 const romanization = res.getString(2);
                 const instance: Lexicon = {
@@ -92,7 +92,7 @@ export class Researcher {
                     romanization: romanization,
                     input: text,
                     inputCount: inputCount,
-                    number: number,
+                    number: rowID,
                 };
                 lexicons.push(instance);
             }
@@ -114,7 +114,7 @@ export class Researcher {
         try {
             res = store.querySqlSync(command, [code, limit]);
             while (res.goToNextRow()) {
-                const number = res.getLong(0);
+                const rowID = res.getLong(0);
                 const word = res.getString(1);
                 const romanization = res.getString(2);
                 const instance: Lexicon = {
@@ -123,7 +123,7 @@ export class Researcher {
                     romanization: romanization,
                     input: text,
                     inputCount: inputCount,
-                    number: number,
+                    number: rowID,
                 };
                 lexicons.push(instance);
             }

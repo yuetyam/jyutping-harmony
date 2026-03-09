@@ -395,27 +395,33 @@ export class InputController {
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         const keys = this.bufferEvents.map(event => event.key);
-        if (this.memory) {
-            if (this.isCoreStoreFunctional) {
-                newLexicons = InputMemory.search(keys, this.memory);
-            } else {
-                const memoryLexicons = InputMemory.search(keys, this.memory);
-                const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
-                newLexicons = [...memoryLexicons, ...fallbackLexicons];
-            }
-        } else {
-            this.prepareMemory();
-        }
         if (this.store) {
             const segmentation = Segmenter.segment(keys, this.store);
-            const searched = await Researcher.search(keys, segmentation, this.store);
+            if (this.memory) {
+                if (this.isCoreStoreFunctional) {
+                    newLexicons = InputMemory.suggest(keys, segmentation, this.memory);
+                } else {
+                    const memoryLexicons = InputMemory.search(keys, this.memory);
+                    const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
+                    newLexicons = [...memoryLexicons, ...fallbackLexicons];
+                }
+            } else {
+                this.prepareMemory();
+            }
+            const searched = await Researcher.suggest(keys, segmentation, this.store);
             if (searched.length > 0) {
                 this.isCoreStoreFunctional = true;
                 newLexicons = newLexicons.concat(searched);
-                // sort((a, b) => b.inputCount - a.inputCount);
             }
         } else {
             this.prepareStore();
+            if (this.memory) {
+                const memoryLexicons = InputMemory.search(keys, this.memory);
+                const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
+                newLexicons = [...memoryLexicons, ...fallbackLexicons];
+            } else {
+                this.prepareMemory();
+            }
         }
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
