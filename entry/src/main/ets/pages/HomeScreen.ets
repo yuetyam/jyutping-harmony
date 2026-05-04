@@ -287,25 +287,15 @@ export struct HomeScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
-                /*
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.guide_abbreviated_input_heading"))
-                            .fontWeight(FontWeight.Bold)
+                        Text($r("app.string.guide_abbreviated_input_heading")).fontWeight(FontWeight.Bold)
                     }
-
-                    ListItem() {
-                        Divider()
-                    }
-
+                    ListItem() { Divider() }
                     ListItem() {
                         Text($r('app.string.guide_abbreviated_input_body_row1'))
                     }
-
-                    ListItem() {
-                        Divider()
-                    }
-
+                    ListItem() { Divider() }
                     ListItem() {
                         Text($r('app.string.guide_abbreviated_input_body_row2'))
                     }
@@ -316,14 +306,9 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r('app.string.guide_pinyin_reverse_lookup_heading'))
-                            .fontWeight(FontWeight.Bold)
+                        Text($r('app.string.guide_pinyin_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
                     }
-
-                    ListItem() {
-                        Divider()
-                    }
-
+                    ListItem() { Divider() }
                     ListItem() {
                         Text($r('app.string.guide_pinyin_reverse_lookup_body'))
                     }
@@ -332,6 +317,7 @@ export struct HomeScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                /*
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
                         Text($r('app.string.guide_cangjie_reverse_lookup_heading'))
