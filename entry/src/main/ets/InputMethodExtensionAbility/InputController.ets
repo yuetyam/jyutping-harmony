@@ -399,7 +399,7 @@ export class InputController {
             const segmentation = Segmenter.segment(keys, this.store);
             if (this.memory) {
                 if (this.isCoreStoreFunctional) {
-                    newLexicons = InputMemory.suggest(keys, segmentation, this.memory);
+                    newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.store);
                 } else {
                     const memoryLexicons = InputMemory.search(keys, this.memory);
                     const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
