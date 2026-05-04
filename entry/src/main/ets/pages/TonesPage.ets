@@ -21,7 +21,7 @@ export struct TonesPage {
                 .padding({ left: 8, right: 8 })
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
-                        ToneLabel({ word: "分", syllable: "fan1", name: "陰平", value: "55 / 53" })
+                        ToneLabel({ word: "芬", syllable: "fan1", name: "陰平", value: "55 / 53" })
                     }
                     ListItem() { Divider() }
                     ListItem() {

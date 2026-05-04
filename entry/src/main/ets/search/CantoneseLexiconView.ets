@@ -17,7 +17,7 @@ export struct CantoneseLexiconView {
             if (this.lexicon?.unihanDefinition) {
                 Divider()
                 Row({ space: 2 }) {
-                    Text("英文")
+                    Text("英語")
                         .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()

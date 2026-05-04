@@ -163,7 +163,7 @@ export struct ExpressionsPage {
                 .borderRadius(this.groupBorderRadius)
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
-                        Text("區分【諗】以及【冧】").fontWeight(FontWeight.Bold)
+                        Text("區分【諗】【冧】【霖】").fontWeight(FontWeight.Bold)
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -175,11 +175,19 @@ export struct ExpressionsPage {
                     }
                     ListItem() { Divider() }
                     ListItem() {
+                        Text("霖 lam4 : 本義連綿落雨，多見於人名")
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
                         Text("例：我諗緊今晚食咩。")
                     }
                     ListItem() { Divider() }
                     ListItem() {
                         Text("例：佢畀人㨃冧咗。")
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text("例：甘霖時雨。")
                     }
                 }
                 .padding(8)

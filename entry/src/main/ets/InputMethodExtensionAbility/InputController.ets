@@ -308,8 +308,8 @@ export class InputController {
     onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
         try {
-            let defaultDisplay = display.getDefaultDisplaySync();
-            this.initWindow(defaultDisplay)
+            const defaultDisplay = display.getDefaultDisplaySync();
+            this.initWindow(defaultDisplay);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to getDefaultDisplaySync(), message: " + err.message + ", code: " + err.code);
@@ -566,22 +566,13 @@ export class InputController {
 
     @Trace keyHeight: Length = 53;
     @Trace keyboardHeight: Length = 268;
+    @Trace isPhoneLandscape: boolean | undefined = undefined;
     private initWindow(screen: display.Display) {
         if(this.ctx === undefined) {
             return;
         }
-        let displayWidth = screen.width;
-        let displayHeight = screen.height;
-        let density = screen.scaledDensity;
-        const widthInPoint = displayWidth / density;
-        const keyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
-        const toolBarHeight = 56;
-        const keyboardHeight = (keyHeight * 4) + toolBarHeight;
-        this.keyHeight = keyHeight;
-        this.keyboardHeight = keyboardHeight;
-        const panelHeight = keyboardHeight * density;
-        const nonBarPosition = displayHeight - panelHeight;
-        let panelInfo: inputMethodEngine.PanelInfo = {
+        const panelHeight = this.responsiveKeyboard(screen);
+        const panelInfo: inputMethodEngine.PanelInfo = {
             type: inputMethodEngine.PanelType.SOFT_KEYBOARD,
             flag: inputMethodEngine.PanelFlag.FLG_FIXED
         };
@@ -589,12 +580,31 @@ export class InputController {
             .then(async (inputPanel: inputMethodEngine.Panel) => {
                 this.panel = inputPanel;
                 if(this.panel) {
-                    await this.panel.resize(displayWidth, panelHeight);
-                    await this.panel.moveTo(0, nonBarPosition);
+                    await this.panel.resize(screen.width, panelHeight);
                     await this.panel.setUiContent('InputMethodExtensionAbility/pages/Index');
                 }
             })
             .catch(() => { console.error("Failed to createPanel()"); });
+    }
+    private responsiveKeyboard(screen: display.Display): number | undefined {
+        const displayWidth = screen.width;
+        const displayHeight = screen.height;
+        const density = screen.scaledDensity;
+        const widthInPoint = displayWidth / density;
+        const heightInPoint = displayHeight / density;
+        const minDimension = Math.min(widthInPoint, heightInPoint);
+        const isLandscape = (widthInPoint > heightInPoint) && (minDimension < 500);
+        if (this.isPhoneLandscape === isLandscape) {
+            return;
+        }
+        this.isPhoneLandscape = isLandscape;
+        const toolBarHeight = 56;
+        const landscapeKeyHeight = 36;
+        const portraitKeyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
+        this.keyHeight = isLandscape ? landscapeKeyHeight : portraitKeyHeight;
+        this.keyboardHeight = (this.keyHeight * 4) + toolBarHeight;
+        const panelHeight = this.keyboardHeight * density;
+        return panelHeight;
     }
 
     private registerListener() {
@@ -605,6 +615,17 @@ export class InputController {
                 this.isTextPreviewSupported = this.attribute.isTextPreviewSupported;
             } catch (error) {
                 console.error("Failed to getEditorAttributeSync()");
+            }
+            try {
+                const screen = display.getDefaultDisplaySync();
+                const panelHeight = this.responsiveKeyboard(screen);
+                if (panelHeight) {
+                    this.panel?.resize(screen.width, panelHeight);
+                    this.panel?.setUiContent('InputMethodExtensionAbility/pages/Index');
+                }
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error(`Failed to responsive keyboard, error: ${err.message}}, code: ${err.code}}`);
             }
             this.keyboardController = kbController;
         })

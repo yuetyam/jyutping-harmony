@@ -37,6 +37,18 @@ export default class EntryAbility extends UIAbility {
                 console.error(`Failed to set the window layout to full-screen mode. Code is ${err.code}, message is ${err.message}`);
             });
 
+            try {
+                const orientation = window.Orientation.AUTO_ROTATION;
+                windowClass.setPreferredOrientation(orientation, (err) => {
+                    if (err.code) {
+                        console.error('Failed to set window orientation. Cause: ' + JSON.stringify(err));
+                    }
+                    console.debug('Succeeded in setting window orientation.');
+                });
+            } catch (exception) {
+                console.error('Failed to set window orientation. Cause: ' + JSON.stringify(exception));
+            }
+
             let type = window.AvoidAreaType.TYPE_SYSTEM;
             let avoidArea = windowClass.getWindowAvoidArea(type);
             let topRectHeight = avoidArea.topRect.height;
