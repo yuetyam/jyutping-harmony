@@ -377,29 +377,32 @@ export class Researcher {
             ...fullInput,
             ...notIdealQueried,
         ]);
+        const sliceMatched = segmentation.length < 1 ? Researcher.processSlices(keys, text, store, tailSyllableCache) : [];
         if (fetched.length < 1) {
-            return Researcher.processSlices(keys, text, store, tailSyllableCache);
+            return sliceMatched;
         }
-        if (fetched[0].inputCount >= inputLength) {
-            return fetched;
+        const sliceFallback = sliceMatched.filter((item) => item.inputCount < inputLength);
+        const mergedFetched = sliceFallback.length < 1 ? fetched : Researcher.distinctLexicons([...fetched, ...sliceFallback]);
+        if (mergedFetched[0].inputCount >= inputLength) {
+            return mergedFetched;
         }
         if (inputLength > Researcher.maxConcatenatedInputLength) {
-            return fetched;
+            return mergedFetched;
         }
-        const headInputLengths = Researcher.distinctNumbers(fetched.map((item) => item.inputCount)).slice(0, 1);
+        const headInputLengths = Researcher.distinctNumbers(mergedFetched.map((item) => item.inputCount)).slice(0, 1);
         const concatenated = Researcher.sortLexicons(
             Researcher.distinctLexicons(headInputLengths.flatMap((headLength) => {
                 const tailKeys = keys.slice(headLength);
                 const tailSegmentation = Segmenter.segment(tailKeys, store);
                 const tailLexicon = Researcher.search(tailKeys, tailSegmentation, store)[0];
-                const headLexicon = fetched.find((item) => item.inputCount === headLength);
+                const headLexicon = mergedFetched.find((item) => item.inputCount === headLength);
                 if (tailLexicon === undefined || headLexicon === undefined) {
                     return [];
                 }
                 return [Researcher.concatenateLexicons(headLexicon, tailLexicon)];
             }))
         ).slice(0, 1);
-        return [...concatenated, ...fetched];
+        return [...concatenated, ...mergedFetched];
     }
 
     private static query(inputLength: number, segmentation: Segmentation, store: relationalStore.RdbStore): Lexicon[] {

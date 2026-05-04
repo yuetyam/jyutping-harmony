@@ -309,20 +309,35 @@ export class InputMemory {
             return InputMemory.strictMatch(spellCode, shortcutCode, text, store, InputMemory.schemeMark(scheme), InputMemory.defaultStrictLimit);
         });
         const queried = InputMemory.query(segmentation, idealSchemes, deepSearch, store);
+        const partialMatched = deepSearch ?
+            InputMemory.partialMatch(keys, text, inputLength, segmentation, idealSchemes, store, syllableStore, tailSyllableCache) :
+            [];
+        const partialFallback = segmentation.length < 1 ?
+            partialMatched.filter((item) => item.inputCount < inputLength) :
+            [];
         if (fullMatched.length > 0 || idealQueried.length > 0) {
-            return [...InputMemory.idealLexicons([...fullMatched, ...idealQueried], inputLength), ...queried];
+            return [...InputMemory.idealLexicons([...fullMatched, ...idealQueried], inputLength), ...partialFallback, ...queried];
         }
         const shortcuts = InputMemory.shortcutMatch(text, text, store, 5);
         if (shortcuts.length > 0) {
-            return [...InputMemory.idealLexicons(shortcuts, inputLength), ...queried];
+            return [...InputMemory.idealLexicons(shortcuts, inputLength), ...partialFallback, ...queried];
         }
         if (!deepSearch) {
             return queried;
         }
-        const shouldPartiallyMatch = inputLength <= InputMemory.maxPartialInputLength && (idealSchemes.length < 1 || keys[0] === VirtualInputKey.letterM ||
-            keys[inputLength - 1] === VirtualInputKey.letterM);
-        if (!shouldPartiallyMatch) {
+        if (partialMatched.length < 1) {
             return queried;
+        }
+        return [...partialMatched, ...queried];
+    }
+
+    private static partialMatch(keys: VirtualInputKey[], text: string, inputLength: number, segmentation: Segmentation,
+        idealSchemes: Scheme[], store: relationalStore.RdbStore, syllableStore: relationalStore.RdbStore,
+        tailSyllableCache: Record<string, string>): Lexicon[] {
+        const shouldPartiallyMatch = inputLength <= InputMemory.maxPartialInputLength && (idealSchemes.length < 1 ||
+            keys[0] === VirtualInputKey.letterM || keys[inputLength - 1] === VirtualInputKey.letterM);
+        if (!shouldPartiallyMatch) {
+            return [];
         }
         const prefixMatched: InternalLexicon[] = segmentation.flatMap((scheme) => {
             if (scheme.length < 1) {
@@ -394,10 +409,9 @@ export class InputMemory {
                 const tailText = InputMemory.keysText(tail);
                 return lastSyllable.startsWith(tailText) ? [converted] : [];
             });
-        const partialMatched = InputMemory.distinctInternalLexicons(
+        return InputMemory.distinctInternalLexicons(
             InputMemory.advancedSort([...prefixMatched, ...gainedMatched], inputLength)
         ).slice(0, 5).map((item) => InputMemory.toLexicon(item, -1));
-        return [...partialMatched, ...queried];
     }
 
     private static query(segmentation: Segmentation, idealSchemes: Scheme[], deepSearch: boolean,
