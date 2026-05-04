@@ -19,6 +19,8 @@ import { Converter } from './model/Converter';
 import { HapticEffectId, HapticType } from './model/HapticType';
 import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
+import { PinyinResearcher } from './model/PinyinResearcher';
+import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { Segmenter } from './model/Segmenter';
 
 @ObservedV2
@@ -386,48 +388,59 @@ export class InputController {
             return;
         }
         const previewText = this.joinedBufferTexts();
-        if (this.isTextPreviewSupported) {
-            this.inputClient?.setPreviewText(previewText, { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
-        } else {
-            this.inlinePreEditText = previewText;
-        }
+        this.updatePreviewText(previewText);
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         const keys = this.bufferEvents.map(event => event.key);
+        const isPinyinReverseLookup = this.isPinyinReverseLookup(keys);
+        const reverseLookupKeys = isPinyinReverseLookup ? keys.slice(1) : [];
+        let pinyinSegmentation: PinyinSegmentation = [];
         if (this.store) {
-            const segmentation = Segmenter.segment(keys, this.store);
-            if (this.memory) {
-                if (this.isCoreStoreFunctional) {
-                    newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.store);
-                } else {
-                    const memoryLexicons = InputMemory.search(keys, this.memory);
-                    const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
-                    newLexicons = [...memoryLexicons, ...fallbackLexicons];
+            if (isPinyinReverseLookup) {
+                pinyinSegmentation = PinyinSegmenter.segment(reverseLookupKeys, this.store);
+                newLexicons = PinyinResearcher.suggest(reverseLookupKeys, pinyinSegmentation, this.store);
+                if (newLexicons.length > 0) {
+                    this.isCoreStoreFunctional = true;
                 }
             } else {
-                this.prepareMemory();
-            }
-            const searched = await Researcher.suggest(keys, segmentation, this.store);
-            if (searched.length > 0) {
-                this.isCoreStoreFunctional = true;
-                newLexicons = newLexicons.concat(searched);
+                const segmentation = Segmenter.segment(keys, this.store);
+                if (this.memory) {
+                    if (this.isCoreStoreFunctional) {
+                        newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.store);
+                    } else {
+                        const memoryLexicons = InputMemory.search(keys, this.memory);
+                        const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
+                        newLexicons = [...memoryLexicons, ...fallbackLexicons];
+                    }
+                } else {
+                    this.prepareMemory();
+                }
+                const searched = await Researcher.suggest(keys, segmentation, this.store);
+                if (searched.length > 0) {
+                    this.isCoreStoreFunctional = true;
+                    newLexicons = newLexicons.concat(searched);
+                }
             }
         } else {
             this.prepareStore();
-            if (this.memory) {
+            if (!isPinyinReverseLookup && this.memory) {
                 const memoryLexicons = InputMemory.search(keys, this.memory);
                 const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
                 newLexicons = [...memoryLexicons, ...fallbackLexicons];
-            } else {
+            } else if (!isPinyinReverseLookup) {
                 this.prepareMemory();
             }
         }
+        if (isPinyinReverseLookup) {
+            this.updatePreviewText(this.buildPinyinReverseLookupPreview(previewText, reverseLookupKeys, pinyinSegmentation, newLexicons));
+        }
+        const conversionStore = isPinyinReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
                 type: CandidateType.Cantonese,
-                text: needsConversion ? Converter.convert(item.text, true, (this.isCoreStoreFunctional ? this.store : this.memory)) : item.text,
+                text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
                 comment: item.romanization,
                 lexicon: item,
                 number: index,
@@ -440,39 +453,79 @@ export class InputController {
         return this.bufferEvents.map(event => KeyboardCaseCompanion.isLowercased(event.kbCase) ? event.key.text : event.key.text.toUpperCase()).join("");
     }
 
+    private updatePreviewText(text: string) {
+        if (this.isTextPreviewSupported) {
+            this.inputClient?.setPreviewText(text, { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
+        } else {
+            this.inlinePreEditText = text;
+        }
+    }
+
+    private isPinyinReverseLookup(keys: VirtualInputKey[]): boolean {
+        return keys.length > 0 && keys[0] === VirtualInputKey.letterR;
+    }
+
+    private buildPinyinReverseLookupPreview(bufferText: string, keys: VirtualInputKey[], segmentation: PinyinSegmentation,
+        lexicons: Lexicon[]): string {
+        if (lexicons.length < 1) {
+            return bufferText;
+        }
+        const first = lexicons[0];
+        const prefix = bufferText.slice(0, 1);
+        const reverseText = bufferText.slice(1);
+        if (first.inputCount === keys.length) {
+            return `${prefix} ${(first.mark ?? reverseText)}`.trim();
+        }
+        const bestScheme = segmentation[0];
+        if (bestScheme === undefined) {
+            return bufferText;
+        }
+        const leadingLength = PinyinSegmenter.schemeLength(bestScheme);
+        if (leadingLength >= keys.length) {
+            return `${prefix} ${PinyinSegmenter.schemeMark(bestScheme)}`.trim();
+        }
+        const tail = reverseText.slice(leadingLength);
+        return `${prefix} ${PinyinSegmenter.schemeMark(bestScheme)} ${tail}`.trim();
+    }
+
     selectCandidateBy(index: number) {
         if (this.candidates.length > index) {
-            const selected = this.candidates[index];
-            const text = selected.text;
-            this.insert(text);
-            this.selectedCandidates.push(selected);
-            const inputLength = selected.lexicon.inputCount;
-            this.bufferEvents.splice(0, inputLength);
-            if (this.bufferEvents.length < 1) {
-                if (this.memory) {
-                    InputMemory.process(this.selectedCandidates, this.memory);
-                }
-                this.selectedCandidates = [];
-            }
-            this.runInputSession();
+            this.consumeCandidate(this.candidates[index]);
         }
     }
     selectCandidate(selected: Candidate) {
         const candidate = this.candidates.find((item) => item.text === selected.text && item.comment === selected.comment);
         if (candidate) {
-            const text = candidate.text;
-            this.insert(text);
-            this.selectedCandidates.push(candidate);
-            const inputLength = candidate.lexicon.inputCount;
-            this.bufferEvents.splice(0, inputLength);
-            if (this.bufferEvents.length < 1) {
-                if (this.memory) {
-                    InputMemory.process(this.selectedCandidates, this.memory);
-                }
-                this.selectedCandidates = [];
-            }
-            this.runInputSession();
+            this.consumeCandidate(candidate);
         }
+    }
+
+    private consumeCandidate(candidate: Candidate) {
+        this.insert(candidate.text);
+        if (this.isPinyinReverseLookup(this.bufferEvents.map((event) => event.key))) {
+            this.selectedCandidates = [];
+            let tailEvents = this.bufferEvents.slice(candidate.lexicon.inputCount + 1);
+            while (tailEvents.length > 0 && tailEvents[0].key.isApostrophe) {
+                tailEvents = tailEvents.slice(1);
+            }
+            if (tailEvents.length < 1) {
+                this.clearBuffer();
+                return;
+            }
+            this.bufferEvents = [this.bufferEvents[0], ...tailEvents];
+            this.runInputSession();
+            return;
+        }
+        this.selectedCandidates.push(candidate);
+        const inputLength = candidate.lexicon.inputCount;
+        this.bufferEvents.splice(0, inputLength);
+        if (this.bufferEvents.length < 1) {
+            if (this.memory) {
+                InputMemory.process(this.selectedCandidates, this.memory);
+            }
+            this.selectedCandidates = [];
+        }
+        this.runInputSession();
     }
     process(text: string) {
         this.inputClient?.insertText(text).catch(() => {

@@ -14,6 +14,8 @@
 - `entry/src/main/module.json5`: declares `EntryAbility`, `EntryBackupAbility`, and `InputMethodExtensionAbility`.
 - `entry/src/main/ets/pages/`: tabbed app screens such as Home, Romanization, Cantonese lookup, About, and Privacy.
 - `entry/src/main/ets/InputMethodExtensionAbility/`: keyboard runtime. `InputController.ets` is the main coordination point for panel lifecycle, candidates, preferences, audio, haptics, and database access.
+- `entry/src/main/ets/InputMethodExtensionAbility/model/PinyinSegmenter.ets`: segments `r`-prefixed Mandarin Pinyin reverse-lookup input against `pinyin_syllable_table`.
+- `entry/src/main/ets/InputMethodExtensionAbility/model/PinyinResearcher.ets`: queries `pinyin_lexicon`, then maps matched Hanzi back through `core_lexicon` so candidates still show Jyutping comments.
 - `entry/src/main/ets/search/`: SQLite-backed Cantonese/Jyutping lookup helpers and view models.
 - `entry/src/main/resources/`: colors, localized strings, raw assets, route/profile JSON, and bundled SQLite databases.
 - `entry/src/test/`: local Hypium tests.
@@ -61,6 +63,8 @@
   - keyboard layout switching
   - audio and haptic feedback
   - database bootstrapping
+- Pinyin reverse lookup is triggered by a leading `r` in the IME buffer. `InputController.ets` strips that trigger before querying, but candidate selection must still consume the leading trigger plus the matched Pinyin span from the live buffer.
+- The reverse-lookup modes are not interchangeable: `r` is Pinyin, `v` is Cangjie/Quick-family, `x` is stroke, and `q` is structure. Keep the controller branching and buffer-consumption rules aligned with the trigger.
 - Keyboard settings are stored in `kbsettings` preferences with keys such as `audio`, `haptic`, and `charset`.
 - The main app privacy gate uses a separate shared preference value (`privacy`) in `pages/Index.ets` and `pages/PrivacyScreen.ets`.
 - When changing persisted keys or value semantics, add a migration path or preserve backward compatibility.
@@ -70,6 +74,7 @@
 - Bundled databases live in `entry/src/main/resources/resfile/`, including:
   - `imedb.sqlite3`
   - `appdb.sqlite3`
+- `imedb.sqlite3` now carries the Pinyin reverse-lookup tables used by the HarmonyOS IME, including `pinyin_lexicon` and `pinyin_syllable_table` alongside the existing Cantonese lookup tables.
 - `InputController.ets` copies the IME database into the app database directory using a **versioned filename** (`imedb-20260311-tmp.sqlite3` at the time of writing).
 - That version string is coupled across:
   - `copyKeyboardDatabase(...)`
