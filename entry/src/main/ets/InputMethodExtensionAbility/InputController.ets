@@ -416,10 +416,10 @@ export class InputController {
                 } else {
                     this.prepareMemory();
                 }
-                const searched = await Researcher.suggest(keys, segmentation, this.store);
-                if (searched.length > 0) {
+                const queried = await Researcher.suggest(keys, segmentation, this.store);
+                if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
-                    newLexicons = newLexicons.concat(searched);
+                    newLexicons = Converter.dispatch(newLexicons, queried);
                 }
             }
         } else {
