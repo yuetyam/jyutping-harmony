@@ -23,14 +23,18 @@
 
 ## Tooling expectations
 
-- There is **no** `.editorconfig`, **no** npm script entrypoint, and **no** checked-in `hvigorw` wrapper.
+- The repo has a checked-in `.editorconfig` plus repo-owned `hvigorw` / `hvigorw.bat` wrappers for command-line builds.
+- There is still **no** npm script entrypoint; build orchestration stays in Hvigor config rather than package scripts.
 - Build configuration lives in:
   - `build-profile.json5`
   - `hvigorfile.ts`
   - `entry/build-profile.json5`
   - `entry/hvigorfile.ts`
 - Prefer DevEco Studio for build/run/test tasks unless the environment already has HarmonyOS CLI tools installed.
-- If using CLI, first confirm `ohpm`/`hvigor` exist on the host; do not invent replacement scripts.
+- For CLI builds, prefer the checked-in wrapper:
+  - `./hvigorw clean assembleHap -p product=default -p buildMode=debug`
+  - If DevEco Studio is not in a common install location, set `DEVECO_STUDIO_HOME` to the app `Contents` directory first.
+- If you bypass the wrapper, first confirm `hvigor` exists on the host; do not invent replacement scripts.
 - Keep `code-linter.json5` in mind: linting targets `**/*.ets` and explicitly ignores `src/test`, `src/ohosTest`, `src/mock`, `oh_modules`, and build outputs.
 
 ## Code style and conventions
@@ -75,7 +79,7 @@
   - `imedb.sqlite3`
   - `appdb.sqlite3`
 - `imedb.sqlite3` now carries the Pinyin reverse-lookup tables used by the HarmonyOS IME, including `pinyin_lexicon` and `pinyin_syllable_table` alongside the existing Cantonese lookup tables.
-- `InputController.ets` copies the IME database into the app database directory using a **versioned filename** (`imedb-20260311-tmp.sqlite3` at the time of writing).
+- `InputController.ets` copies the IME database into the app database directory using a **versioned filename** (`imedb-20260505-tmp.sqlite3` at the time of writing).
 - That version string is coupled across:
   - `copyKeyboardDatabase(...)`
   - `obtainStore()`

@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PROJECT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
+
+find_node() {
+    if [ -n "${NODE_BIN:-}" ] && [ -x "${NODE_BIN}" ]; then
+        printf "%s\n" "${NODE_BIN}"
+        return 0
+    fi
+
+    if command -v node >/dev/null 2>&1; then
+        command -v node
+        return 0
+    fi
+
+    for candidate in \
+        "${HOME}/Applications/DevEco-Studio.app/Contents/tools/node/bin/node" \
+        "/Applications/DevEco-Studio.app/Contents/tools/node/bin/node"
+    do
+        if [ -x "${candidate}" ]; then
+            printf "%s\n" "${candidate}"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+run_deveco_hvigor() {
+    local studio_home="$1"
+    local node_bin="${studio_home}/tools/node/bin/node"
+    local hvigor_bin="${studio_home}/tools/hvigor/bin/hvigorw.js"
+
+    if [ ! -x "${node_bin}" ] || [ ! -f "${hvigor_bin}" ]; then
+        return 1
+    fi
+
+    export DEVECO_STUDIO_HOME="${studio_home}"
+    if [ -z "${DEVECO_SDK_HOME:-}" ] && [ -d "${studio_home}/sdk" ]; then
+        export DEVECO_SDK_HOME="${studio_home}/sdk"
+    fi
+
+    cd "${PROJECT_DIR}"
+    exec "${node_bin}" "${hvigor_bin}" "$@"
+}
+
+run_local_hvigor() {
+    local hvigor_js="$1"
+    local node_bin
+
+    node_bin="$(find_node)" || return 1
+
+    cd "${PROJECT_DIR}"
+    exec "${node_bin}" "${hvigor_js}" "$@"
+}
+
+if [ -n "${HVIGOR_BIN:-}" ] && [ -x "${HVIGOR_BIN}" ]; then
+    cd "${PROJECT_DIR}"
+    exec "${HVIGOR_BIN}" "$@"
+fi
+
+if [ -n "${DEVECO_STUDIO_HOME:-}" ] && [ -d "${DEVECO_STUDIO_HOME}" ]; then
+    if [ -x "${DEVECO_STUDIO_HOME}/tools/node/bin/node" ] && [ -f "${DEVECO_STUDIO_HOME}/tools/hvigor/bin/hvigorw.js" ]; then
+        run_deveco_hvigor "${DEVECO_STUDIO_HOME}" "$@"
+    fi
+fi
+
+for studio_home in \
+    "${HOME}/Applications/DevEco-Studio.app/Contents" \
+    "/Applications/DevEco-Studio.app/Contents"
+do
+    if [ -d "${studio_home}" ] && [ -x "${studio_home}/tools/node/bin/node" ] && [ -f "${studio_home}/tools/hvigor/bin/hvigorw.js" ]; then
+        run_deveco_hvigor "${studio_home}" "$@"
+    fi
+done
+
+if command -v hvigor >/dev/null 2>&1; then
+    cd "${PROJECT_DIR}"
+    exec hvigor "$@"
+fi
+
+for hvigor_js in \
+    "${PROJECT_DIR}/oh_modules/@ohos/hvigor/bin/hvigor.js" \
+    "${PROJECT_DIR}/node_modules/@ohos/hvigor/bin/hvigor.js"
+do
+    if [ -f "${hvigor_js}" ]; then
+        run_local_hvigor "${hvigor_js}" "$@"
+    fi
+done
+
+echo "Error: unable to find a usable HarmonyOS hvigor toolchain." >&2
+echo "Set DEVECO_STUDIO_HOME to your DevEco Studio Contents directory," >&2
+echo "or put hvigor on PATH before running this wrapper." >&2
+exit 1
