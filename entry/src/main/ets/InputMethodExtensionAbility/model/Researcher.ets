@@ -483,7 +483,8 @@ export class Researcher {
                 const rowID = res.getLong(0);
                 const word = res.getString(1);
                 const romanization = res.getString(2);
-                lexicons.push(Researcher.makeLexicon(word, romanization, input, inputCount, rowID, mark ?? input));
+                const markText: string = mark ?? Researcher.stripTones(romanization);
+                lexicons.push(Researcher.makeLexicon(word, romanization, input, inputCount, rowID, markText));
             }
         } catch (error) {
             const err: BusinessError = error as BusinessError;
@@ -504,7 +505,8 @@ export class Researcher {
                 const rowID = res.getLong(0);
                 const word = res.getString(1);
                 const romanization = res.getString(2);
-                lexicons.push(Researcher.makeLexicon(word, romanization, input, inputCount, rowID, mark ?? input));
+                const markText: string = mark ?? Researcher.stripTones(romanization);
+                lexicons.push(Researcher.makeLexicon(word, romanization, input, inputCount, rowID, markText));
             }
         } catch (error) {
             const err: BusinessError = error as BusinessError;

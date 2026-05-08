@@ -21,7 +21,7 @@ import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
 import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
-import { Segmenter } from './model/Segmenter';
+import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
 
 @ObservedV2
 export class InputController {
@@ -387,12 +387,11 @@ export class InputController {
             }
             return;
         }
-        const previewText = this.joinedBufferTexts();
-        this.updatePreviewText(previewText);
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         const keys = this.bufferEvents.map(event => event.key);
+        let segmentation: Segmentation = [];
         const isPinyinReverseLookup = this.isPinyinReverseLookup(keys);
         const reverseLookupKeys = isPinyinReverseLookup ? keys.slice(1) : [];
         let pinyinSegmentation: PinyinSegmentation = [];
@@ -404,7 +403,7 @@ export class InputController {
                     this.isCoreStoreFunctional = true;
                 }
             } else {
-                const segmentation = Segmenter.segment(keys, this.store);
+                segmentation = Segmenter.segment(keys, this.store);
                 if (this.memory) {
                     if (this.isCoreStoreFunctional) {
                         newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.store);
@@ -433,7 +432,11 @@ export class InputController {
             }
         }
         if (isPinyinReverseLookup) {
-            this.updatePreviewText(this.buildPinyinReverseLookupPreview(previewText, reverseLookupKeys, pinyinSegmentation, newLexicons));
+            const text = this.joinedBufferTexts();
+            this.updatePreviewText(this.buildPinyinReverseLookupPreview(text, reverseLookupKeys, pinyinSegmentation, newLexicons));
+        } else {
+            const text = this.joinedBufferTexts();
+            this.updatePreviewText(this.buildPreviewText(text, keys, segmentation, newLexicons));
         }
         const conversionStore = isPinyinReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
@@ -459,6 +462,57 @@ export class InputController {
         } else {
             this.inlinePreEditText = text;
         }
+    }
+
+    private buildPreviewText(bufferText: string, keys: VirtualInputKey[], segmentation: Segmentation, lexicons: Lexicon[]): string {
+        if (lexicons.length < 1) {
+            return bufferText;
+        }
+        if (this.isPeculiarInput(keys)) {
+            return this.formatPreviewMark(this.toneConvertedText(bufferText));
+        }
+        const first = lexicons[0];
+        if (first.inputCount === keys.length) {
+            return first.mark ?? bufferText;
+        }
+        const bestScheme = segmentation[0];
+        if (bestScheme === undefined) {
+            return bufferText;
+        }
+        const leadingLength = this.schemeLength(bestScheme);
+        if (leadingLength >= keys.length) {
+            return this.schemeMark(bestScheme);
+        }
+        return `${this.schemeMark(bestScheme)} ${bufferText.slice(leadingLength)}`.trim();
+    }
+
+    private isPeculiarInput(keys: VirtualInputKey[]): boolean {
+        return this.bufferEvents.some((event) => KeyboardCaseCompanion.isCapitalized(event.kbCase)) || keys.some((key) => !key.isSyllableLetter);
+    }
+    private toneConvertedText(text: string): string {
+        return text
+            .replace(/vv/g, "4")
+            .replace(/xx/g, "5")
+            .replace(/qq/g, "6")
+            .replace(/v/g, "1")
+            .replace(/x/g, "2")
+            .replace(/q/g, "3");
+    }
+    private formatPreviewMark(text: string): string {
+        let result = "";
+        for (const character of text) {
+            result += character;
+            if (!/[A-Za-z]/.test(character)) {
+                result += " ";
+            }
+        }
+        return result;
+    }
+    private schemeLength(scheme: Scheme): number {
+        return scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0);
+    }
+    private schemeMark(scheme: Scheme): string {
+        return scheme.map((syllable) => syllable.alias.map((key) => key.text).join("")).join(" ");
     }
 
     private isPinyinReverseLookup(keys: VirtualInputKey[]): boolean {
