@@ -2,7 +2,7 @@ import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
-import { NineKeyCombo } from "../ninekey/NineKeyCombo";
+import { Combo } from "../ninekey/Combo";
 
 class NineKeyPinyinLexicon {
     readonly text: string;
@@ -66,7 +66,7 @@ class NineKeyReverseLookupLexicon implements Lexicon {
 export class NineKeyPinyinResearcher {
     private static readonly concatenationStep: number = 1000000;
 
-    static suggest(combos: NineKeyCombo[], store: relationalStore.RdbStore): Lexicon[] {
+    static suggest(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
         if (combos.length < 1 || combos.some((combo) => combo.isSpecial)) {
             return [];
         }
@@ -76,9 +76,9 @@ export class NineKeyPinyinResearcher {
         );
     }
 
-    private static search(combos: NineKeyCombo[], store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
+    private static search(combos: Combo[], store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
         const inputLength = combos.length;
-        const fullCode = NineKeyPinyinResearcher.codeText(combos);
+        const fullCode = NineKeyPinyinResearcher.combinedCode(combos);
         if (inputLength < 2) {
             return NineKeyPinyinResearcher.distinctPinyinLexicons([
                 ...NineKeyPinyinResearcher.codeMatch(fullCode, -1, store),
@@ -88,11 +88,11 @@ export class NineKeyPinyinResearcher {
         const fullMatched = NineKeyPinyinResearcher.codeMatch(fullCode, -1, store);
         const idealAnchorsMatched = NineKeyPinyinResearcher.anchorsMatch(fullCode, 4, store);
         const codeMatched = NineKeyPinyinResearcher.descendingTailCounts(inputLength).flatMap((tailCount) => {
-            const code = NineKeyPinyinResearcher.codeText(combos.slice(0, inputLength - tailCount));
+            const code = NineKeyPinyinResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
             return NineKeyPinyinResearcher.codeMatch(code, -1, store);
         });
         const anchorsMatched = NineKeyPinyinResearcher.trailingInclusiveTailCounts(inputLength).flatMap((tailCount) => {
-            const code = NineKeyPinyinResearcher.codeText(combos.slice(0, inputLength - tailCount));
+            const code = NineKeyPinyinResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
             return NineKeyPinyinResearcher.anchorsMatch(code, -1, store);
         });
         const queried = NineKeyPinyinResearcher.distinctPinyinLexicons([
@@ -106,8 +106,8 @@ export class NineKeyPinyinResearcher {
             return queried;
         }
         const tailCombos = combos.slice(head.inputCount);
-        const tailCode = NineKeyPinyinResearcher.codeText(tailCombos);
-        if (tailCode.length < 1) {
+        const tailCode = NineKeyPinyinResearcher.combinedCode(tailCombos);
+        if (tailCode < 1n) {
             return queried;
         }
         const tailLexicons = [
@@ -138,8 +138,12 @@ export class NineKeyPinyinResearcher {
         return values;
     }
 
-    private static codeText(combos: NineKeyCombo[]): string {
-        return combos.map((combo) => combo.digit).join("");
+    private static combinedCode(combos: Combo[]): number {
+        if (combos.length > 15) {
+            return 0;
+        } else {
+            return combos.reduce((acc, combo) => acc * 10 + combo.digit, 0);
+        }
     }
 
     private static makePinyinLexicon(text: string, pinyin: string, input: string, mark: string, order: number): NineKeyPinyinLexicon {
@@ -157,13 +161,12 @@ export class NineKeyPinyinResearcher {
         );
     }
 
-    private static anchorsMatch(code: string, limit: number, store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
-        if (code.length < 1) {
+    private static anchorsMatch(code: number, limit: number, store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
+        if (code < 1) {
             return [];
         }
         const items: NineKeyPinyinLexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon " +
-            "WHERE nine_key_anchors = CAST(? AS INTEGER) ORDER BY rowid LIMIT ?;";
+        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE nine_key_anchors = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -181,13 +184,12 @@ export class NineKeyPinyinResearcher {
         return items;
     }
 
-    private static codeMatch(code: string, limit: number, store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
-        if (code.length < 1) {
+    private static codeMatch(code: number, limit: number, store: relationalStore.RdbStore): NineKeyPinyinLexicon[] {
+        if (code < 1) {
             return [];
         }
         const items: NineKeyPinyinLexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon " +
-            "WHERE nine_key_code = CAST(? AS INTEGER) ORDER BY rowid LIMIT ?;";
+        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE nine_key_code = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -255,7 +257,7 @@ export class NineKeyPinyinResearcher {
 
     private static matchWord(text: string, store: relationalStore.RdbStore): NineKeyRomanizationMatch[] {
         const matches: NineKeyRomanizationMatch[] = [];
-        const command = "SELECT rowid, romanization FROM core_lexicon WHERE word = ? ORDER BY rowid;";
+        const command = "SELECT rowid, romanization FROM core_lexicon WHERE word = ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [text]);

@@ -2,7 +2,7 @@ import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
-import { NineKeyCombo } from "../ninekey/NineKeyCombo";
+import { Combo } from "../ninekey/Combo";
 
 class NineKeyCandidateLexicon implements Lexicon {
     readonly type: LexiconType;
@@ -28,7 +28,7 @@ class NineKeyCandidateLexicon implements Lexicon {
 export class NineKeyResearcher {
     private static readonly concatenationStep: number = 1000000;
 
-    static suggest(combos: NineKeyCombo[], store: relationalStore.RdbStore): Lexicon[] {
+    static suggest(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
         if (combos.length < 1 || combos.some((combo) => combo.isSpecial)) {
             return [];
         }
@@ -38,8 +38,8 @@ export class NineKeyResearcher {
             return queried;
         }
         const tailCombos = combos.slice(head.inputCount);
-        const tailCode = NineKeyResearcher.codeText(tailCombos);
-        if (tailCode.length < 1) {
+        const tailCode = NineKeyResearcher.combinedCode(tailCombos);
+        if (tailCode < 1) {
             return queried;
         }
         const tailLexicons = [
@@ -54,9 +54,9 @@ export class NineKeyResearcher {
         return NineKeyResearcher.distinctLexicons([compound, ...queried]);
     }
 
-    private static search(combos: NineKeyCombo[], store: relationalStore.RdbStore): Lexicon[] {
+    private static search(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
         const inputLength = combos.length;
-        const fullCode = NineKeyResearcher.codeText(combos);
+        const fullCode = NineKeyResearcher.combinedCode(combos);
         if (inputLength < 2) {
             return NineKeyResearcher.distinctLexicons([
                 ...NineKeyResearcher.codeMatch(fullCode, -1, store),
@@ -66,11 +66,11 @@ export class NineKeyResearcher {
         const fullMatched = NineKeyResearcher.codeMatch(fullCode, -1, store);
         const idealAnchorsMatched = NineKeyResearcher.anchorsMatch(fullCode, 4, store);
         const codeMatched = NineKeyResearcher.descendingTailCounts(inputLength).flatMap((tailCount) => {
-            const code = NineKeyResearcher.codeText(combos.slice(0, inputLength - tailCount));
+            const code = NineKeyResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
             return NineKeyResearcher.codeMatch(code, -1, store);
         });
         const anchorsMatched = NineKeyResearcher.trailingInclusiveTailCounts(inputLength).flatMap((tailCount) => {
-            const code = NineKeyResearcher.codeText(combos.slice(0, inputLength - tailCount));
+            const code = NineKeyResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
             return NineKeyResearcher.anchorsMatch(code, -1, store);
         });
         return NineKeyResearcher.distinctLexicons([
@@ -97,8 +97,12 @@ export class NineKeyResearcher {
         return values;
     }
 
-    private static codeText(combos: NineKeyCombo[]): string {
-        return combos.map((combo) => combo.digit).join("");
+    private static combinedCode(combos: Combo[]): number {
+        if (combos.length > 15) {
+            return 0;
+        } else {
+            return combos.reduce((acc, combo) => acc * 10 + combo.digit, 0);
+        }
     }
 
     private static makeLexicon(text: string, romanization: string, input: string, number: number, mark: string): Lexicon {
@@ -120,12 +124,12 @@ export class NineKeyResearcher {
         );
     }
 
-    private static anchorsMatch(code: string, limit: number, store: relationalStore.RdbStore): Lexicon[] {
-        if (code.length < 1) {
+    private static anchorsMatch(code: number, limit: number, store: relationalStore.RdbStore): Lexicon[] {
+        if (code < 1) {
             return [];
         }
         const items: Lexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_anchors = CAST(? AS INTEGER) ORDER BY rowid LIMIT ?;";
+        const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_anchors = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -143,12 +147,12 @@ export class NineKeyResearcher {
         return items;
     }
 
-    private static codeMatch(code: string, limit: number, store: relationalStore.RdbStore): Lexicon[] {
-        if (code.length < 1) {
+    private static codeMatch(code: number, limit: number, store: relationalStore.RdbStore): Lexicon[] {
+        if (code < 1) {
             return [];
         }
         const items: Lexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_code = CAST(? AS INTEGER) ORDER BY rowid LIMIT ?;";
+        const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_code = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);

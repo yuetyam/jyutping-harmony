@@ -1,6 +1,5 @@
 import controller from "../InputController";
 import { KeyboardForm } from "../model/KeyboardForm";
-import { NineKeyCombo } from "./NineKeyCombo";
 
 @ComponentV2
 export default struct NineKeyNavigateKey {

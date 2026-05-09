@@ -1,9 +1,9 @@
 import controller from "../InputController";
-import { NineKeyCombo } from "./NineKeyCombo";
+import { Combo } from "./Combo";
 
 @ComponentV2
 export default struct NineKeyInputKey {
-    @Param @Require @Once combo: NineKeyCombo;
+    @Param @Require @Once element: Combo;
     @Local private isTouching: boolean = false;
     build() {
         Stack() {
@@ -12,7 +12,7 @@ export default struct NineKeyInputKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(this.combo.text)
+                Text(this.element.text)
                     .fontSize(16)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
@@ -42,7 +42,7 @@ export default struct NineKeyInputKey {
             }
         })
         .onClick(() => {
-            controller.handleNineKey(this.combo);
+            controller.handleNineKey(this.element);
         })
     }
 }

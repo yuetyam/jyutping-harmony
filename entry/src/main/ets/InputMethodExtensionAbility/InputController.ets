@@ -20,7 +20,7 @@ import { HapticEffectId, HapticType } from './model/HapticType';
 import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
 import { KeyboardLayout, KeyboardLayoutCompanion } from './model/KeyboardLayout';
-import { NineKeyCombo } from './ninekey/NineKeyCombo';
+import { Combo } from './ninekey/Combo';
 import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
 import { NineKeyResearcher } from './model/NineKeyResearcher';
 import { PinyinResearcher } from './model/PinyinResearcher';
@@ -378,7 +378,7 @@ export class InputController {
     private selectedCandidates: Candidate[] = [];
     @Trace isBuffering: boolean = false;
     private bufferEvents: BasicInputEvent[] = [];
-    private comboBuffer: NineKeyCombo[] = [];
+    private comboBuffer: Combo[] = [];
     get isBufferEmpty(): boolean {
         const hasBuffer = this.bufferEvents.length > 0 || this.comboBuffer.length > 0;
         if (this.isBuffering != hasBuffer) {
@@ -399,9 +399,9 @@ export class InputController {
             this.updateKeyboardCase(KeyboardCase.lowercased);
         }
     }
-    handleNineKey(combo: NineKeyCombo) {
+    handleNineKey(combo: Combo) {
         if (InputModeCompanion.isABC(this.inputMode)) {
-            this.insert(combo.leadingText);
+            this.insert(combo.leadingLetter);
             return;
         }
         this.comboBuffer.push(combo);
@@ -533,8 +533,8 @@ export class InputController {
     private joinedBufferTexts(): string {
         return this.bufferEvents.map(event => KeyboardCaseCompanion.isLowercased(event.kbCase) ? event.key.text : event.key.text.toUpperCase()).join("");
     }
-    private joinedNineKeyTexts(combos: NineKeyCombo[] = this.comboBuffer): string {
-        return combos.map((combo) => combo.leadingText).join("");
+    private joinedNineKeyTexts(combos: Combo[] = this.comboBuffer): string {
+        return combos.map((combo) => combo.leadingLetter).join("");
     }
 
     private updatePreviewText(text: string) {
@@ -622,7 +622,7 @@ export class InputController {
         const tail = reverseText.slice(leadingLength);
         return `${prefix} ${PinyinSegmenter.schemeMark(bestScheme)} ${tail}`.trim();
     }
-    private buildNineKeyPreviewText(combos: NineKeyCombo[], lexicons: Lexicon[]): string {
+    private buildNineKeyPreviewText(combos: Combo[], lexicons: Lexicon[]): string {
         const bufferText = this.joinedNineKeyTexts(combos);
         if (lexicons.length < 1) {
             return bufferText;
@@ -634,11 +634,11 @@ export class InputController {
         const tail = this.joinedNineKeyTexts(combos.slice(first.inputCount));
         return `${first.mark ?? bufferText} ${tail}`.trim();
     }
-    private isNineKeyPinyinReverseLookup(combos: NineKeyCombo[]): boolean {
+    private isNineKeyPinyinReverseLookup(combos: Combo[]): boolean {
         return combos.length > 0 && combos[0]?.isSpecial;
     }
-    private buildNineKeyPinyinReverseLookupPreview(combos: NineKeyCombo[], lexicons: Lexicon[]): string {
-        const prefix = NineKeyCombo.Special.leadingText;
+    private buildNineKeyPinyinReverseLookupPreview(combos: Combo[], lexicons: Lexicon[]): string {
+        const prefix = Combo.Special.leadingLetter;
         const reverseText = this.joinedNineKeyTexts(combos);
         if (lexicons.length < 1) {
             return combos.length < 1 ? prefix : `${prefix} ${reverseText}`.trim();

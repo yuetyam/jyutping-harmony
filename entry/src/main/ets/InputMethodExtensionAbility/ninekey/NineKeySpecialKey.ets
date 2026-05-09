@@ -1,5 +1,5 @@
 import controller from "../InputController";
-import { NineKeyCombo } from "./NineKeyCombo";
+import { Combo } from "./Combo";
 
 @ComponentV2
 export default struct NineKeySpecialKey {
@@ -45,7 +45,7 @@ export default struct NineKeySpecialKey {
         })
         .onClick(() => {
             if (!controller.isBuffering) {
-                controller.handleNineKey(NineKeyCombo.Special);
+                controller.handleNineKey(Combo.Special);
             }
         })
     }

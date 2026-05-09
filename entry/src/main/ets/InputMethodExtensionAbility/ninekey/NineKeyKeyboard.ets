@@ -1,5 +1,5 @@
 import controller from '../InputController';
-import { NineKeyCombo } from './NineKeyCombo';
+import { Combo } from './Combo';
 import { KeyboardForm } from '../model/KeyboardForm';
 import CandidateBar from '../pages/CandidateBar';
 import NineKeyInputKey from './NineKeyInputKey';
@@ -56,8 +56,8 @@ export default struct NineKeyKeyboard {
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
                                 NineKeySpecialKey().width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.ABC }).width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.DEF }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.ABC }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.DEF }).width("33.33%")
                             }
                             .height("33%")
                             Flex({
@@ -65,9 +65,9 @@ export default struct NineKeyKeyboard {
                                 alignItems: ItemAlign.Center,
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
-                                NineKeyInputKey({ combo: NineKeyCombo.GHI }).width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.JKL }).width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.MNO }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.GHI }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.JKL }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.MNO }).width("33.33%")
                             }
                             .height("33%")
                             Flex({
@@ -75,9 +75,9 @@ export default struct NineKeyKeyboard {
                                 alignItems: ItemAlign.Center,
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
-                                NineKeyInputKey({ combo: NineKeyCombo.PQRS }).width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.TUV }).width("33.33%")
-                                NineKeyInputKey({ combo: NineKeyCombo.WXYZ }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.PQRS }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.TUV }).width("33.33%")
+                                NineKeyInputKey({ element: Combo.WXYZ }).width("33.33%")
                             }
                             .height("33%")
                         }
