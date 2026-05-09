@@ -4,27 +4,6 @@ import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Combo } from "../ninekey/Combo";
 
-class NineKeyCandidateLexicon implements Lexicon {
-    readonly type: LexiconType;
-    readonly text: string;
-    readonly romanization?: string;
-    readonly input: string;
-    readonly inputCount: number;
-    readonly number: number;
-    readonly mark?: string;
-    readonly note?: string;
-
-    constructor(text: string, romanization: string, input: string, number: number, mark: string) {
-        this.type = LexiconType.Cantonese;
-        this.text = text;
-        this.romanization = romanization;
-        this.input = input;
-        this.inputCount = input.length;
-        this.number = number;
-        this.mark = mark;
-    }
-}
-
 export class NineKeyResearcher {
     private static readonly concatenationStep: number = 1000000;
 
@@ -66,12 +45,14 @@ export class NineKeyResearcher {
         const fullMatched = NineKeyResearcher.codeMatch(fullCode, -1, store);
         const idealAnchorsMatched = NineKeyResearcher.anchorsMatch(fullCode, 4, store);
         const codeMatched = NineKeyResearcher.descendingTailCounts(inputLength).flatMap((tailCount) => {
-            const code = NineKeyResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
-            return NineKeyResearcher.codeMatch(code, -1, store);
+            const leadingLength = inputLength - tailCount;
+            if (leadingLength < 2) return [] as Lexicon[];
+            const code = NineKeyResearcher.combinedCode(combos.slice(0, leadingLength));
+            return NineKeyResearcher.codeMatch(code, 100, store);
         });
         const anchorsMatched = NineKeyResearcher.trailingInclusiveTailCounts(inputLength).flatMap((tailCount) => {
             const code = NineKeyResearcher.combinedCode(combos.slice(0, inputLength - tailCount));
-            return NineKeyResearcher.anchorsMatch(code, -1, store);
+            return NineKeyResearcher.anchorsMatch(code, 30, store);
         });
         return NineKeyResearcher.distinctLexicons([
             ...fullMatched,
@@ -106,7 +87,16 @@ export class NineKeyResearcher {
     }
 
     private static makeLexicon(text: string, romanization: string, input: string, number: number, mark: string): Lexicon {
-        return new NineKeyCandidateLexicon(text, romanization, input, number, mark);
+        const instance: Lexicon = {
+            type: LexiconType.Cantonese,
+            text: text,
+            romanization: romanization,
+            input: input,
+            inputCount: input.length,
+            number: number,
+            mark: mark
+        }
+        return instance;
     }
 
     private static concatenateLexicons(lhs: Lexicon, rhs: Lexicon): Lexicon {
@@ -124,10 +114,8 @@ export class NineKeyResearcher {
         );
     }
 
-    private static anchorsMatch(code: number, limit: number, store: relationalStore.RdbStore): Lexicon[] {
-        if (code < 1) {
-            return [];
-        }
+    private static anchorsMatch(code: number, limit: number = 30, store: relationalStore.RdbStore): Lexicon[] {
+        if (code < 1) { return []; }
         const items: Lexicon[] = [];
         const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_anchors = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -148,9 +136,7 @@ export class NineKeyResearcher {
     }
 
     private static codeMatch(code: number, limit: number, store: relationalStore.RdbStore): Lexicon[] {
-        if (code < 1) {
-            return [];
-        }
+        if (code < 1) { return []; }
         const items: Lexicon[] = [];
         const command = "SELECT rowid, word, romanization FROM core_lexicon WHERE nine_key_code = ? LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
@@ -176,14 +162,14 @@ export class NineKeyResearcher {
     }
 
     private static distinctLexicons(items: Lexicon[]): Lexicon[] {
-        const handled: string[] = [];
+        const handled: Set<string> = new Set();
         const results: Lexicon[] = [];
         for (const item of items) {
             const key = NineKeyResearcher.lexiconKey(item);
-            if (handled.includes(key)) {
+            if (handled.has(key)) {
                 continue;
             }
-            handled.push(key);
+            handled.add(key);
             results.push(item);
         }
         return results;

@@ -193,7 +193,6 @@ export class InputController {
             return;
         }
         this.keyboardLayout = layout;
-        this.clearBuffer();
         this.updateKeyboardCase(KeyboardCase.lowercased);
         try {
             this.sharedPreferences?.putSync("layout", layout);
