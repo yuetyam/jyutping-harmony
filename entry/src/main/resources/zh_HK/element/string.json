@@ -231,6 +231,14 @@
     {
       "name": "keyboard_settings_feedback_haptic",
       "value": "按鍵振動"
+    },
+    {
+      "name": "keyboard_settings_layout_qwerty",
+      "value": "26鍵"
+    },
+    {
+      "name": "keyboard_settings_layout_t9",
+      "value": "9鍵"
     }
   ]
 }

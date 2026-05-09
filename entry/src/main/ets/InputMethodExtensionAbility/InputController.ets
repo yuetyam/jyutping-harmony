@@ -19,6 +19,10 @@ import { Converter } from './model/Converter';
 import { HapticEffectId, HapticType } from './model/HapticType';
 import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
+import { KeyboardLayout, KeyboardLayoutCompanion } from './model/KeyboardLayout';
+import { NineKeyCombo } from './ninekey/NineKeyCombo';
+import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
+import { NineKeyResearcher } from './model/NineKeyResearcher';
 import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
@@ -183,6 +187,25 @@ export class InputController {
         }
     }
 
+    @Trace keyboardLayout: KeyboardLayout = KeyboardLayout.Qwerty;
+    updateKeyboardLayout(layout: KeyboardLayout) {
+        if (this.keyboardLayout === layout) {
+            return;
+        }
+        this.keyboardLayout = layout;
+        this.clearBuffer();
+        this.updateKeyboardCase(KeyboardCase.lowercased);
+        try {
+            this.sharedPreferences?.putSync("layout", layout);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the keyboard layout preferences");
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the keyboard layout preferences, message: " + err.message + ", code: " + err.code);
+        }
+    }
+
     private async deleteOldDatabases(context: Context) {
         const fileNames: string[] = ["imedb-20260311-tmp.sqlite3", "imedb-20260107-tmp.sqlite3", "imedb-20251217-tmp.sqlite3", "imedb-20251129-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/ime/";
@@ -333,6 +356,8 @@ export class InputController {
             this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
             const savedCharacterStandardValue: number = this.sharedPreferences.getSync("charset", 1) as number;
             this.isMutilated = (savedCharacterStandardValue == 51);
+            const savedKeyboardLayoutValue: number = this.sharedPreferences.getSync("layout", KeyboardLayout.Qwerty) as number;
+            this.keyboardLayout = KeyboardLayoutCompanion.layoutOf(savedKeyboardLayoutValue);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
@@ -353,8 +378,9 @@ export class InputController {
     private selectedCandidates: Candidate[] = [];
     @Trace isBuffering: boolean = false;
     private bufferEvents: BasicInputEvent[] = [];
+    private comboBuffer: NineKeyCombo[] = [];
     get isBufferEmpty(): boolean {
-        const hasBuffer = this.bufferEvents.length > 0;
+        const hasBuffer = this.bufferEvents.length > 0 || this.comboBuffer.length > 0;
         if (this.isBuffering != hasBuffer) {
             this.isBuffering = hasBuffer;
         }
@@ -373,6 +399,14 @@ export class InputController {
             this.updateKeyboardCase(KeyboardCase.lowercased);
         }
     }
+    handleNineKey(combo: NineKeyCombo) {
+        if (InputModeCompanion.isABC(this.inputMode)) {
+            this.insert(combo.leadingText);
+            return;
+        }
+        this.comboBuffer.push(combo);
+        this.runInputSession();
+    }
     private isTextPreviewSupported: boolean = true;
     @Trace inlinePreEditText: string = "";
     private async runInputSession() {
@@ -385,6 +419,10 @@ export class InputController {
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Alphabetic);
             }
+            return;
+        }
+        if (this.isNineKeyActive()) {
+            this.runNineKeyInputSession();
             return;
         }
         const needsConversion: boolean = this.isMutilated;
@@ -452,8 +490,51 @@ export class InputController {
         }
         this.candidates = newCandidates;
     }
+    private isNineKeyActive(): boolean {
+        return KeyboardLayoutCompanion.isNineKey(this.keyboardLayout) && InputModeCompanion.isCantonese(this.inputMode);
+    }
+    private runNineKeyInputSession() {
+        const needsConversion: boolean = this.isMutilated;
+        const newCandidates: Candidate[] = [];
+        let newLexicons: Lexicon[] = [];
+        const combos = [...this.comboBuffer];
+        const isPinyinReverseLookup = this.isNineKeyPinyinReverseLookup(combos);
+        const reverseLookupCombos = isPinyinReverseLookup ? combos.slice(1) : [];
+        if (this.store) {
+            if (isPinyinReverseLookup) {
+                newLexicons = NineKeyPinyinResearcher.suggest(reverseLookupCombos, this.store);
+            } else {
+                newLexicons = NineKeyResearcher.suggest(combos, this.store);
+            }
+            if (newLexicons.length > 0) {
+                this.isCoreStoreFunctional = true;
+            }
+        } else {
+            this.prepareStore();
+        }
+        if (isPinyinReverseLookup) {
+            this.updatePreviewText(this.buildNineKeyPinyinReverseLookupPreview(reverseLookupCombos, newLexicons));
+        } else {
+            this.updatePreviewText(this.buildNineKeyPreviewText(combos, newLexicons));
+        }
+        for (let index = 0; index < newLexicons.length; index++) {
+            const item = newLexicons[index];
+            let instance: Candidate = {
+                type: CandidateType.Cantonese,
+                text: needsConversion ? Converter.convert(item.text, true, this.store) : item.text,
+                comment: item.romanization,
+                lexicon: item,
+                number: index,
+            };
+            newCandidates.push(instance);
+        }
+        this.candidates = newCandidates;
+    }
     private joinedBufferTexts(): string {
         return this.bufferEvents.map(event => KeyboardCaseCompanion.isLowercased(event.kbCase) ? event.key.text : event.key.text.toUpperCase()).join("");
+    }
+    private joinedNineKeyTexts(combos: NineKeyCombo[] = this.comboBuffer): string {
+        return combos.map((combo) => combo.leadingText).join("");
     }
 
     private updatePreviewText(text: string) {
@@ -541,6 +622,34 @@ export class InputController {
         const tail = reverseText.slice(leadingLength);
         return `${prefix} ${PinyinSegmenter.schemeMark(bestScheme)} ${tail}`.trim();
     }
+    private buildNineKeyPreviewText(combos: NineKeyCombo[], lexicons: Lexicon[]): string {
+        const bufferText = this.joinedNineKeyTexts(combos);
+        if (lexicons.length < 1) {
+            return bufferText;
+        }
+        const first = lexicons[0];
+        if (first.inputCount >= combos.length) {
+            return first.mark ?? bufferText;
+        }
+        const tail = this.joinedNineKeyTexts(combos.slice(first.inputCount));
+        return `${first.mark ?? bufferText} ${tail}`.trim();
+    }
+    private isNineKeyPinyinReverseLookup(combos: NineKeyCombo[]): boolean {
+        return combos.length > 0 && combos[0]?.isSpecial;
+    }
+    private buildNineKeyPinyinReverseLookupPreview(combos: NineKeyCombo[], lexicons: Lexicon[]): string {
+        const prefix = NineKeyCombo.Special.leadingText;
+        const reverseText = this.joinedNineKeyTexts(combos);
+        if (lexicons.length < 1) {
+            return combos.length < 1 ? prefix : `${prefix} ${reverseText}`.trim();
+        }
+        const first = lexicons[0];
+        if (first.inputCount >= combos.length) {
+            return `${prefix} ${first.mark ?? reverseText}`.trim();
+        }
+        const tail = this.joinedNineKeyTexts(combos.slice(first.inputCount));
+        return `${prefix} ${first.mark ?? reverseText} ${tail}`.trim();
+    }
 
     selectCandidateBy(index: number) {
         if (this.candidates.length > index) {
@@ -555,6 +664,10 @@ export class InputController {
     }
 
     private consumeCandidate(candidate: Candidate) {
+        if (this.isNineKeyActive()) {
+            this.consumeNineKeyCandidate(candidate);
+            return;
+        }
         this.insert(candidate.text);
         if (this.isPinyinReverseLookup(this.bufferEvents.map((event) => event.key))) {
             this.selectedCandidates = [];
@@ -581,6 +694,29 @@ export class InputController {
         }
         this.runInputSession();
     }
+    private consumeNineKeyCandidate(candidate: Candidate) {
+        this.insert(candidate.text);
+        if (this.isNineKeyPinyinReverseLookup(this.comboBuffer)) {
+            this.selectedCandidates = [];
+            const tailCombos = this.comboBuffer.slice(candidate.lexicon.inputCount + 1);
+            if (tailCombos.length < 1) {
+                this.clearBuffer();
+                return;
+            }
+            this.comboBuffer = [this.comboBuffer[0], ...tailCombos];
+            this.runInputSession();
+            return;
+        }
+        this.selectedCandidates.push(candidate);
+        this.comboBuffer = this.comboBuffer.slice(candidate.lexicon.inputCount);
+        if (this.comboBuffer.length < 1) {
+            if (this.memory) {
+                InputMemory.process(this.selectedCandidates, this.memory);
+            }
+            this.selectedCandidates = [];
+        }
+        this.runInputSession();
+    }
     process(text: string) {
         this.inputClient?.insertText(text).catch(() => {
             console.error("Failed to insertText()");
@@ -597,12 +733,17 @@ export class InputController {
                 console.error("Failed to deleteForward()");
             });
         } else {
-            this.bufferEvents.pop();
+            if (this.isNineKeyActive()) {
+                this.comboBuffer.pop();
+            } else {
+                this.bufferEvents.pop();
+            }
             this.runInputSession();
         }
     }
     clearBuffer() {
         this.bufferEvents = [];
+        this.comboBuffer = [];
         this.runInputSession();
     }
     rightDelete(length: number = 1) {
@@ -617,7 +758,7 @@ export class InputController {
             if (this.isTextPreviewSupported) {
                 this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
             } else {
-                const text: string = this.joinedBufferTexts();
+                const text: string = this.isNineKeyActive() ? this.joinedNineKeyTexts() : this.joinedBufferTexts();
                 this.insert(text);
             }
             this.clearBuffer();
@@ -631,7 +772,7 @@ export class InputController {
             if (this.isTextPreviewSupported) {
                 this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
             } else {
-                const text: string = this.joinedBufferTexts();
+                const text: string = this.isNineKeyActive() ? this.joinedNineKeyTexts() : this.joinedBufferTexts();
                 this.insert(text);
             }
             this.clearBuffer();

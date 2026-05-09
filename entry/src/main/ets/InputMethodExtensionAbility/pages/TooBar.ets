@@ -8,7 +8,6 @@ import CharacterSetSwitch from "./CharacterSetSwitch";
 @ComponentV2
 export default struct ToolBar {
     private buttonLength: Length = '48vp';
-    private iconLength: Length = '24vp';
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
     build() {
@@ -21,8 +20,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_settings'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
+                        .width('24.vp')
+                        .height('24.vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -39,10 +38,10 @@ export default struct ToolBar {
 
             Stack() {
                 Button() {
-                    Image($r('app.media.button_emoji'))
+                    Image($r('app.media.button_show_keyboard'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
+                        .width('28vp')
+                        .height('28vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -54,15 +53,15 @@ export default struct ToolBar {
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
+                controller.transformTo(KeyboardForm.LayoutPicker);
             })
-            .opacity(0)
 
             Stack() {
                 Button() {
                     Image($r('app.media.button_emoji'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
+                        .width('24.vp')
+                        .height('24.vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -75,7 +74,7 @@ export default struct ToolBar {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
             })
-            .opacity(0)
+            // .opacity(0)
 
             InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')
@@ -119,8 +118,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_dismiss_keyboard'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width(this.iconLength)
-                        .height(this.iconLength)
+                        .width('28vp')
+                        .height('28vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)

@@ -2,11 +2,14 @@ import EditingPanel from '../editing/EditingPanel';
 import controller from '../InputController';
 import { InputModeCompanion } from '../model/InputMode';
 import { KeyboardForm } from '../model/KeyboardForm';
+import { KeyboardLayoutCompanion } from '../model/KeyboardLayout';
 import ABCKeyboard from './ABCKeyboard';
 import CandidateBoard from './CandidateBoard';
 import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
+import KeyboardLayoutPickerView from './KeyboardLayoutPickerView';
+import NineKeyKeyboard from '../ninekey/NineKeyKeyboard';
 import NumericKeyboard from './NumericKeyboard';
 import SettingsPanel from './SettingsPanel';
 import SymbolicKeyboard from './SymbolicKeyboard';
@@ -24,6 +27,8 @@ struct Index {
                 if (controller.keyboardForm === KeyboardForm.Alphabetic) {
                     if (InputModeCompanion.isABC(controller.inputMode)) {
                         ABCKeyboard()
+                    } else if (KeyboardLayoutCompanion.isNineKey(controller.keyboardLayout)) {
+                        NineKeyKeyboard()
                     } else {
                         CantoneseKeyboard()
                     }
@@ -43,6 +48,8 @@ struct Index {
                     EditingPanel()
                 } else if (controller.keyboardForm === KeyboardForm.Settings) {
                     SettingsPanel()
+                } else if (controller.keyboardForm === KeyboardForm.LayoutPicker) {
+                    KeyboardLayoutPickerView()
                 } else if (controller.keyboardForm === KeyboardForm.CandidateBoard) {
                     CandidateBoard()
                 } else {

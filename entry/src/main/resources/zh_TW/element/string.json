@@ -227,6 +227,14 @@
     {
       "name": "keyboard_settings_feedback_audio",
       "value": "按鍵聲音"
+    },
+    {
+      "name": "keyboard_settings_layout_qwerty",
+      "value": "26鍵"
+    },
+    {
+      "name": "keyboard_settings_layout_t9",
+      "value": "9鍵"
     }
   ]
 }

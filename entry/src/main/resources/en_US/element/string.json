@@ -231,6 +231,14 @@
     {
       "name": "keyboard_settings_feedback_haptic",
       "value": "Haptic Feedback"
+    },
+    {
+      "name": "keyboard_settings_layout_qwerty",
+      "value": "QWERTY"
+    },
+    {
+      "name": "keyboard_settings_layout_t9",
+      "value": "9-Key"
     }
   ]
 }

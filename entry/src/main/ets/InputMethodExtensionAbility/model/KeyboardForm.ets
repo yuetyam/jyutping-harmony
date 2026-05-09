@@ -4,6 +4,7 @@ export const enum KeyboardForm {
     DecimalPad,
     EditingPanel,
     EmojiBoard,
+    LayoutPicker,
     Numeric,
     Settings,
     Symbolic,
