@@ -254,7 +254,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return false;
     }
@@ -471,7 +476,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return lexicons;
     }
@@ -502,7 +512,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return lexicons;
     }
@@ -532,7 +547,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return lexicons;
     }
@@ -598,7 +618,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return frequency;
     }
@@ -672,7 +697,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return lexicons;
     }
@@ -725,7 +755,12 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return needs;
     }

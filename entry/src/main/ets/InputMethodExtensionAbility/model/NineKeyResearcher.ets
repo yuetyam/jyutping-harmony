@@ -130,7 +130,12 @@ export class NineKeyResearcher {
             const err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return items;
     }
@@ -152,7 +157,12 @@ export class NineKeyResearcher {
             const err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return items;
     }

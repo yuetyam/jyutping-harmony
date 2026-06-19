@@ -93,14 +93,19 @@ export class PinyinSegmenter {
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code]);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 return res.getString(0);
             }
         } catch (error) {
             const err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return undefined;
     }

@@ -67,7 +67,12 @@ export class GwongWanHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         const word: string = (units.length > 0) ? units[0].word : "?";
         const lexicon: GwongWanLexicon = {

@@ -22,7 +22,7 @@ export class CantoneseDataHelper {
     }
     private static match(text: string, store: relationalStore.RdbStore): CantoneseLexicon {
         const romanizations = CantoneseDataHelper.fetchRomanizations(text, store);
-        const pronunciations: Pronunciation[] = romanizations.map( (romanization) => {
+        const pronunciations: Pronunciation[] = romanizations.map((romanization) => {
             const homophones = CantoneseDataHelper.fetchHomophones(romanization, store).filter(item => item !== text);
             const collocations = CantoneseDataHelper.fetchCollocations(text, romanization, store);
             const descriptions = CantoneseDataHelper.fetchDescriptions(text, romanization, store);
@@ -56,7 +56,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return items;
     }
@@ -74,7 +79,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return items;
     }
@@ -91,7 +101,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         if (rowText === "X") {
             return [];
@@ -114,7 +129,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return items;
     }
@@ -139,7 +159,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return definition;
     }
@@ -157,7 +182,12 @@ export class CantoneseDataHelper {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return num;
     }
