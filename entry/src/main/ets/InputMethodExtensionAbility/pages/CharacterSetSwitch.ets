@@ -34,7 +34,7 @@ export default struct CharacterSetSwitch {
             .backgroundColor($r('app.color.key_emphatic'))
             .borderRadius('13.vp')
             .width('48vp')
-            .height('26vp')
+            .height('24vp')
         }
         .width('100%')
         .height('100%')

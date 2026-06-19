@@ -20,8 +20,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_settings'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width('24.vp')
-                        .height('24.vp')
+                        .width('22.vp')
+                        .height('22.vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -40,8 +40,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_show_keyboard'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width('28vp')
-                        .height('28vp')
+                        .width('26vp')
+                        .height('26vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -60,8 +60,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_emoji'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width('24.vp')
-                        .height('24.vp')
+                        .width('22.vp')
+                        .height('22.vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -89,8 +89,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_editing'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width('28vp')
-                        .height('28vp')
+                        .width('26vp')
+                        .height('26vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
@@ -118,8 +118,8 @@ export default struct ToolBar {
                 Button() {
                     Image($r('app.media.button_dismiss_keyboard'))
                         .fillColor($r('sys.color.ohos_id_color_primary'))
-                        .width('28vp')
-                        .height('28vp')
+                        .width('26vp')
+                        .height('26vp')
                 }
                 .backgroundColor(Color.Transparent)
                 .clipShape(this.shape)
