@@ -44,7 +44,7 @@ export default struct NineKeyKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyPlaceholderView().width("23.5%")
+                        NineKeyPlaceholderView().width("22.2%")
                         Flex({
                             direction: FlexDirection.Column,
                             alignItems: ItemAlign.Center,
@@ -81,7 +81,7 @@ export default struct NineKeyKeyboard {
                             }
                             .height("33%")
                         }
-                        .width("76.5%")
+                        .width("77.8%")
                     }
                     .height("75%")
                     Flex({
@@ -89,12 +89,12 @@ export default struct NineKeyKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyNavigateKey({ destination: KeyboardForm.Numeric }).width("23.5%")
-                        NineKeySpaceKey().width("76.5%")
+                        NineKeyNavigateKey({ destination: KeyboardForm.Numeric }).width("22.2%")
+                        NineKeySpaceKey().width("77.8%")
                     }
                     .height("25%")
                 }
-                .width("81.2%")
+                .width("81.8%")
                 Flex({
                     direction: FlexDirection.Column,
                     alignItems: ItemAlign.Center,
@@ -104,7 +104,7 @@ export default struct NineKeyKeyboard {
                     NineKeyPlaceholderView().height("25%")
                     NineKeyEnterKey().height("50%")
                 }
-                .width("18.8%")
+                .width("18.2%")
             }
             .width("100%")
             .height("calc(100% - 56vp)")
