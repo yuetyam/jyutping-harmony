@@ -206,7 +206,7 @@ export class InputController {
     }
 
     private async deleteOldDatabases(context: Context) {
-        const fileNames: string[] = ["imedb-20260311-tmp.sqlite3", "imedb-20260107-tmp.sqlite3", "imedb-20251217-tmp.sqlite3", "imedb-20251129-tmp.sqlite3"];
+        const fileNames: string[] = ["imedb-20260505-tmp.sqlite3", "imedb-20260311-tmp.sqlite3", "imedb-20260107-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/ime/";
         for (let index = 0; index < fileNames.length; index++) {
             const name: string = fileNames[index];
@@ -223,13 +223,13 @@ export class InputController {
         }
     }
     private async copyKeyboardDatabase(context: Context) {
-        const desFileName: string = "imedb-20260505-tmp.sqlite3";
+        const desFileName: string = "ime-20260620-tmp.sqlite3";
         const desPath: string = context.databaseDir + "/rdb/ime/" + desFileName;
         try {
             if (fs.accessSync(desPath)) {
                 console.debug("keyboard database path: " + desPath);
             } else {
-                const srcFileName: string = "imedb.sqlite3";
+                const srcFileName: string = "ime.sqlite3";
                 const srcPath: string = context.resourceDir + "/" + srcFileName;
                 console.debug("src database path: " + srcPath);
                 console.debug("des database path: " + desPath);
@@ -243,7 +243,7 @@ export class InputController {
     }
     private store: relationalStore.RdbStore | undefined = undefined;
     private async obtainStore() {
-        const fileName: string = "imedb-20260505-tmp.sqlite3";
+        const fileName: string = "ime-20260620-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
             securityLevel: relationalStore.SecurityLevel.S1,

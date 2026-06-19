@@ -34,19 +34,24 @@ export type Segmentation = Scheme[];
 
 export class Segmenter {
     private static match(code: number, store: relationalStore.RdbStore): number | undefined {
-        const command: string = `SELECT origin_code FROM syllable_table WHERE alias_code = ${code} LIMIT 1;`;
+        const command: string = `SELECT origin_code FROM core_syllable_table WHERE alias_code = ${code} LIMIT 1;`;
         let res: relationalStore.ResultSet | undefined = undefined;
         let originCode: number | undefined = undefined;
         try {
             res = store.querySqlSync(command);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 originCode = res.getLong(0);
             }
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         } finally {
-            res?.close();
+            try {
+                res?.close();
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
         }
         return originCode;
     }

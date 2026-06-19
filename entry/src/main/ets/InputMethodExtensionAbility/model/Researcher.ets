@@ -425,14 +425,14 @@ export class Researcher {
     }
 
     private static perform(scheme: Scheme, store: relationalStore.RdbStore): Lexicon[] {
-        const anchorKeys: VirtualInputKey[] = [];
+        const originAnchors: VirtualInputKey[] = [];
         for (const syllable of scheme) {
             const anchor = syllable.origin[0];
             if (anchor !== undefined) {
-                anchorKeys.push(anchor);
+                originAnchors.push(anchor);
             }
         }
-        const anchorsCode = Researcher.anchorsCode(anchorKeys);
+        const anchorsCode = Researcher.radix100Combined(originAnchors.map((key) => key.code));
         if (anchorsCode < 1) {
             return [];
         }
