@@ -76,10 +76,10 @@
 ## Bundled data and database coupling
 
 - Bundled databases live in `entry/src/main/resources/resfile/`, including:
-  - `imedb.sqlite3`
-  - `appdb.sqlite3`
-- `imedb.sqlite3` now carries the Pinyin reverse-lookup tables used by the HarmonyOS IME, including `pinyin_lexicon` and `pinyin_syllable_table` alongside the existing Cantonese lookup tables.
-- `InputController.ets` copies the IME database into the app database directory using a **versioned filename** (`imedb-20260505-tmp.sqlite3` at the time of writing).
+  - `ime.sqlite3`
+  - `app.sqlite3`
+- `ime.sqlite3` now carries the Pinyin reverse-lookup tables used by the HarmonyOS IME, including `pinyin_lexicon` and `pinyin_syllable_table` alongside the existing Cantonese lookup tables.
+- `InputController.ets` copies the IME database into the app database directory using a **versioned filename**
 - That version string is coupled across:
   - `copyKeyboardDatabase(...)`
   - `obtainStore()`
