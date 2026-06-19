@@ -416,7 +416,7 @@ export class InputController {
             this.inlinePreEditText = "";
             this.selectedCandidates = [];
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
-                this.transformTo(KeyboardForm.Alphabetic);
+                this.transformTo(KeyboardForm.Primary);
             }
             return;
         }
@@ -786,8 +786,8 @@ export class InputController {
         this.panel?.hide();
     }
 
-    @Trace keyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
-    @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Alphabetic;
+    @Trace keyboardForm: KeyboardForm = KeyboardForm.Primary;
+    @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Primary;
     transformTo(destination: KeyboardForm) {
         this.previousKeyboardForm = this.keyboardForm;
         this.keyboardForm = destination;
@@ -882,7 +882,7 @@ export class InputController {
         this.ability.on('keyboardHide', () => {
             this.clearBuffer();
             this.updateKeyboardCase(KeyboardCase.lowercased);
-            this.transformTo(KeyboardForm.Alphabetic);
+            this.transformTo(KeyboardForm.Primary);
             this.inputMode = InputMode.Cantonese;
         })
     }

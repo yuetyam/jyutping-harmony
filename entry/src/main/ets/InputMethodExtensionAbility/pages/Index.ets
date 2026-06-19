@@ -24,7 +24,7 @@ struct Index {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.SpaceBetween
             }) {
-                if (controller.keyboardForm === KeyboardForm.Alphabetic) {
+                if (controller.keyboardForm === KeyboardForm.Primary) {
                     if (InputModeCompanion.isABC(controller.inputMode)) {
                         ABCKeyboard()
                     } else if (KeyboardLayoutCompanion.isNineKey(controller.keyboardLayout)) {

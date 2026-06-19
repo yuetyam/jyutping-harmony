@@ -52,7 +52,7 @@ export default struct CandidateBoard {
             .onClick((event: ClickEvent) => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
-                controller.transformTo(KeyboardForm.Alphabetic);
+                controller.transformTo(KeyboardForm.Primary);
             })
         }
         .width('100%')
