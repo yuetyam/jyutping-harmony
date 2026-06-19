@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { YingWaaLexicon, YingWaaUnit } from './YingWaaUnit';
 
-// yingwaa_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, pronunciation TEXT NOT NULL, pronunciationmark TEXT NOT NULL, interpretation TEXT NOT NULL);
+// yingwaa_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, pronunciation TEXT NOT NULL, note TEXT NOT NULL, interpretation TEXT NOT NULL);
 
 export class YingWaaHelper {
     static search(text: string, store: relationalStore.RdbStore): YingWaaLexicon[] {
@@ -25,22 +25,21 @@ export class YingWaaHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): YingWaaLexicon {
         const units: YingWaaUnit[] = [];
-        const command: string = `SELECT * FROM yingwaa_table WHERE code = ${code};`;
+        const command: string = `SELECT word, romanization, pronunciation, note, interpretation FROM yingwaa_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
             while (res.goToNextRow()) {
-                // const code = res.getLong(0);
-                const word = res.getString(1);
-                const romanization = res.getString(2);
-                const pronunciation = res.getString(3);
-                const pronunciationMark = res.getString(4);
-                const interpretation = res.getString(5);
+                const word = res.getString(0);
+                const romanization = res.getString(1);
+                const pronunciation = res.getString(2);
+                const note = res.getString(3);
+                const interpretation = res.getString(4);
                 const instance: YingWaaUnit = {
                     word: word,
                     romanization: romanization,
                     pronunciation: pronunciation,
-                    pronunciationMark: pronunciationMark,
+                    note: note,
                     interpretation: interpretation,
                     homophones: []
                 };
@@ -59,7 +58,7 @@ export class YingWaaHelper {
                 word: unit.word,
                 romanization: unit.romanization,
                 pronunciation: unit.pronunciation,
-                pronunciationMark: YingWaaHelper.convertedPronunciationMark(unit.pronunciationMark),
+                note: (unit.note == "X" ? undefined : unit.note),
                 interpretation: (unit.interpretation == "X") ? undefined : unit.interpretation,
                 homophones: fetchedHomophones
             };
@@ -90,42 +89,5 @@ export class YingWaaHelper {
             res?.close();
         }
         return homophones;
-    }
-
-    private static convertedPronunciationMark(mark: string | undefined): string | undefined {
-        switch (mark) {
-            case "X":
-                return undefined;
-            case "ALMOST_ALWAYS_PRO":
-                return "Almost Always Pronounced";
-            case "ALSO_PRO":
-                return "Also Pronounced";
-            case "CORRECTLY_READ":
-                return "Correctly Pronounced";
-            case "FAN_WAN_PRO":
-                return "Read in Fan Wan";
-            case "FAN_WAN_ERRONEOUSLY_READ":
-                return "Erroneously read in Fan Wan";
-            case "FREQ_PRO":
-                return "Frequently Pronounced";
-            case "MORE_FREQ_HEARD":
-                return "More frequency heard than original";
-            case "OFTEN_PRO":
-                return "Often Pronounced";
-            case "OFTEN_READ_CANTON":
-                return "Often read in Canton";
-            case "PROPER_SOUND":
-                return "Proper Sound";
-            case "SELDOM_HEARD":
-                return "Seldom Heard";
-            case "SOMETIMES_READ":
-                return "Sometimes Read";
-            case "USUALLY_PRO":
-                return "Usually Pronounced";
-            case "VULGAR":
-                return "Vulgar";
-            default:
-                return mark;
-        }
     }
 }

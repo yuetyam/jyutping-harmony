@@ -1,7 +1,7 @@
 export interface ChoHokUnit {
     readonly word: string;
     readonly romanization: string;
-    readonly pronunciation: string;
+    readonly phone: string;
     readonly tone: string;
     readonly faancit: string;
     readonly homophones: string[];

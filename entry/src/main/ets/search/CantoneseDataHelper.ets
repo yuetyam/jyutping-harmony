@@ -44,7 +44,7 @@ export class CantoneseDataHelper {
     }
     private static fetchRomanizations(text: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
-        const command: string = "SELECT romanization FROM jyutping_table WHERE word = ?;";
+        const command: string = "SELECT romanization FROM jyutping_table WHERE word = ? ORDER BY rowid;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [text]);
@@ -62,7 +62,7 @@ export class CantoneseDataHelper {
     }
     private static fetchHomophones(romanization: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
-        const command: string = "SELECT word FROM jyutping_table WHERE romanization = ? LIMIT 11;";
+        const command: string = "SELECT word FROM jyutping_table WHERE romanization = ? ORDER BY rowid LIMIT 11;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [romanization]);
@@ -80,11 +80,11 @@ export class CantoneseDataHelper {
     }
     private static fetchCollocations(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
         let rowText: string | undefined = undefined;
-        const command: string = "SELECT collocation FROM collocation_table WHERE word = ? AND romanization = ? LIMIT 1;";
+        const command: string = "SELECT collocation FROM collocation_table WHERE word = ? AND romanization = ? ORDER BY rowid LIMIT 1;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [word, romanization]);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 rowText = res.getString(0);
             }
         } catch (error) {
@@ -102,7 +102,7 @@ export class CantoneseDataHelper {
     }
     private static fetchDescriptions(word: string, romanization: string, store: relationalStore.RdbStore): string[] {
         const items: string[] = [];
-        const command: string = "SELECT description FROM dictionary_table WHERE word = ? AND romanization = ?;";
+        const command: string = "SELECT description FROM dictionary_table WHERE word = ? AND romanization = ? ORDER BY rowid;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [word, romanization]);
@@ -132,7 +132,7 @@ export class CantoneseDataHelper {
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 definition = res.getString(0);
             }
         } catch (error) {
@@ -146,11 +146,11 @@ export class CantoneseDataHelper {
 
     static test(store: relationalStore.RdbStore): number {
         let num: number = -1;
-        const command: string = "SELECT rowid FROM jyutping_table WHERE romanization = 'm4' LIMIT 1;";
+        const command: string = "SELECT rowid FROM jyutping_table WHERE romanization = 'm4' ORDER BY rowid LIMIT 1;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 num = res.getLong(0);
             }
         } catch (error) {

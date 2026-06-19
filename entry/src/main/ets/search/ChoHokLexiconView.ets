@@ -28,10 +28,10 @@ struct ChoHokUnitView {
                         .fontSize(15)
                         .opacity(0.9)
                     SeparatorMark()
-                    Text(this.unit.pronunciation)
+                    Text(this.unit.phone)
                 }
                 Text(this.unit.tone)
-                Text(this.unit.faancit)
+                Text(this.unit.faancit + "切")
             }
             Row({ space: 2 }) {
                 Text("轉寫")

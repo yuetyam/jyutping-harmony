@@ -2,7 +2,7 @@ import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ChoHokLexicon, ChoHokUnit } from './ChoHokUnit';
 
-// chohok_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, initial TEXT NOT NULL, final TEXT NOT NULL, tone TEXT NOT NULL, faancit TEXT NOT NULL);
+// chohok_table(code INTEGER NOT NULL, word TEXT NOT NULL, romanization TEXT NOT NULL, phone TEXT NOT NULL, tone TEXT NOT NULL, faancit TEXT NOT NULL);
 
 export class ChoHokHelper {
     static search(text: string, store: relationalStore.RdbStore): ChoHokLexicon[] {
@@ -25,24 +25,22 @@ export class ChoHokHelper {
     }
     static match(code: number, store: relationalStore.RdbStore): ChoHokLexicon {
         const units: ChoHokUnit[] = [];
-        const command: string = `SELECT * FROM chohok_table WHERE code = ${code};`;
+        const command: string = `SELECT word, romanization, phone, tone, faancit FROM chohok_table WHERE code = ${code};`;
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
             while (res.goToNextRow()) {
-                // const code = res.getLong(0);
-                const word = res.getString(1);
-                const romanization = res.getString(2);
-                const initial = res.getString(3);
-                const final = res.getString(4);
-                const tone = res.getString(5);
-                const faancit = res.getString(6);
+                const word = res.getString(0);
+                const romanization = res.getString(1);
+                const phone = res.getString(2);
+                const tone = res.getString(3);
+                const faancit = res.getString(4);
                 const instance: ChoHokUnit = {
                     word: word,
                     romanization: romanization,
-                    pronunciation: ChoHokHelper.pronunciationFrom(initial, final),
+                    phone: phone,
                     tone: tone,
-                    faancit: (faancit + "切"),
+                    faancit: faancit,
                     homophones: []
                 };
                 units.push(instance);
@@ -59,7 +57,7 @@ export class ChoHokHelper {
             const newInstance: ChoHokUnit = {
                 word: unit.word,
                 romanization: unit.romanization,
-                pronunciation: unit.pronunciation,
+                phone: unit.phone,
                 tone: unit.tone,
                 faancit: unit.faancit,
                 homophones: fetchedHomophones
@@ -91,10 +89,5 @@ export class ChoHokHelper {
             res?.close();
         }
         return homophones;
-    }
-    private static pronunciationFrom(initial: string, final: string): string {
-        const convertedInitial: string = (initial === "X") ? "" : initial;
-        const convertedFinal: string = (final === "X") ? "" : final;
-        return convertedInitial + convertedFinal;
     }
 }

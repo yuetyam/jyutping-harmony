@@ -30,8 +30,8 @@ struct YingWaaUnitView {
                     SeparatorMark()
                     Text(this.unit.pronunciation)
                 }
-                if (this.unit.pronunciationMark) {
-                    Text(this.unit.pronunciationMark)
+                if (this.unit.note) {
+                    Text(this.unit.note)
                         .fontStyle(FontStyle.Italic)
                 }
             }
