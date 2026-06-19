@@ -105,15 +105,11 @@ export struct FinalsPage {
                     }
                     ListItem() { Divider() }
                     ListItem() {
-                        FinalLabel({ word: "記", syllable: "gei3", jyutping: "ei", ipa: "[ ei ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
                         FinalLabel({ word: "掉", syllable: "deu6", jyutping: "eu", ipa: "[ ɛːu ]" })
                     }
                     ListItem() { Divider() }
                     ListItem() {
-                        FinalLabel({ word: "𦧷", syllable: "lem2", jyutping: "em", ipa: "[ ɛːm ]" })
+                        FinalLabel({ word: "舔", syllable: "lem2", jyutping: "em", ipa: "[ ɛːm ]" })
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -137,6 +133,22 @@ export struct FinalsPage {
                 .borderRadius(this.groupBorderRadius)
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
+                        FinalLabel({ word: "記", syllable: "gei3", jyutping: "ei", ipa: "[ ei ]" })
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        FinalLabel({ word: "敬", syllable: "ging3", jyutping: "ing", ipa: "[ eŋ ]" })
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        FinalLabel({ word: "極", syllable: "gik6", jyutping: "ik", ipa: "[ ek̚ ]" })
+                    }
+                }
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+                ListItemGroup({ space: 4 }) {
+                    ListItem() {
                         FinalLabel({ word: "意", syllable: "ji3", jyutping: "i", ipa: "[ iː ]" })
                     }
                     ListItem() { Divider() }
@@ -153,19 +165,11 @@ export struct FinalsPage {
                     }
                     ListItem() { Divider() }
                     ListItem() {
-                        FinalLabel({ word: "敬", syllable: "ging3", jyutping: "ing", ipa: "[ eŋ ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
                         FinalLabel({ word: "劫", syllable: "gip3", jyutping: "ip", ipa: "[ iːp̚ ]" })
                     }
                     ListItem() { Divider() }
                     ListItem() {
                         FinalLabel({ word: "結", syllable: "git3", jyutping: "it", ipa: "[ iːt̚ ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        FinalLabel({ word: "極", syllable: "gik6", jyutping: "ik", ipa: "[ ek̚ ]" })
                     }
                 }
                 .padding(8)
@@ -178,10 +182,6 @@ export struct FinalsPage {
                     ListItem() { Divider() }
                     ListItem() {
                         FinalLabel({ word: "蓋", syllable: "goi3", jyutping: "oi", ipa: "[ ɔːi ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        FinalLabel({ word: "告", syllable: "gou3", jyutping: "ou", ipa: "[ ou ]" })
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -205,6 +205,22 @@ export struct FinalsPage {
                 .borderRadius(this.groupBorderRadius)
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
+                        FinalLabel({ word: "告", syllable: "gou3", jyutping: "ou", ipa: "[ ou ]" })
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        FinalLabel({ word: "貢", syllable: "gung3", jyutping: "ung", ipa: "[ oŋ ]" })
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        FinalLabel({ word: "谷", syllable: "guk1", jyutping: "uk", ipa: "[ ok̚ ]" })
+                    }
+                }
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+                ListItemGroup({ space: 4 }) {
+                    ListItem() {
                         FinalLabel({ word: "夫", syllable: "fu1", jyutping: "u", ipa: "[ uː ]" })
                     }
                     ListItem() { Divider() }
@@ -217,15 +233,7 @@ export struct FinalsPage {
                     }
                     ListItem() { Divider() }
                     ListItem() {
-                        FinalLabel({ word: "封", syllable: "fung1", jyutping: "ung", ipa: "[ oŋ ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
                         FinalLabel({ word: "闊", syllable: "fut3", jyutping: "ut", ipa: "[ uːt̚ ]" })
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        FinalLabel({ word: "福", syllable: "fuk1", jyutping: "uk", ipa: "[ ok̚ ]" })
                     }
                 }
                 .padding(8)
