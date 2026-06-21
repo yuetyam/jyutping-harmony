@@ -13,6 +13,7 @@ import NineKeyKeyboard from '../ninekey/NineKeyKeyboard';
 import NumericKeyboard from './NumericKeyboard';
 import SettingsPanel from './SettingsPanel';
 import SymbolicKeyboard from './SymbolicKeyboard';
+import TailoredNumericKeyboard from '../numeric/TailoredNumericKeyboard';
 
 @Entry
 @ComponentV2
@@ -32,6 +33,8 @@ struct Index {
                     } else {
                         CantoneseKeyboard()
                     }
+                } else if (controller.keyboardForm === KeyboardForm.DedicatedNumbers) {
+                    TailoredNumericKeyboard()
                 } else if (controller.keyboardForm === KeyboardForm.Numeric) {
                     if (InputModeCompanion.isABC(controller.inputMode)) {
                         NumericKeyboard()

@@ -7,7 +7,7 @@ import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { media } from '@kit.MediaKit';
 import { vibrator } from '@kit.SensorServiceKit';
 import { InputMode, InputModeCompanion } from './model/InputMode';
-import { KeyboardForm } from './model/KeyboardForm';
+import { KeyboardForm, KeyboardFormCompanion } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
@@ -386,7 +386,7 @@ export class InputController {
         return !hasBuffer
     }
     handle(key: VirtualInputKey) {
-        if (InputModeCompanion.isABC(this.inputMode)) {
+        if (InputModeCompanion.isABC(this.inputMode) || !(KeyboardFormCompanion.isBufferable(this.keyboardForm))) {
             const text: string = KeyboardCaseCompanion.isLowercased(this.keyboardCase) ? key.text : key.text.toUpperCase();
             this.insert(text);
         } else {
@@ -715,11 +715,6 @@ export class InputController {
             this.selectedCandidates = [];
         }
         this.runInputSession();
-    }
-    process(text: string) {
-        this.inputClient?.insertText(text).catch(() => {
-            console.error("Failed to insertText()");
-        });
     }
     insert(text: string) {
         this.inputClient?.insertText(text).catch(() => {

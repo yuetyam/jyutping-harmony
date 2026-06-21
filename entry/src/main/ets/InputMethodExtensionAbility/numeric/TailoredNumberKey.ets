@@ -1,10 +1,10 @@
-import controller from '../InputController';
+import controller from "../InputController";
+import { VirtualInputKey } from "../model/VirtualInputKey";
 
-@Component
-export default struct SymbolKey {
-    keyText: string | undefined = undefined;
-    @State private isTouching: boolean = false;
-
+@ComponentV2
+export default struct TailoredNumberKey {
+    @Param @Require @Once element: VirtualInputKey;
+    @Local private isTouching: boolean = false;
     build() {
         Stack() {
             Flex({
@@ -12,9 +12,7 @@ export default struct SymbolKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                if (this.keyText) {
-                    Text(this.keyText).fontSize(22)
-                }
+                Text(this.element.text).fontSize(24)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(7)
@@ -23,11 +21,11 @@ export default struct SymbolKey {
                 color: Color.Gray,
                 offsetY: 1
             })
-            .width('calc(100% - 6vp)')
-            .height('calc(100% - 12vp)')
+            .width("calc(100% - 6vp)")
+            .height("calc(100% - 6vp)")
         }
-        .width('100%')
-        .height('100%')
+        .width("100%")
+        .height("100%")
         .onTouch((event: TouchEvent) => {
             switch (event.type) {
                 case TouchType.Down:
@@ -42,12 +40,8 @@ export default struct SymbolKey {
                     break;
             }
         })
-        .onClick((event?: ClickEvent) => {
-            if (event) {
-                if (this.keyText) {
-                    controller.insert(this.keyText);
-                }
-            }
+        .onClick(() => {
+            controller.insert(this.element.text);
         })
     }
 }

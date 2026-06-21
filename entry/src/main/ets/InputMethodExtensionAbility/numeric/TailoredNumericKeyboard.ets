@@ -1,18 +1,16 @@
-import controller from '../InputController';
-import { Combo } from './Combo';
+import TailoredNumberKey from './TailoredNumberKey'
 import { KeyboardForm } from '../model/KeyboardForm';
-import CandidateBar from '../pages/CandidateBar';
-import NineKeyInputKey from './NineKeyInputKey';
 import ToolBar from '../pages/TooBar';
-import NineKeySpecialKey from './NineKeySpecialKey';
-import NineKeyNavigateKey from './NineKeyNavigateKey';
-import NineKeyBackspaceKey from './NineKeyBackspaceKey';
-import NineKeyEnterKey from './NineKeyEnterKey';
-import NineKeySpaceKey from './NineKeySpaceKey';
-import NineKeyPlaceholderView from './NineKeyPlaceholderView';
+import NineKeyNavigateKey from '../ninekey/NineKeyNavigateKey';
+import NineKeyBackspaceKey from '../ninekey/NineKeyBackspaceKey';
+import NineKeyEnterKey from '../ninekey/NineKeyEnterKey';
+import NineKeySpaceKey from '../ninekey/NineKeySpaceKey';
+import NineKeyPlaceholderView from '../ninekey/NineKeyPlaceholderView';
+import { VirtualInputKey } from '../model/VirtualInputKey';
+import TailoredNumericDotKey from './TailoredNumericDotKey';
 
 @ComponentV2
-export default struct NineKeyKeyboard {
+export default struct TailoredNumericKeyboard {
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -20,11 +18,7 @@ export default struct NineKeyKeyboard {
             justifyContent: FlexAlign.SpaceBetween
         }) {
             Stack() {
-                if (controller.isBuffering) {
-                    CandidateBar()
-                } else {
-                    ToolBar()
-                }
+                ToolBar()
             }
             .width("100%")
             .height("56vp")
@@ -55,9 +49,9 @@ export default struct NineKeyKeyboard {
                                 alignItems: ItemAlign.Center,
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
-                                NineKeySpecialKey().width("33.33%")
-                                NineKeyInputKey({ element: Combo.ABC }).width("33.33%")
-                                NineKeyInputKey({ element: Combo.DEF }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number1 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number2 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number3 }).width("33.33%")
                             }
                             .height("33%")
                             Flex({
@@ -65,9 +59,9 @@ export default struct NineKeyKeyboard {
                                 alignItems: ItemAlign.Center,
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
-                                NineKeyInputKey({ element: Combo.GHI }).width("33.33%")
-                                NineKeyInputKey({ element: Combo.JKL }).width("33.33%")
-                                NineKeyInputKey({ element: Combo.MNO }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number4 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number5 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number6 }).width("33.33%")
                             }
                             .height("33%")
                             Flex({
@@ -75,9 +69,9 @@ export default struct NineKeyKeyboard {
                                 alignItems: ItemAlign.Center,
                                 justifyContent: FlexAlign.SpaceBetween
                             }) {
-                                NineKeyInputKey({ element: Combo.PQRS }).width("33.33%")
-                                NineKeyInputKey({ element: Combo.TUV }).width("33.33%")
-                                NineKeyInputKey({ element: Combo.WXYZ }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number7 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number8 }).width("33.33%")
+                                TailoredNumberKey({ element: VirtualInputKey.number9 }).width("33.33%")
                             }
                             .height("33%")
                         }
@@ -89,8 +83,10 @@ export default struct NineKeyKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyNavigateKey({ destination: KeyboardForm.DedicatedNumbers }).width("22.2%")
-                        NineKeySpaceKey().width("77.8%")
+                        NineKeyNavigateKey({ destination: KeyboardForm.Primary }).width("22.2%")
+                        TailoredNumericDotKey().width("25.9%")
+                        TailoredNumberKey({ element: VirtualInputKey.number0 }).width("25.9%")
+                        NineKeySpaceKey().width("26%")
                     }
                     .height("25%")
                 }
