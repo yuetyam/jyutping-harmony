@@ -1,5 +1,6 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
+import { CharCode } from "./CharCode";
 import { VirtualInputKey } from "./VirtualInputKey";
 
 export class PinyinSyllable {
@@ -78,7 +79,7 @@ export class PinyinSegmenter {
         const syllables: PinyinSyllable[] = [];
         for (let length = maxLength; length >= 1; length--) {
             const leadingKeys = keys.slice(0, length);
-            const code = leadingKeys.reduce((acc, key) => acc * 100 + key.code, 0);
+            const code = CharCode.keysCode(leadingKeys);
             const text = PinyinSegmenter.match(code, store);
             if (text === undefined) {
                 continue;

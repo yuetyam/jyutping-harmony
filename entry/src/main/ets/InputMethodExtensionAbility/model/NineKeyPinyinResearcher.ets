@@ -1,5 +1,6 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
+import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Combo } from "../ninekey/Combo";
@@ -141,11 +142,7 @@ export class NineKeyPinyinResearcher {
     }
 
     private static combinedCode(combos: Combo[]): number {
-        if (combos.length > 15) {
-            return 0;
-        } else {
-            return combos.reduce((acc, combo) => acc * 10 + combo.digit, 0);
-        }
+        return CharCode.comboCode(combos);
     }
 
     private static makePinyinLexicon(text: string, pinyin: string, input: string, mark: string, order: number): NineKeyPinyinLexicon {

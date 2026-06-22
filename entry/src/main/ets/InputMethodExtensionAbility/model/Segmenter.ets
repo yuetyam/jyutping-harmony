@@ -1,5 +1,6 @@
 import { BusinessError } from '@kit.BasicServicesKit';
 import { relationalStore } from "@kit.ArkData";
+import { CharCode } from "./CharCode";
 import { VirtualInputKey } from "./VirtualInputKey";
 
 export class Syllable {
@@ -10,22 +11,13 @@ export class Syllable {
     constructor(aliasCode: number, originCode: number) {
         this.aliasCode = aliasCode;
         this.originCode = originCode;
-        this.alias = this.matchedInputKeys(aliasCode);
-        this.origin = this.matchedInputKeys(originCode);
+        this.alias = CharCode.matchedInputKeys(aliasCode);
+        this.origin = CharCode.matchedInputKeys(originCode);
     }
     equals(other: Object | null | undefined): boolean {
         if (this === other) return true;
         if (!(other instanceof Syllable)) return false;
         return this.aliasCode === other.aliasCode && this.originCode === other.originCode;
-    }
-    private matchedInputKeys(value: number): VirtualInputKey[] {
-        let num = value;
-        const codes: number[] = [];
-        while (num > 0) {
-            codes.push(num % 100);
-            num = Math.floor(num / 100);
-        }
-        return codes.reverse().map((code) => VirtualInputKey.matchVirtualKey(code)).filter(Boolean) as VirtualInputKey[];
     }
 }
 
@@ -62,7 +54,7 @@ export class Segmenter {
         }
         const syllables: Syllable[] = [];
         for (let num = maxLength; num >= 1; num--) {
-            const code = keys.slice(0, num).reduce((acc, event) => acc * 100 + event.code, 0);
+            const code = CharCode.keysCode(keys.slice(0, num));
             const originCode: number = Segmenter.match(code, store) ?? 0;
             if (originCode > 0) {
                 const syllable = new Syllable(code, originCode);
@@ -114,7 +106,7 @@ export class Segmenter {
                     default: return [];
                 }
             case 4:
-                const combinedCode = keys.reduce((acc, key) => acc * 100 + key.code, 0);
+                const combinedCode = CharCode.keysCode(keys);
                 switch (combinedCode) {
                     case 32203220: return Segmenter.mama;
                     case 32203228: return Segmenter.mami;

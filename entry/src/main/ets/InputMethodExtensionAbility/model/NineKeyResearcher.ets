@@ -1,5 +1,6 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
+import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Combo } from "../ninekey/Combo";
@@ -79,11 +80,7 @@ export class NineKeyResearcher {
     }
 
     private static combinedCode(combos: Combo[]): number {
-        if (combos.length > 15) {
-            return 0;
-        } else {
-            return combos.reduce((acc, combo) => acc * 10 + combo.digit, 0);
-        }
+        return CharCode.comboCode(combos);
     }
 
     private static makeLexicon(text: string, romanization: string, input: string, number: number, mark: string): Lexicon {

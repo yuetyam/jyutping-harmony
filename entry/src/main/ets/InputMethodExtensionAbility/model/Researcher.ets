@@ -4,6 +4,7 @@ import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Scheme, Segmentation, Segmenter } from "./Segmenter";
+import { CharCode } from "./CharCode";
 
 export class Researcher {
     private static readonly concatenationStep: number = 1000000;
@@ -27,25 +28,19 @@ export class Researcher {
     }
 
     private static radix100Combined(numbers: number[]): number {
-        if (numbers.length > 8) {
-            // Max value: 9007199254740992
-            return 0;
-        } else {
-            return numbers.reduce((acc, num) => acc * 100 + num, 0);
-        }
+        return CharCode.radix100Combined(numbers);
     }
 
     private static keysText(keys: VirtualInputKey[]): string {
-        return keys.map((key) => key.text).join("");
+        return CharCode.keysText(keys);
     }
 
     private static normalizeAnchorKey(key: VirtualInputKey): VirtualInputKey {
-        return (key === VirtualInputKey.letterY) ? VirtualInputKey.letterJ : key;
+        return CharCode.normalizeAnchorKey(key);
     }
 
     private static anchorsCode(keys: VirtualInputKey[]): number {
-        const codes = keys.map((key) => Researcher.normalizeAnchorKey(key).code);
-        return Researcher.radix100Combined(codes);
+        return CharCode.anchorsCode(keys);
     }
 
     private static stripTones(text: string): string {

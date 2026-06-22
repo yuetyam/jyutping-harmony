@@ -1,5 +1,6 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
+import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { PinyinScheme, PinyinSegmentation, PinyinSegmenter } from "./PinyinSegmenter";
@@ -353,7 +354,7 @@ export class PinyinResearcher {
 
     private static anchorsMatch(keys: VirtualInputKey[], input: string | undefined, store: relationalStore.RdbStore,
         limit: number = PinyinResearcher.defaultAnchorsLimit): PinyinLexicon[] {
-        const code = keys.reduce((acc, key) => acc * 100 + key.code, 0);
+        const code = CharCode.keysCode(keys);
         if (code < 1) {
             return [];
         }
@@ -395,7 +396,7 @@ export class PinyinResearcher {
     }
 
     private static keysText(keys: VirtualInputKey[]): string {
-        return keys.map((key) => key.text).join("");
+        return CharCode.keysText(keys);
     }
 
     private static splitRomanization(text: string): string[] {

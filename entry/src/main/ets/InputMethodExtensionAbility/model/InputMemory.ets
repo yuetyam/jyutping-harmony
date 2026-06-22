@@ -7,6 +7,7 @@ import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Segmentation, Scheme, Segmenter } from "./Segmenter";
+import { CharCode } from "./CharCode";
 
 interface InternalLexicon {
     readonly word: string;
@@ -40,7 +41,7 @@ export class InputMemory {
     }
 
     private static keysText(keys: VirtualInputKey[]): string {
-        return keys.map((key) => key.text).join("");
+        return CharCode.keysText(keys);
     }
 
     private static normalizeShortcutText(text: string): string {
@@ -48,7 +49,7 @@ export class InputMemory {
     }
 
     private static normalizeAnchorKey(key: VirtualInputKey): VirtualInputKey {
-        return (key === VirtualInputKey.letterY) ? VirtualInputKey.letterJ : key;
+        return CharCode.normalizeAnchorKey(key);
     }
 
     private static stripTones(text: string): string {
