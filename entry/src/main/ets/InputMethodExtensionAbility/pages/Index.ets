@@ -8,7 +8,7 @@ import CandidateBoard from './CandidateBoard';
 import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
-import KeyboardLayoutPickerView from './KeyboardLayoutPickerView';
+import LayoutPickerPanel from './LayoutPickerPanel';
 import NineKeyKeyboard from '../ninekey/NineKeyKeyboard';
 import NumericKeyboard from './NumericKeyboard';
 import SettingsPanel from './SettingsPanel';
@@ -52,7 +52,7 @@ struct Index {
                 } else if (controller.keyboardForm === KeyboardForm.Settings) {
                     SettingsPanel()
                 } else if (controller.keyboardForm === KeyboardForm.LayoutPicker) {
-                    KeyboardLayoutPickerView()
+                    LayoutPickerPanel()
                 } else if (controller.keyboardForm === KeyboardForm.CandidateBoard) {
                     CandidateBoard()
                 } else {

@@ -233,12 +233,12 @@
       "value": "按键振动"
     },
     {
-      "name": "keyboard_settings_layout_qwerty",
-      "value": "26键"
+      "name": "layout_picker_layout_qwerty",
+      "value": "26 键"
     },
     {
-      "name": "keyboard_settings_layout_t9",
-      "value": "9键"
+      "name": "layout_picker_layout_t9",
+      "value": "9 键"
     }
   ]
 }

@@ -3,7 +3,7 @@ import { KeyboardLayout, KeyboardLayoutCompanion } from "../model/KeyboardLayout
 import controller from "../InputController"
 
 @ComponentV2
-export default struct KeyboardLayoutPickerView {
+export default struct LayoutPickerPanel {
     private shapeSize = '44vp';
     private shape = new CircleShape({ width: this.shapeSize, height: this.shapeSize });
     build() {
@@ -55,18 +55,24 @@ struct LayoutOptionView {
     private shape = new CircleShape({ width: this.shapeSize, height: this.shapeSize });
     build() {
         Column({ space: 2 }) {
-            Button() {
+            Stack() {
                 Image($r('app.media.button_show_keyboard'))
-                    .fillColor(controller.keyboardLayout === this.layout ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
+                    .fillColor((controller.keyboardLayout === this.layout) ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
                     .width(this.iconSize)
                     .height(this.iconSize)
             }
             .backgroundColor($r('app.color.key_shallow'))
             .clipShape(this.shape)
+            .border({
+                width: 2,
+                color: (controller.keyboardLayout === this.layout) ? $r('app.color.accent') : Color.Transparent,
+                radius: 22,
+                style: BorderStyle.Solid
+            })
             .width(this.shapeSize)
             .height(this.shapeSize)
-            Text(this.isNineKey ? $r('app.string.keyboard_settings_layout_t9') : $r('app.string.keyboard_settings_layout_qwerty'))
-                .fontSize(13)
+            Text(this.isNineKey ? $r('app.string.layout_picker_layout_t9') : $r('app.string.layout_picker_layout_qwerty'))
+                .fontSize(12)
         }
         .width(this.buttonSize)
         .height(this.buttonSize)
