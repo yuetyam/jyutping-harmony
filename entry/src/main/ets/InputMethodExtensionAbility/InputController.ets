@@ -284,12 +284,13 @@ export class InputController {
         }
     }
     private async prepareMemory() {
+        const sharedPreferences = this.obtainSharedPreferences();
         if (this.memory) {
-            InputMemory.prepare(this.memory);
+            InputMemory.prepare(this.memory, sharedPreferences);
         } else {
             await this.attachMemory();
             if (this.memory) {
-                InputMemory.prepare(this.memory);
+                InputMemory.prepare(this.memory, sharedPreferences);
             }
         }
     }
@@ -310,6 +311,7 @@ export class InputController {
                     return;
                 }
                 this.memory = rdbStore;
+                InputMemory.prepare(rdbStore, this.obtainSharedPreferences());
             });
     }
     @Trace isMutilated: boolean = false;
@@ -319,7 +321,7 @@ export class InputController {
         try {
             this.sharedPreferences?.putSync("charset", value);
             this.sharedPreferences?.flush().catch(() => {
-                console.error("Failed to save value to the charset preferences")
+                console.error("Failed to save value to the charset preferences");
             });
         } catch (error) {
             let err: BusinessError = error as BusinessError;
@@ -328,6 +330,22 @@ export class InputController {
     }
 
     private sharedPreferences: preferences.Preferences | undefined = undefined;
+    private obtainSharedPreferences(): preferences.Preferences | undefined {
+        if (this.sharedPreferences) {
+            return this.sharedPreferences;
+        }
+        if (this.ctx === undefined) {
+            return undefined;
+        }
+        try {
+            const options: preferences.Options = { name: "kbsettings" };
+            this.sharedPreferences = preferences.getPreferencesSync(this.ctx, options);
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
+        }
+        return this.sharedPreferences;
+    }
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
@@ -347,16 +365,17 @@ export class InputController {
             this.prepareMemory();
         }, 1000);
         try {
-            const options: preferences.Options = { name: "kbsettings" };
-            this.sharedPreferences = preferences.getPreferencesSync(context, options);
-            const savedAudioFeedbackValue: number = this.sharedPreferences.getSync("audio", 1) as number;
-            this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
-            const savedHapticFeedbackValue: number = this.sharedPreferences.getSync("haptic", 1) as number;
-            this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
-            const savedCharacterStandardValue: number = this.sharedPreferences.getSync("charset", 1) as number;
-            this.isMutilated = (savedCharacterStandardValue == 51);
-            const savedKeyboardLayoutValue: number = this.sharedPreferences.getSync("layout", KeyboardLayout.Qwerty) as number;
-            this.keyboardLayout = KeyboardLayoutCompanion.layoutOf(savedKeyboardLayoutValue);
+            const sharedPreferences = this.obtainSharedPreferences();
+            if (sharedPreferences !== undefined) {
+                const savedAudioFeedbackValue: number = sharedPreferences.getSync("audio", 1) as number;
+                this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
+                const savedHapticFeedbackValue: number = sharedPreferences.getSync("haptic", 1) as number;
+                this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
+                const savedCharacterStandardValue: number = sharedPreferences.getSync("charset", 1) as number;
+                this.isMutilated = (savedCharacterStandardValue == 51);
+                const savedKeyboardLayoutValue: number = sharedPreferences.getSync("layout", KeyboardLayout.Qwerty) as number;
+                this.keyboardLayout = KeyboardLayoutCompanion.layoutOf(savedKeyboardLayoutValue);
+            }
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);

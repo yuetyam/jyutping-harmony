@@ -1,4 +1,4 @@
-import { relationalStore } from "@kit.ArkData";
+import { preferences, relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Candidate } from "./Candidate";
 import { FallbackLexiconHelper } from "./FallbackLexiconHelper";
@@ -19,7 +19,21 @@ interface InternalLexicon {
     readonly mark: string;
 }
 
+interface MemoryEntry {
+    readonly word: string;
+    readonly romanization: string;
+    readonly frequency: number;
+    readonly latest: number;
+    readonly shortcut: number;
+    readonly spell: number;
+    readonly nineKeyAnchors: number;
+    readonly nineKeyCode: number
+}
+
 export class InputMemory {
+    private static readonly legacyMemoryTable: string = "memory";
+    private static readonly definedMigrationValue: number = 2026;
+    private static readonly migrationKey: string = "input_memory_migration2026";
     private static readonly recentIntervalMilliseconds: number = 86400000;
     private static readonly defaultSpellLimit: number = 20;
     private static readonly defaultShortcutLimit: number = 20;
@@ -27,6 +41,7 @@ export class InputMemory {
     private static readonly partialShortcutLimit: number = 300;
     private static readonly gainedShortcutLimit: number = 300;
     private static readonly maxPartialInputLength: number = 10;
+    private static isMigrating: boolean = false;
 
     private static hashCode(str: string): number {
         let hash = 0;
@@ -62,6 +77,35 @@ export class InputMemory {
 
     private static splitRomanization(text: string): string[] {
         return text.split(/\s+/).filter((part) => part.length > 0);
+    }
+
+    private static anchorsText(romanization: string): string {
+        return InputMemory.splitRomanization(romanization)
+            .map((syllable) => syllable[0] ?? "")
+            .join("");
+    }
+
+    private static letterText(romanization: string): string {
+        return romanization.replace(/[^a-z]/g, "");
+    }
+
+    private static makeMemoryEntry(word: string, romanization: string, frequency: number = 1, latest: number = InputMemory.nowMilliseconds()): MemoryEntry {
+        const anchors = InputMemory.anchorsText(romanization);
+        const syllableText = InputMemory.letterText(romanization);
+        const shortcut = InputMemory.hashCode(anchors);
+        const spell = InputMemory.hashCode(syllableText);
+        const nineKeyAnchors: number = CharCode.nineKeyCharCode(anchors) ?? 0;
+        const nineKeyCode: number = CharCode.nineKeyCharCode(syllableText) ?? 0;
+        return {
+            word: word,
+            romanization: romanization,
+            frequency: frequency,
+            latest: latest,
+            shortcut: shortcut,
+            spell: spell,
+            nineKeyAnchors: nineKeyAnchors,
+            nineKeyCode: nineKeyCode
+        };
     }
 
     private static schemeLength(scheme: Scheme): number {
@@ -241,7 +285,27 @@ export class InputMemory {
             .map((item) => InputMemory.toLexicon(item, -2));
     }
 
-    private static memoryHasLatestColumn(store: relationalStore.RdbStore): boolean {
+    private static tableExists(tableName: string, store: relationalStore.RdbStore): boolean {
+        const command = "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?);";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [tableName]);
+            return res.goToNextRow() && res.getLong(0) === 1;
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
+        }
+        return false;
+    }
+
+    private static legacyTableHasLatestColumn(store: relationalStore.RdbStore): boolean {
         const command = "PRAGMA table_info(memory);";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
@@ -264,9 +328,8 @@ export class InputMemory {
         }
         return false;
     }
-
-    private static ensureLatestColumn(store: relationalStore.RdbStore) {
-        if (InputMemory.memoryHasLatestColumn(store)) {
+    private static ensureLegacyLatestColumn(store: relationalStore.RdbStore) {
+        if (!(InputMemory.tableExists(InputMemory.legacyMemoryTable, store)) || InputMemory.legacyTableHasLatestColumn(store)) {
             return;
         }
         const command = "ALTER TABLE memory ADD COLUMN latest INTEGER NOT NULL DEFAULT 0;";
@@ -274,11 +337,189 @@ export class InputMemory {
             store.executeSync(command);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
-            console.error(`error in ensureLatestColumn(), message: ${err.message}, code: ${err.code}`);
+            console.error(`error in ensureLegacyLatestColumn(), message: ${err.message}, code: ${err.code}`);
         }
     }
 
+    private static ensureCoreMemoryTable(store: relationalStore.RdbStore) {
+        try {
+            const command: string = "CREATE TABLE IF NOT EXISTS core_memory (id INTEGER PRIMARY KEY AUTOINCREMENT, word TEXT NOT NULL, romanization TEXT NOT NULL, frequency INTEGER NOT NULL, latest INTEGER NOT NULL, shortcut INTEGER NOT NULL, spell INTEGER NOT NULL, nine_key_anchors INTEGER NOT NULL, nine_key_code INTEGER NOT NULL, UNIQUE (word, romanization));";
+            store.executeSync(command);
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`error in ensureCoreMemoryTable(), message: ${err.message}, code: ${err.code}`);
+        }
+    }
+
+    private static ensureCoreMemoryIndexes(store: relationalStore.RdbStore) {
+        const commands: string[] = [
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_frequency ON core_memory (frequency);",
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_shortcut ON core_memory (shortcut, frequency DESC);",
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_spell ON core_memory (spell, frequency DESC);",
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_strict ON core_memory (spell, shortcut, frequency DESC);",
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_nine_key_anchors ON core_memory (nine_key_anchors, frequency DESC);",
+            "CREATE INDEX IF NOT EXISTS ix_core_memory_nine_key_code ON core_memory (nine_key_code, frequency DESC);",
+        ];
+        for (const command of commands) {
+            try {
+                store.executeSync(command);
+            } catch (error) {
+                let err: BusinessError = error as BusinessError;
+                console.error(`error in ensureCoreMemoryIndexes(), message: ${err.message}, code: ${err.code}`);
+            }
+        }
+    }
+
+    private static isLegacyDataPresent(store: relationalStore.RdbStore): boolean {
+        if (!(InputMemory.tableExists(InputMemory.legacyMemoryTable, store))) {
+            return false;
+        }
+        const command: string = "SELECT frequency FROM memory WHERE frequency > 0 LIMIT 1;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command);
+            if (res.goToFirstRow()) {
+                return res.getLong(0) > 0;
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
+        }
+        return false;
+    }
+
+    private static fetchLegacyEntries(lower: number, upper: number, store: relationalStore.RdbStore): MemoryEntry[] {
+        const entries: MemoryEntry[] = [];
+        const command: string = "SELECT word, romanization, frequency, latest FROM memory WHERE frequency > ? AND frequency <= ?;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [lower, upper]);
+            while (res.goToNextRow()) {
+                const word = res.getString(0);
+                const romanization = res.getString(1);
+                const frequency = res.getLong(2);
+                const latest = res.getLong(3);
+                entries.push(InputMemory.makeMemoryEntry(word, romanization, frequency, latest));
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
+        }
+        return entries;
+    }
+
+    private static migrate(lower: number, upper: number, store: relationalStore.RdbStore): boolean {
+        const entries = InputMemory.fetchLegacyEntries(lower, upper, store);
+        if (entries.length < 1) {
+            return true;
+        }
+        const command: string = "INSERT OR IGNORE INTO core_memory (word, romanization, frequency, latest, shortcut, spell, nine_key_anchors, nine_key_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
+        let didBeginTransaction: boolean = false;
+        try {
+            store.beginTransaction();
+            didBeginTransaction = true;
+            for (const entry of entries) {
+                store.executeSync(command, [entry.word, entry.romanization, entry.frequency, entry.latest, entry.shortcut, entry.spell, entry.nineKeyAnchors, entry.nineKeyCode]);
+            }
+            store.commit();
+            didBeginTransaction = false;
+            return true;
+        } catch (error) {
+            if (didBeginTransaction) {
+                try {
+                    store.rollBack();
+                } catch (rollbackError) {
+                    let err: BusinessError = rollbackError as BusinessError;
+                    console.error(`error in migrate() rollback, message: ${err.message}, code: ${err.code}`);
+                }
+            }
+            let err: BusinessError = error as BusinessError;
+            console.error(`error in migrate(), message: ${err.message}, code: ${err.code}`);
+            return false;
+        }
+    }
+
+    private static setMigrationValue(settings: preferences.Preferences, value: number) {
+        try {
+            settings.putSync(InputMemory.migrationKey, value);
+            settings.flush().catch(() => {
+                console.error("Failed to save input memory migration value");
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`Failed to save input memory migration value, message: ${err.message}, code: ${err.code}`);
+        }
+    }
+
+    private static missionAccomplished(settings: preferences.Preferences) {
+        InputMemory.setMigrationValue(settings, InputMemory.definedMigrationValue);
+        InputMemory.isMigrating = false;
+    }
+
+    private static getMigrationValue(settings: preferences.Preferences): number {
+        try {
+            const savedValue = settings.getSync(InputMemory.migrationKey, 0);
+            return typeof savedValue === "number" ? savedValue : 0;
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`Failed to load input memory migration value, message: ${err.message}, code: ${err.code}`);
+        }
+        return 0;
+    }
+
+    private static performMigration(store: relationalStore.RdbStore, settings: preferences.Preferences) {
+        const savedValue: number = InputMemory.getMigrationValue(settings);
+        if (savedValue === InputMemory.definedMigrationValue) {
+            InputMemory.isMigrating = false;
+            return;
+        }
+        if (!(InputMemory.isLegacyDataPresent(store))) {
+            InputMemory.missionAccomplished(settings);
+            return;
+        }
+        InputMemory.isMigrating = true;
+        if (savedValue === 0) {
+            if (!InputMemory.migrate(20, 100000, store)) {
+                InputMemory.isMigrating = false;
+                return;
+            }
+            InputMemory.setMigrationValue(settings, 20);
+        }
+        let upper: number = savedValue === 0 ? 20 : savedValue;
+        while (upper > 1) {
+            const lower: number = upper - 1;
+            if (!InputMemory.migrate(lower, upper, store)) {
+                InputMemory.isMigrating = false;
+                return;
+            }
+            InputMemory.setMigrationValue(settings, lower);
+            upper = lower;
+        }
+        if (!InputMemory.migrate(0, 1, store)) {
+            InputMemory.isMigrating = false;
+            return;
+        }
+        InputMemory.missionAccomplished(settings);
+    }
+
     static search(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
+        if (InputMemory.isMigrating) {
+            return [];
+        }
         if (keys.length < 1) {
             return [];
         }
@@ -296,6 +537,9 @@ export class InputMemory {
     }
 
     static suggest(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore, syllableStore: relationalStore.RdbStore): Lexicon[] {
+        if (InputMemory.isMigrating) {
+            return [];
+        }
         return InputMemory.searchDetailed(keys, segmentation, true, store, syllableStore);
     }
 
@@ -462,7 +706,7 @@ export class InputMemory {
         limit: number = InputMemory.defaultShortcutLimit, mark?: string): InternalLexicon[] {
         const code = InputMemory.hashCode(InputMemory.normalizeShortcutText(text));
         const lexicons: InternalLexicon[] = [];
-        const command: string = "SELECT word, romanization, frequency, latest FROM memory WHERE shortcut = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
+        const command: string = "SELECT word, romanization, frequency, latest FROM core_memory WHERE shortcut = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -491,7 +735,7 @@ export class InputMemory {
         limit: number = InputMemory.defaultSpellLimit, mark?: string): InternalLexicon[] {
         const code = InputMemory.hashCode(text);
         const lexicons: InternalLexicon[] = [];
-        const command: string = "SELECT word, romanization, frequency, latest FROM memory WHERE ping = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
+        const command: string = "SELECT word, romanization, frequency, latest FROM core_memory WHERE spell = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [code, limit]);
@@ -526,7 +770,7 @@ export class InputMemory {
     private static strictMatch(spell: number, shortcut: number, input: string, store: relationalStore.RdbStore,
         mark?: string, limit: number = InputMemory.defaultStrictLimit): InternalLexicon[] {
         const lexicons: InternalLexicon[] = [];
-        const command: string = "SELECT word, romanization, frequency, latest FROM memory WHERE ping = ? AND shortcut = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
+        const command: string = "SELECT word, romanization, frequency, latest FROM core_memory WHERE spell = ? AND shortcut = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [spell, shortcut, limit]);
@@ -558,32 +802,33 @@ export class InputMemory {
         return lexicons;
     }
 
-    static prepare(store: relationalStore.RdbStore) {
-        try {
-            const command: string = "CREATE TABLE IF NOT EXISTS memory(word TEXT NOT NULL, romanization TEXT NOT NULL, frequency INTEGER NOT NULL, latest INTEGER NOT NULL DEFAULT 0, shortcut INTEGER NOT NULL, ping INTEGER NOT NULL);";
-            store.executeSync(command);
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`)
-        }
-        InputMemory.ensureLatestColumn(store);
+    static prepare(store: relationalStore.RdbStore, settings?: preferences.Preferences) {
+        InputMemory.ensureCoreMemoryTable(store);
+        InputMemory.ensureCoreMemoryIndexes(store);
+        InputMemory.ensureLegacyLatestColumn(store);
         try {
             const command: string = "CREATE TABLE IF NOT EXISTS fallback(word TEXT NOT NULL, romanization TEXT NOT NULL, shortcut INTEGER NOT NULL, ping INTEGER NOT NULL);";
             store.executeSync(command);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
-            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`)
+            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`);
         }
         try {
             const command: string = "CREATE TABLE IF NOT EXISTS variant_sim(left INTEGER NOT NULL, right INTEGER NOT NULL);";
             store.executeSync(command);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
-            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`)
+            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`);
         }
         InputMemory.prepareFallbackTables(store);
+        if (settings !== undefined) {
+            InputMemory.performMigration(store, settings);
+        }
     }
     static process(candidates: Candidate[], store: relationalStore.RdbStore) {
+        if (InputMemory.isMigrating) {
+            return;
+        }
         const text: string = candidates.map(item => item.lexicon.text).join("");
         const romanization: string = candidates.map(item => item.lexicon.romanization ?? "").join(" ");
         const concatenated: Lexicon = {
@@ -593,7 +838,7 @@ export class InputMemory {
             input: "i",
             inputCount: 1,
             number: 0
-        }
+        };
         InputMemory.handle(concatenated, store);
     }
     private static handle(lexicon: Lexicon, store: relationalStore.RdbStore) {
@@ -608,11 +853,11 @@ export class InputMemory {
     private static find(lexicon: Lexicon, store: relationalStore.RdbStore): number {
         let frequency: number = 0;
         const romanization = lexicon.romanization ?? "X";
-        const command: string = "SELECT frequency FROM memory WHERE word = ? AND romanization = ? LIMIT 1;";
+        const command: string = "SELECT frequency FROM core_memory WHERE word = ? AND romanization = ? LIMIT 1;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command, [lexicon.text, romanization]);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 frequency = res.getLong(0);
             }
         } catch (error) {
@@ -631,7 +876,7 @@ export class InputMemory {
     private static update(lexicon: Lexicon, newFrequency: number, store: relationalStore.RdbStore) {
         const romanization = lexicon.romanization ?? "X";
         const latest = InputMemory.nowMilliseconds();
-        const command: string = "UPDATE memory SET frequency = ?, latest = ? WHERE word = ? AND romanization = ?;";
+        const command: string = "UPDATE core_memory SET frequency = ?, latest = ? WHERE word = ? AND romanization = ?;";
         try {
             store.executeSync(command, [newFrequency, latest, lexicon.text, romanization]);
         } catch (error) {
@@ -641,14 +886,10 @@ export class InputMemory {
     }
     private static insert(lexicon: Lexicon, store: relationalStore.RdbStore) {
         const romanization = lexicon.romanization ?? "X";
-        const anchors = romanization.match(/\b(\w)/g)?.join('') ?? "X";
-        const shortcutCode = InputMemory.hashCode(anchors);
-        const syllableText = romanization.replace(/[\d\s]/g, '');
-        const pingCode = InputMemory.hashCode(syllableText);
-        const latest = InputMemory.nowMilliseconds();
-        const command: string = "INSERT INTO memory (word, romanization, frequency, latest, shortcut, ping) VALUES (?, ?, ?, ?, ?, ?);";
+        const entry = InputMemory.makeMemoryEntry(lexicon.text, romanization);
+        const command: string = "INSERT INTO core_memory (word, romanization, frequency, latest, shortcut, spell, nine_key_anchors, nine_key_code) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         try {
-            store.executeSync(command, [lexicon.text, romanization, 1, latest, shortcutCode, pingCode]);
+            store.executeSync(command, [entry.word, entry.romanization, entry.frequency, entry.latest, entry.shortcut, entry.spell, entry.nineKeyAnchors, entry.nineKeyCode]);
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
@@ -748,7 +989,7 @@ export class InputMemory {
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
             res = store.querySqlSync(command);
-            if (res.goToNextRow()) {
+            if (res.goToFirstRow()) {
                 const shortcut = res.getLong(0);
                 needs = (shortcut != 110);
             }
