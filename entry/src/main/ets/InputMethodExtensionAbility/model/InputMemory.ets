@@ -8,6 +8,7 @@ import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { Segmentation, Scheme, Segmenter } from "./Segmenter";
 import { CharCode } from "./CharCode";
+import { Combo } from "../ninekey/Combo";
 
 interface InternalLexicon {
     readonly word: string;
@@ -202,7 +203,6 @@ export class InputMemory {
         }
         return results;
     }
-
     private static timeSort(items: InternalLexicon[], now: number = InputMemory.nowMilliseconds()): InternalLexicon[] {
         return [...items].sort((lhs, rhs) => {
             if (lhs.inputCount !== rhs.inputCount) {
@@ -219,7 +219,6 @@ export class InputMemory {
             return rhs.latest - lhs.latest;
         });
     }
-
     private static advancedSort(items: InternalLexicon[], inputLength: number): InternalLexicon[] {
         const now = InputMemory.nowMilliseconds();
         const recentEntries = items
@@ -236,7 +235,6 @@ export class InputMemory {
         });
         return [...recentEntries, ...InputMemory.timeSort(others, now)];
     }
-
     private static queryIdealSingleSyllable(keys: VirtualInputKey[], syllableStore: relationalStore.RdbStore): Scheme | undefined {
         if (keys.length < 1) {
             return undefined;
@@ -244,7 +242,6 @@ export class InputMemory {
         const segmentation = Segmenter.segment(keys, syllableStore);
         return segmentation.find((scheme: Scheme) => scheme.length === 1 && InputMemory.schemeLength(scheme) === keys.length);
     }
-
     private static matchedTailSyllable(keys: VirtualInputKey[], syllableStore: relationalStore.RdbStore,
         cache: Record<string, string>): string | undefined {
         if (keys.length < 1) {
@@ -264,7 +261,6 @@ export class InputMemory {
         cache[cacheKey] = originText;
         return originText;
     }
-
     private static descendingInputLengths(inputLength: number): number[] {
         const lengths: number[] = [];
         for (let index = inputLength - 1; index >= 1; index--) {
@@ -272,17 +268,42 @@ export class InputMemory {
         }
         return lengths;
     }
-
     private static idealLexicons(items: InternalLexicon[], inputLength: number, limit?: number): Lexicon[] {
         const sorted = InputMemory.distinctInternalLexicons(InputMemory.advancedSort(items, inputLength));
         const handled = limit === undefined ? sorted : sorted.slice(0, limit);
         return handled.map((item) => InputMemory.toLexicon(item, -1));
     }
-
     private static queriedLexicons(items: InternalLexicon[]): Lexicon[] {
         return InputMemory.distinctInternalLexicons(InputMemory.timeSort(items))
             .slice(0, 6)
             .map((item) => InputMemory.toLexicon(item, -2));
+    }
+
+    private static nineKeyQueriedLexicons(items: InternalLexicon[]): Lexicon[] {
+        return InputMemory.distinctInternalLexicons(InputMemory.nineKeyPeculiarSort(items))
+            .slice(0, 6)
+            .map((item) => InputMemory.toLexicon(item, -2));
+    }
+    private static nineKeyRegularSort(items: InternalLexicon[], isOrdered: boolean = false): InternalLexicon[] {
+        const frequencyPreferred = isOrdered ? [...items] : [...items].sort((lhs, rhs) => rhs.frequency - lhs.frequency);
+        const datePreferred = [...items].sort((lhs, rhs) => rhs.latest - lhs.latest);
+        return InputMemory.distinctInternalLexicons([
+            ...frequencyPreferred.slice(0, 3),
+            ...datePreferred.slice(0, 5),
+            ...frequencyPreferred
+        ]);
+    }
+    private static nineKeyPeculiarSort(items: InternalLexicon[]): InternalLexicon[] {
+        const inputCounts: number[] = [];
+        for (const item of items) {
+            if (!inputCounts.includes(item.inputCount)) {
+                inputCounts.push(item.inputCount);
+            }
+        }
+        inputCounts.sort((lhs, rhs) => rhs - lhs);
+        return inputCounts.flatMap((inputCount) => {
+            return InputMemory.nineKeyRegularSort(items.filter((item) => item.inputCount === inputCount));
+        });
     }
 
     private static tableExists(tableName: string, store: relationalStore.RdbStore): boolean {
@@ -802,6 +823,96 @@ export class InputMemory {
         return lexicons;
     }
 
+
+    static nineKeySearch(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
+        if (InputMemory.isMigrating) {
+            return [];
+        }
+        if (combos.length < 1 || combos.some((combo) => combo.isSpecial)) {
+            return [];
+        }
+        const inputLength = combos.length;
+        const fullCode = CharCode.comboCode(combos);
+        if (inputLength < 2) {
+            const codeMatched = InputMemory.nineKeyCodeMatch(fullCode, store, 100);
+            const anchorsMatched = InputMemory.nineKeyAnchorsMatch(fullCode, store, 100);
+            return [...codeMatched, ...anchorsMatched].map((item) => InputMemory.toLexicon(item, -1));
+        }
+        const fullCodeMatched = InputMemory.nineKeyRegularSort(InputMemory.nineKeyCodeMatch(fullCode, store, 100), true);
+        const fullAnchorsMatched = InputMemory.nineKeyRegularSort(InputMemory.nineKeyAnchorsMatch(fullCode, store, 100), true);
+        const ideal = InputMemory.distinctInternalLexicons([
+            ...fullCodeMatched.slice(0, 10),
+            ...InputMemory.nineKeyRegularSort([...fullCodeMatched, ...fullAnchorsMatched.slice(0, 5)])
+        ]).map((item) => InputMemory.toLexicon(item, -1));
+        const queried = InputMemory.nineKeyQueriedLexicons(InputMemory.descendingInputLengths(inputLength)
+            .flatMap((leadingLength) => {
+                const code = CharCode.comboCode(combos.slice(0, leadingLength));
+                return InputMemory.nineKeyCodeMatch(code, store, 4);
+            }));
+        return [...ideal, ...queried];
+    }
+    private static nineKeyAnchorsMatch(code: number, store: relationalStore.RdbStore, limit: number = 100): InternalLexicon[] {
+        if (code < 1) {
+            return [];
+        }
+        const lexicons: InternalLexicon[] = [];
+        const command: string = "SELECT word, romanization, frequency, latest FROM core_memory WHERE nine_key_anchors = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [code, limit]);
+            while (res.goToNextRow()) {
+                const word = res.getString(0);
+                const romanization = res.getString(1);
+                const frequency = res.getLong(2);
+                const latest = res.getLong(3);
+                const anchors = InputMemory.anchorsText(romanization);
+                lexicons.push(InputMemory.makeInternalLexicon(word, romanization, frequency, latest, anchors, anchors));
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
+        }
+        return lexicons;
+    }
+    private static nineKeyCodeMatch(code: number, store: relationalStore.RdbStore, limit: number = 100): InternalLexicon[] {
+        if (code < 1) {
+            return [];
+        }
+        const lexicons: InternalLexicon[] = [];
+        const command: string = "SELECT word, romanization, frequency, latest FROM core_memory WHERE nine_key_code = ? ORDER BY frequency DESC, latest DESC LIMIT ?;";
+        let res: relationalStore.ResultSet | undefined = undefined;
+        try {
+            res = store.querySqlSync(command, [code, limit]);
+            while (res.goToNextRow()) {
+                const word = res.getString(0);
+                const romanization = res.getString(1);
+                const frequency = res.getLong(2);
+                const latest = res.getLong(3);
+                const mark = InputMemory.stripTones(romanization).replace(/\s+/g, " ").trim();
+                const input = mark.replace(/\s+/g, "");
+                lexicons.push(InputMemory.makeInternalLexicon(word, romanization, frequency, latest, input, mark));
+            }
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error(`message: ${err.message}, code: ${err.code}`);
+        } finally {
+            try {
+                res?.close();
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`message: ${err.message}, code: ${err.code}`);
+            }
+        }
+        return lexicons;
+    }
+
     static prepare(store: relationalStore.RdbStore, settings?: preferences.Preferences) {
         InputMemory.ensureCoreMemoryTable(store);
         InputMemory.ensureCoreMemoryIndexes(store);
@@ -904,7 +1015,7 @@ export class InputMemory {
     }
     private static fallBackProcessSlices(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const inputLength: number = keys.length;
-        const range = [...Array(inputLength)].map((value: number, index: number) => index);
+        const range = [...Array(inputLength)].map((_value: number, index: number) => index);
         let items: Lexicon[] = range.flatMap(num => {
             const leadingKeys = keys.slice(0, inputLength - num);
             const leadingText = leadingKeys.map((key) => key.text).join("")

@@ -522,24 +522,37 @@ export class InputController {
             if (isPinyinReverseLookup) {
                 newLexicons = NineKeyPinyinResearcher.suggest(reverseLookupCombos, this.store);
             } else {
-                newLexicons = NineKeyResearcher.suggest(combos, this.store);
-            }
-            if (newLexicons.length > 0) {
-                this.isCoreStoreFunctional = true;
+                const queried = NineKeyResearcher.suggest(combos, this.store);
+                if (queried.length > 0) {
+                    this.isCoreStoreFunctional = true;
+                }
+                if (this.memory) {
+                    const memoryLexicons = InputMemory.nineKeySearch(combos, this.memory);
+                    newLexicons = Converter.dispatch(memoryLexicons, queried);
+                } else {
+                    this.prepareMemory();
+                    newLexicons = queried;
+                }
             }
         } else {
             this.prepareStore();
+            if (!isPinyinReverseLookup && this.memory) {
+                newLexicons = InputMemory.nineKeySearch(combos, this.memory);
+            } else if (!isPinyinReverseLookup) {
+                this.prepareMemory();
+            }
         }
         if (isPinyinReverseLookup) {
             this.updatePreviewText(this.buildNineKeyPinyinReverseLookupPreview(reverseLookupCombos, newLexicons));
         } else {
             this.updatePreviewText(this.buildNineKeyPreviewText(combos, newLexicons));
         }
+        const conversionStore = isPinyinReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
                 type: CandidateType.Cantonese,
-                text: needsConversion ? Converter.convert(item.text, true, this.store) : item.text,
+                text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
                 comment: item.romanization,
                 lexicon: item,
                 number: index,
