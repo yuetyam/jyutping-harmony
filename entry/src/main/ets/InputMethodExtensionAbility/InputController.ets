@@ -929,6 +929,9 @@ export class InputController {
     @Trace keyboardForm: KeyboardForm = KeyboardForm.Primary;
     @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Primary;
     transformTo(destination: KeyboardForm) {
+        if (!(KeyboardFormCompanion.isBufferable(destination)) && this.isBuffering) {
+            this.clearBuffer();
+        }
         this.previousKeyboardForm = this.keyboardForm;
         this.keyboardForm = destination;
     }
