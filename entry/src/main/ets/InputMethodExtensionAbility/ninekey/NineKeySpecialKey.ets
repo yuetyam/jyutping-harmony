@@ -4,16 +4,19 @@ import { Combo } from "./Combo";
 
 @ComponentV2
 export default struct NineKeySpecialKey {
-
     @Local private isTouching: boolean = false;
-
     build() {
         Stack() {
-            Flex({
-                direction: FlexDirection.Column,
-                alignItems: ItemAlign.Center,
-                justifyContent: FlexAlign.Center
-            }) {
+            Stack() {
+                Stack({ alignContent: Alignment.Bottom }) {
+                    Stack()
+                        .width("100%")
+                        .height("100%")
+                    Text("反查")
+                        .fontSize(10)
+                        .opacity(controller.isBuffering ? 0 : 0.35)
+                }
+                .padding(2)
                 Text("R")
                     .fontSize(16)
                     .opacity(controller.isBuffering ? 0 : 1)

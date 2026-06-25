@@ -1,4 +1,5 @@
 import controller from '../InputController'
+import { KeyboardFormCompanion } from '../model/KeyboardForm';
 import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
@@ -11,7 +12,7 @@ export default struct NineKeySpaceKey {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
-                Text(controller.isMutilated ? "粤拼" : "粵拼")
+                Text(KeyboardFormCompanion.isDedicatedNumbers(controller.keyboardForm) ? "空格" : (controller.isMutilated ? "粤拼" : "粵拼"))
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
             .borderRadius(PresetConstant.largeKeyCornerRadius)
