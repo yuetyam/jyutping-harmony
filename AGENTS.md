@@ -32,7 +32,7 @@
   - `entry/hvigorfile.ts`
 - Prefer DevEco Studio for build/run/test tasks unless the environment already has HarmonyOS CLI tools installed.
 - For CLI builds, prefer the checked-in wrapper:
-  - `./hvigorw clean assembleHap -p product=default -p buildMode=debug`
+  - `./hvigorw clean assembleHap -p product=default -p buildMode=debug --no-daemon --no-incremental`
   - If DevEco Studio is not in a common install location, set `DEVECO_STUDIO_HOME` to the app `Contents` directory first.
 - If you bypass the wrapper, first confirm `hvigor` exists on the host; do not invent replacement scripts.
 - Keep `code-linter.json5` in mind: linting targets `**/*.ets` and explicitly ignores `src/test`, `src/ohosTest`, `src/mock`, `oh_modules`, and build outputs.

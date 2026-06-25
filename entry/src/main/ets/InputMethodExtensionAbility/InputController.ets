@@ -21,6 +21,7 @@ import { VirtualInputKey } from './model/VirtualInputKey';
 import { BasicInputEvent } from './model/BasicInputEvent';
 import { KeyboardLayout, KeyboardLayoutCompanion } from './model/KeyboardLayout';
 import { Combo } from './ninekey/Combo';
+import { SidebarSyllable } from './ninekey/SidebarSyllable';
 import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
 import { NineKeyResearcher } from './model/NineKeyResearcher';
 import { PinyinResearcher } from './model/PinyinResearcher';
@@ -394,6 +395,9 @@ export class InputController {
     }
     @Trace candidates: Candidate[] = [];
     private selectedCandidates: Candidate[] = [];
+    private nineKeyCachedCandidates: Candidate[] = [];
+    @Trace sidebarSyllables: SidebarSyllable[] = [];
+    private selectedSyllables: SidebarSyllable[] = [];
     @Trace isBuffering: boolean = false;
     private bufferEvents: BasicInputEvent[] = [];
     private comboBuffer: Combo[] = [];
@@ -434,6 +438,8 @@ export class InputController {
             this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
             this.inlinePreEditText = "";
             this.selectedCandidates = [];
+            this.nineKeyCachedCandidates = [];
+            this.clearSidebarSyllables();
             if (this.keyboardForm === KeyboardForm.CandidateBoard) {
                 this.transformTo(KeyboardForm.Primary);
             }
@@ -443,6 +449,8 @@ export class InputController {
             this.runNineKeyInputSession();
             return;
         }
+        this.nineKeyCachedCandidates = [];
+        this.clearSidebarSyllables();
         const needsConversion: boolean = this.isMutilated;
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
@@ -559,8 +567,111 @@ export class InputController {
             };
             newCandidates.push(instance);
         }
-        this.candidates = newCandidates;
+        if (isPinyinReverseLookup) {
+            this.nineKeyCachedCandidates = [];
+            this.clearSidebarSyllables();
+            this.candidates = newCandidates;
+        } else {
+            this.nineKeyCachedCandidates = newCandidates;
+            this.updateSidebarSyllables(true);
+        }
     }
+
+    handleSidebarTapping(index: number) {
+        if (index < 0 || index >= this.sidebarSyllables.length) {
+            return;
+        }
+        const item = this.sidebarSyllables[index];
+        if (!item) {
+            return;
+        }
+        const shouldClearSelected: boolean = item.isSelected && index < (this.selectedSyllables.length - 1);
+        if (shouldClearSelected) {
+            this.selectedSyllables = [];
+        } else {
+            const updated = new SidebarSyllable(item.text, !item.isSelected);
+            const changed = [...this.sidebarSyllables];
+            changed.splice(index, 1, updated);
+            const selected = changed.filter((syllable) => syllable.isSelected);
+            const unselected = changed.filter((syllable) => !syllable.isSelected);
+            this.sidebarSyllables = [...selected, ...unselected];
+            this.selectedSyllables = selected;
+        }
+        this.updateSidebarSyllables();
+    }
+    private updateSidebarSyllables(shouldRefresh: boolean = false) {
+        if (shouldRefresh || this.selectedSyllables.length < 1) {
+            this.candidates = this.nineKeyCachedCandidates;
+            this.sidebarSyllables = this.distinctStrings(this.nineKeyCachedCandidates
+                .filter((candidate) => candidate.type === CandidateType.Cantonese)
+                .map((candidate) => this.firstRomanizationSyllable(candidate))
+                .filter((text) => text.length > 0)
+            ).map((text) => new SidebarSyllable(text));
+            return;
+        }
+        const selected = this.selectedSyllables.map((item) => item.text);
+        const selectedCount = selected.length;
+        this.candidates = this.nineKeyCachedCandidates.filter((candidate) => {
+            const syllables = this.splitRomanization(this.stripTones(candidate.lexicon.romanization ?? ""));
+            if (syllables.length < selectedCount) {
+                return this.startsWithSyllables(selected, syllables);
+            }
+            return this.startsWithSyllables(syllables, selected);
+        });
+        const selectedLength = selected.reduce((acc, item) => acc + item.length, 0);
+        if (selectedLength >= this.comboBuffer.length) {
+            this.sidebarSyllables = this.selectedSyllables;
+            return;
+        }
+        const leadingLength = selectedLength + selectedCount;
+        const newSyllables = this.distinctStrings(this.candidates
+            .map((candidate) => {
+                const romanization = this.stripTones(candidate.lexicon.romanization ?? "");
+                return this.splitRomanization(romanization.slice(leadingLength))[0] ?? "";
+            })
+            .filter((text) => text.length > 0))
+            .map((text) => new SidebarSyllable(text));
+        this.sidebarSyllables = [...this.selectedSyllables, ...newSyllables];
+    }
+    private clearSidebarSyllables() {
+        this.sidebarSyllables = [];
+        this.selectedSyllables = [];
+    }
+
+    private firstRomanizationSyllable(candidate: Candidate): string {
+        const romanization = this.stripTones(candidate.lexicon.romanization ?? "");
+        return this.splitRomanization(romanization)[0] ?? "";
+    }
+    private stripTones(text: string): string {
+        return text.replace(/[1-6]/g, "");
+    }
+    private splitRomanization(text: string): string[] {
+        return text.trim().split(/\s+/).filter((item) => item.length > 0);
+    }
+    private distinctStrings(items: string[]): string[] {
+        const handled: string[] = [];
+        const results: string[] = [];
+        for (const item of items) {
+            if (handled.includes(item)) {
+                continue;
+            }
+            handled.push(item);
+            results.push(item);
+        }
+        return results;
+    }
+    private startsWithSyllables(items: string[], prefix: string[]): boolean {
+        if (prefix.length > items.length) {
+            return false;
+        }
+        for (let index = 0; index < prefix.length; index++) {
+            if (items[index] !== prefix[index]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private joinedBufferTexts(): string {
         return this.bufferEvents.map(event => KeyboardCaseCompanion.isLowercased(event.kbCase) ? event.key.text : event.key.text.toUpperCase()).join("");
     }
@@ -739,6 +850,7 @@ export class InputController {
             return;
         }
         this.selectedCandidates.push(candidate);
+        this.selectedSyllables = [];
         this.comboBuffer = this.comboBuffer.slice(candidate.lexicon.inputCount);
         if (this.comboBuffer.length < 1) {
             if (this.memory) {
@@ -761,6 +873,7 @@ export class InputController {
         } else {
             if (this.isNineKeyActive()) {
                 this.comboBuffer.pop();
+                this.selectedSyllables = [];
             } else {
                 this.bufferEvents.pop();
             }

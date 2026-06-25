@@ -1,32 +1,34 @@
 import controller from '../InputController';
+import { SidebarSyllable } from './SidebarSyllable';
+import { util } from '@kit.ArkTS';
 
 @ComponentV2
-export default struct SymbolSidebarScrollView {
-    @Param @Require @Once symbols: string[];
+export default struct SidebarScrollView {
     private scroller: Scroller = new Scroller();
     build() {
         List({ scroller: this.scroller }) {
-            ForEach(this.symbols, (symbol: string) => {
+            ForEach(controller.sidebarSyllables, (item: SidebarSyllable, index: number) => {
                 ListItem() {
                     Button() {
-                        Text(symbol)
+                        Text(item.text)
                             .textAlign(TextAlign.Center)
-                            .fontSize(18)
-                            .fontFamily('HarmonyOS Sans TC')
+                            .maxLines(1)
+                            .textOverflow({ overflow: TextOverflow.Ellipsis })
+                            .fontSize(15)
                     }
                     .borderRadius(0)
-                    .backgroundColor(Color.Transparent)
+                    .backgroundColor(item.isSelected ? $r('app.color.key_emphatic') : Color.Transparent)
                     .width('100%')
-                    .height('25%')
+                    .height(item.isSelected ? '15%' : '25%')
                     .onClick(() => {
                         controller.playInputSound();
                         controller.triggerHapticFeedback();
-                        controller.insert(symbol);
+                        controller.handleSidebarTapping(index);
                         this.scroller.scrollToIndex(0);
                     })
                 }
                 ListItem() { Divider() }
-            }, (item: string) => item)
+            }, (item: SidebarSyllable) => (item.text + util.generateRandomUUID()))
         }
         .listDirection(Axis.Vertical)
         .scrollBar(BarState.Off)
