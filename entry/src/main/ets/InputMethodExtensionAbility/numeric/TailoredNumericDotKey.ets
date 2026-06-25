@@ -1,4 +1,5 @@
 import controller from "../InputController";
+import { PresetConstant } from "../model/PresetConstant";
 import { VirtualInputKey } from "../model/VirtualInputKey";
 
 @ComponentV2
@@ -15,7 +16,7 @@ export default struct TailoredNumericDotKey {
                 Text(this.keyText).fontSize(24)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.largeKeyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

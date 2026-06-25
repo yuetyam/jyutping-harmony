@@ -1,5 +1,6 @@
 import controller from '../InputController';
 import { KeyboardForm } from '../model/KeyboardForm'
+import { PresetConstant } from '../model/PresetConstant';
 
 @Component
 export default struct TransformKey {
@@ -24,7 +25,7 @@ export default struct TransformKey {
                 Text(this.keyText())
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

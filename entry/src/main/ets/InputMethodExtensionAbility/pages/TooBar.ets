@@ -74,7 +74,7 @@ export default struct ToolBar {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
             })
-            // .opacity(0)
+            .opacity(0)
 
             InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')

@@ -1,5 +1,6 @@
 import controller from "../InputController";
 import { KeyboardFormCompanion } from "../model/KeyboardForm";
+import { PresetConstant } from "../model/PresetConstant";
 import SymbolSidebarScrollView from "./SymbolSidebarScrollView"
 
 @ComponentV2
@@ -16,7 +17,7 @@ export default struct SidebarPanel {
                 SymbolSidebarScrollView({ symbols: KeyboardFormCompanion.isDedicatedNumbers(controller.keyboardForm) ? this.symbols : this.punctuation })
             }
             .backgroundColor($r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.largeKeyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

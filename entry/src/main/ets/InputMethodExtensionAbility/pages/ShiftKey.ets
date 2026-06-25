@@ -1,5 +1,6 @@
 import controller from '../InputController';
 import { KeyboardCase } from '../model/KeyboardCase';
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct ShiftKey {
@@ -19,7 +20,7 @@ export default struct ShiftKey {
                     .height('22vp')
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

@@ -1,4 +1,5 @@
 import controller from '../InputController'
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct ABCLeftKey {
@@ -15,7 +16,7 @@ export default struct ABCLeftKey {
                 Text(this.keyText).fontSize(20)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

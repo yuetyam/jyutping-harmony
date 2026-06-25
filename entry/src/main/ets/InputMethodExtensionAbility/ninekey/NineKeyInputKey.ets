@@ -1,4 +1,5 @@
 import controller from "../InputController";
+import { PresetConstant } from "../model/PresetConstant";
 import { Combo } from "./Combo";
 
 @ComponentV2
@@ -16,7 +17,7 @@ export default struct NineKeyInputKey {
                     .fontSize(16)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.largeKeyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

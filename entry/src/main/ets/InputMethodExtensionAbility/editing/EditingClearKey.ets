@@ -1,4 +1,5 @@
 import controller from '../InputController';
+import { PresetConstant } from '../model/PresetConstant';
 import { EditingAction } from './EditingAction';
 
 @ComponentV2
@@ -18,14 +19,14 @@ export default struct EditingClearKey {
                     .fontSize(11)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
-            .borderRadius(8)
+            .borderRadius(PresetConstant.ultraKeyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,
                 offsetY: 1
             })
-            .width('calc(100% - 8vp)')
-            .height('calc(100% - 8vp)')
+            .width('calc(100% - 6vp)')
+            .height('calc(100% - 6vp)')
         }
         .width('100%')
         .height('100%')

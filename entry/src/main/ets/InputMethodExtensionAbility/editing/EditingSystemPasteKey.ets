@@ -27,7 +27,7 @@ export default struct EditingSystemPasteKey {
                             break
                     }
                 })
-                .width('calc(100% - 8vp)')
+                .width('calc(100% - 6vp)')
                 .height('calc(100% - 16vp)')
         }
         .width('100%')

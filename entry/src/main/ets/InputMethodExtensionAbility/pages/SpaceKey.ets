@@ -1,5 +1,6 @@
 import controller from '../InputController'
 import { InputModeCompanion } from '../model/InputMode'
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct SpaceKey {
@@ -14,7 +15,7 @@ export default struct SpaceKey {
                 Text(InputModeCompanion.isABC(controller.inputMode) ? "space" : (controller.isMutilated ? "粤拼" : "粵拼"))
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

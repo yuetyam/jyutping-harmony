@@ -1,6 +1,7 @@
 import controller from '../InputController';
 import { VirtualInputKey } from '../model/VirtualInputKey';
 import { KeyboardCaseCompanion } from '../model/KeyboardCase';
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct LetterKey {
@@ -18,7 +19,7 @@ export default struct LetterKey {
                     .fontSize(22)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,

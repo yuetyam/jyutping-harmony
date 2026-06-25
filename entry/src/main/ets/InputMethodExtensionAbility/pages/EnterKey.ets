@@ -1,4 +1,5 @@
 import controller from '../InputController'
+import { PresetConstant } from '../model/PresetConstant'
 
 @ComponentV2
 export default struct EnterKey {
@@ -16,7 +17,7 @@ export default struct EnterKey {
                     .height('20vp')
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
-            .borderRadius(7)
+            .borderRadius(PresetConstant.keyCornerRadius)
             .shadow({
                 radius: 1,
                 color: Color.Gray,
