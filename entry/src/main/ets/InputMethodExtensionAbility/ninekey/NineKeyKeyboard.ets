@@ -9,7 +9,7 @@ import NineKeyNavigateKey from './NineKeyNavigateKey';
 import NineKeyBackspaceKey from './NineKeyBackspaceKey';
 import NineKeyEnterKey from './NineKeyEnterKey';
 import NineKeySpaceKey from './NineKeySpaceKey';
-import NineKeyPlaceholderView from './NineKeyPlaceholderView';
+import SidebarPanel from './SidebarPanel';
 
 @ComponentV2
 export default struct NineKeyKeyboard {
@@ -44,7 +44,7 @@ export default struct NineKeyKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyPlaceholderView().width("22.2%")
+                        SidebarPanel().width("22.2%")
                         Flex({
                             direction: FlexDirection.Column,
                             alignItems: ItemAlign.Center,

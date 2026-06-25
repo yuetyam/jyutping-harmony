@@ -55,7 +55,7 @@ struct LayoutOptionView {
     private shape = new CircleShape({ width: this.shapeSize, height: this.shapeSize });
     build() {
         Column({ space: 2 }) {
-            Stack() {
+            Button() {
                 Image($r('app.media.button_show_keyboard'))
                     .fillColor((controller.keyboardLayout === this.layout) ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
                     .width(this.iconSize)

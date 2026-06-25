@@ -38,6 +38,12 @@ export namespace KeyboardFormCompanion {
     export function isPrimary(form: KeyboardForm): boolean {
         return form === KeyboardForm.Primary;
     }
+    export function isDedicatedNumbers(form: KeyboardForm): boolean {
+        return form === KeyboardForm.DedicatedNumbers;
+    }
+    export function isDedicatedStroke(form: KeyboardForm): boolean {
+        return form === KeyboardForm.DedicatedStroke;
+    }
     export  function isBufferable(form: KeyboardForm): boolean {
         switch (form) {
             case KeyboardForm.Primary: return true

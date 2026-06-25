@@ -5,9 +5,9 @@ import NineKeyNavigateKey from '../ninekey/NineKeyNavigateKey';
 import NineKeyBackspaceKey from '../ninekey/NineKeyBackspaceKey';
 import NineKeyEnterKey from '../ninekey/NineKeyEnterKey';
 import NineKeySpaceKey from '../ninekey/NineKeySpaceKey';
-import NineKeyPlaceholderView from '../ninekey/NineKeyPlaceholderView';
 import { VirtualInputKey } from '../model/VirtualInputKey';
 import TailoredNumericDotKey from './TailoredNumericDotKey';
+import SidebarPanel from '../ninekey/SidebarPanel';
 
 @ComponentV2
 export default struct TailoredNumericKeyboard {
@@ -38,7 +38,7 @@ export default struct TailoredNumericKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyPlaceholderView().width("22.2%")
+                        SidebarPanel().width("22.2%")
                         Flex({
                             direction: FlexDirection.Column,
                             alignItems: ItemAlign.Center,

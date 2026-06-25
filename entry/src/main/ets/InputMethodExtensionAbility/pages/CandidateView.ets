@@ -16,7 +16,7 @@ export default struct CandidateView {
                 .maxLines(1)
                 .fontSize(18)
         }
-        .padding({ left: 8, right: 8 })
+        .padding({ left: 10, right: 10 })
         .height('100%')
     }
 }

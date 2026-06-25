@@ -1,5 +1,11 @@
+import controller from "../InputController";
+import { KeyboardFormCompanion } from "../model/KeyboardForm";
+import SymbolSidebarScrollView from "./SymbolSidebarScrollView"
+
 @ComponentV2
 export default struct SidebarPanel {
+    private punctuation: string[] = ["，", "。", "？", "！", "、", "：", "；", "／", "…", "~", "～"];
+    private symbols: string[] = ["+", "-", "*", "/", "=", "%", ":", "@", "#", ",", "$", "~", "≈", "×"];
     build() {
         Stack() {
             Flex({
@@ -7,6 +13,7 @@ export default struct SidebarPanel {
                 alignItems: ItemAlign.Center,
                 justifyContent: FlexAlign.Center
             }) {
+                SymbolSidebarScrollView({ symbols: KeyboardFormCompanion.isDedicatedNumbers(controller.keyboardForm) ? this.symbols : this.punctuation })
             }
             .backgroundColor($r('app.color.key_shallow'))
             .borderRadius(7)
