@@ -28,6 +28,7 @@ import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
 import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
+import { StructureResearcher } from './model/StructureResearcher';
 
 interface ReverseLookupQuery {
     readonly method: ReverseLookupMethod;
@@ -37,6 +38,7 @@ interface ReverseLookupQuery {
 interface ReverseLookupSuggestion {
     readonly lexicons: Lexicon[];
     readonly pinyinSegmentation: PinyinSegmentation;
+    readonly structureSegmentation: Segmentation;
 }
 
 interface NineKeyReverseLookupQuery {
@@ -778,6 +780,7 @@ export class InputController {
         return {
             lexicons: [],
             pinyinSegmentation: [],
+            structureSegmentation: [],
         };
     }
 
@@ -788,11 +791,20 @@ export class InputController {
                 return {
                     lexicons: PinyinResearcher.suggest(query.keys, pinyinSegmentation, store),
                     pinyinSegmentation: pinyinSegmentation,
+                    structureSegmentation: [],
+                };
+            }
+            case ReverseLookupMethod.Structure: {
+                const syllableKeys = query.keys.filter((key) => key.isSyllableLetter);
+                const structureSegmentation = Segmenter.segment(syllableKeys, store);
+                return {
+                    lexicons: StructureResearcher.suggest(query.keys, structureSegmentation, store),
+                    pinyinSegmentation: [],
+                    structureSegmentation: structureSegmentation,
                 };
             }
             case ReverseLookupMethod.Cangjie:
             case ReverseLookupMethod.Stroke:
-            case ReverseLookupMethod.Structure:
             default:
                 return this.emptyReverseLookupSuggestion();
         }
@@ -817,8 +829,10 @@ export class InputController {
                     suggestion.lexicons);
             case ReverseLookupMethod.Cangjie:
             case ReverseLookupMethod.Stroke:
-            case ReverseLookupMethod.Structure:
                 return this.buildRawReverseLookupPreview(bufferText, query.keys, suggestion.lexicons);
+            case ReverseLookupMethod.Structure:
+                return this.buildStructureReverseLookupPreview(bufferText, query.keys, suggestion.structureSegmentation,
+                    suggestion.lexicons);
             default:
                 return bufferText;
         }
@@ -859,6 +873,28 @@ export class InputController {
         }
         const tail = reverseText.slice(leadingLength);
         return `${prefix} ${PinyinSegmenter.schemeMark(bestScheme)} ${tail}`.trim();
+    }
+    private buildStructureReverseLookupPreview(bufferText: string, keys: VirtualInputKey[], segmentation: Segmentation,
+        lexicons: Lexicon[]): string {
+        if (lexicons.length < 1) {
+            return bufferText;
+        }
+        const prefix = bufferText.slice(0, 1);
+        const reverseText = bufferText.slice(1);
+        const hasPeculiarInput = keys.some((key) => !key.isSyllableLetter);
+        if (hasPeculiarInput) {
+            return `${prefix} ${this.formatPreviewMark(this.toneConvertedText(reverseText))}`.trim();
+        }
+        const bestScheme = segmentation[0];
+        if (bestScheme === undefined) {
+            return `${prefix} ${reverseText}`.trim();
+        }
+        const leadingLength = this.schemeLength(bestScheme);
+        if (leadingLength >= keys.length) {
+            return `${prefix} ${this.schemeMark(bestScheme)}`.trim();
+        }
+        const tail = reverseText.slice(leadingLength);
+        return `${prefix} ${this.schemeMark(bestScheme)} ${tail}`.trim();
     }
     private buildNineKeyPreviewText(combos: Combo[], lexicons: Lexicon[]): string {
         const bufferText = this.joinedNineKeyTexts(combos);
