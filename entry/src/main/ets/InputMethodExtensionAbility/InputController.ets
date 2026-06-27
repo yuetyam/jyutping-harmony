@@ -908,12 +908,7 @@ export class InputController {
     }
     enterKeyAction() {
         if (this.isBuffering) {
-            if (this.isTextPreviewSupported) {
-                this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
-            } else {
-                const text: string = this.isNineKeyActive() ? this.joinedNineKeyTexts() : this.joinedBufferTexts();
-                this.insert(text);
-            }
+            this.flushBufferText();
             this.clearBuffer();
         } else {
             let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
@@ -921,6 +916,14 @@ export class InputController {
                 console.error(`Failed to sendKeyFunction() in enterKeyAction(), actionCode: ${actionCode}`);
             })
         }
+    }
+    private flushBufferText() {
+        if (this.isTextPreviewSupported) {
+            this.inputClient?.setPreviewText("", { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
+            this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
+        }
+        const text: string = this.isNineKeyActive() ? this.joinedNineKeyTexts() : this.joinedBufferTexts();
+        this.insert(text);
     }
     dismissKeyboard() {
         this.panel?.hide();
@@ -930,6 +933,7 @@ export class InputController {
     @Trace previousKeyboardForm: KeyboardForm = KeyboardForm.Primary;
     transformTo(destination: KeyboardForm) {
         if (!(KeyboardFormCompanion.isBufferable(destination)) && this.isBuffering) {
+            this.flushBufferText();
             this.clearBuffer();
         }
         this.previousKeyboardForm = this.keyboardForm;

@@ -7,7 +7,7 @@ import SymbolSidebarScrollView from "./SymbolSidebarScrollView";
 @ComponentV2
 export default struct SidebarPanel {
     private punctuation: string[] = ["，", "。", "？", "！", "、", "：", "；", "／", "…", "~", "～"];
-    private symbols: string[] = ["+", "-", "*", "/", "=", "%", ":", "@", "#", ",", "$", "~", "≈", "×"];
+    private symbols: string[] = ["+", "-", "*", "/", "=", "%", ":", "@", "#", ",", "$", "~", "≈", "×", "÷"];
     build() {
         Stack() {
             Flex({
