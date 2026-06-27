@@ -894,15 +894,10 @@ export class InputController {
         if (this.candidates.length > 0) {
             this.selectCandidateBy(0);
         } else if (this.isBuffering) {
-            if (this.isTextPreviewSupported) {
-                this.inputClient?.finishTextPreview().catch(() => { console.error("Failed to finishTextPreview()"); });
-            } else {
-                const text: string = this.isNineKeyActive() ? this.joinedNineKeyTexts() : this.joinedBufferTexts();
-                this.insert(text);
-            }
+            this.flushBufferText();
             this.clearBuffer();
         } else {
-            let text = " ";
+            const text = " ";
             this.insert(text);
         }
     }

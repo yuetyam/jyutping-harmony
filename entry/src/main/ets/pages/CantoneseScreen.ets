@@ -5,7 +5,7 @@ import { WebLinkView } from "./WebLinkView";
 export struct CantoneseScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     build() {
         Navigation(this.pageStack) {
             List({ space: 20 }) {

@@ -6,7 +6,7 @@ export function PageBuilder() {
 @Component
 export struct TonesPage {
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     build() {
         NavDestination() {
             List({ space: 8 }) {

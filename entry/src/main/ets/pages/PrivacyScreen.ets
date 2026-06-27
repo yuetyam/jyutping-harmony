@@ -6,7 +6,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 export struct PrivacyScreen {
     @Link privacy: string
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     build() {
         List() {
             ListItem() {

@@ -6,7 +6,7 @@ export function PageBuilder() {
 @Component
 export struct InitialsPage {
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     build() {
         NavDestination() {
             List({ space: 8 }) {
@@ -119,6 +119,10 @@ export struct InitialsPage {
                 .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
+
+                ListItem() {
+                    Stack().height(144)
+                }
             }
             .padding({ left: 16, right: 16 })
             .width('100%')

@@ -8,7 +8,7 @@ export function PageBuilder() {
 @ComponentV2
 export struct ConfusionPage {
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     @Local entries: ConfusionEntry[] = [];
     aboutToAppear(): void {
         let context = this.getUIContext().getHostContext();
@@ -38,6 +38,10 @@ export struct ConfusionPage {
                     .backgroundColor(this.groupBackgroundColor)
                     .borderRadius(this.groupBorderRadius)
                 }, (item: ConfusionEntry) => item.simplified)
+
+                ListItem() {
+                    Stack().height(144)
+                }
             }
             .padding({ left: 16, right: 16 })
             .width('100%')

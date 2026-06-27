@@ -23,7 +23,7 @@ import { YingWaaLexicon } from '../search/YingWaaUnit';
 export struct HomeScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     @Local private inputText: string = '';
     @Local private submittedText: string = '';
     @Monitor('submittedText') performSearch() {
@@ -145,7 +145,7 @@ export struct HomeScreen {
 
     build() {
         Navigation(this.pageStack) {
-            List({ space: 20 }) {
+            List({ space: 24 }) {
                 ListItem() {
                     Search({
                         value: this.inputText,
@@ -317,6 +317,19 @@ export struct HomeScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Text($r('app.string.guide_structure_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r('app.string.guide_structure_reverse_lookup_body'))
+                    }
+                }
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
                 /*
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
@@ -365,24 +378,6 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r('app.string.guide_structure_reverse_lookup_heading'))
-                            .fontWeight(FontWeight.Bold)
-                    }
-
-                    ListItem() {
-                        Divider()
-                    }
-
-                    ListItem() {
-                        Text($r('app.string.guide_structure_reverse_lookup_body'))
-                    }
-                }
-                .padding(8)
-                .backgroundColor(this.groupBackgroundColor)
-                .borderRadius(this.groupBorderRadius)
-
-                ListItemGroup({ space: 8 }) {
-                    ListItem() {
                         Text($r('app.string.guide_tones_input_heading'))
                             .fontWeight(FontWeight.Bold)
                     }
@@ -408,6 +403,10 @@ export struct HomeScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
                 */
+
+                ListItem() {
+                    Stack().height(144)
+                }
             }
             .padding({ left: 16, right: 16 })
             .width('100%')

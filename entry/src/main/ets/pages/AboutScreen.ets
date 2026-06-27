@@ -6,7 +6,7 @@ import { WebLinkView } from './WebLinkView';
 export struct AboutScreen {
     private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     @State private version: string = '_error';
     aboutToAppear(): void {
         bundleManager.getBundleInfoForSelf(bundleManager.BundleFlag.GET_BUNDLE_INFO_WITH_APPLICATION).then((bundleInfo) => {

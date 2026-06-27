@@ -6,7 +6,7 @@ export default struct SettingsPanel {
     private shapeLength = '44vp';
     private shape = new CircleShape({ width: this.shapeLength, height: this.shapeLength });
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     private groupHorizontalPadding: Length = 12;
 
     build() {

@@ -86,11 +86,11 @@
     },
     {
       "name": "guide_structure_reverse_lookup_heading",
-      "value": "用兩分拆字反查粵拼"
+      "value": "用拆字輸入反查粵拼"
     },
     {
       "name": "guide_structure_reverse_lookup_body",
-      "value": "兩分即係將一個字分成兩部分，比如【林 = 木, 木】。以 q 開始，再輸入兩個字嘅粵拼，例如 qmukmuk → 林。"
+      "value": "拆字例如【林 = 木, 木】，以 q 開始，再輸入兩個字嘅粵拼: qmukmuk → 林。"
     },
     {
       "name": "guide_tones_input_heading",

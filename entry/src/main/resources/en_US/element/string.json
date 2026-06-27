@@ -62,7 +62,7 @@
     },
     {
       "name": "guide_pinyin_reverse_lookup_body",
-      "value": "Start with “r”, then enter Pinyin code. For example, “rlin” → “林”."
+      "value": "Start with “r”, then enter Pinyin. For example, “rlin” → “林”."
     },
     {
       "name": "guide_cangjie_reverse_lookup_heading",
@@ -90,7 +90,7 @@
     },
     {
       "name": "guide_structure_reverse_lookup_body",
-      "value": "Start with “q”, then enter two components’ Jyutping. For example, “qmukmuk” → “林”."
+      "value": "Start with “q”, then enter the Jyutping of the components. For example, “qmukmuk” → “林”."
     },
     {
       "name": "guide_tones_input_heading",

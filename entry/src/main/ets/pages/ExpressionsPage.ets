@@ -6,7 +6,7 @@ export function PageBuilder() {
 @Component
 export struct ExpressionsPage {
     private groupBackgroundColor = $r('app.color.group_background');
-    private groupBorderRadius: Length = 12;
+    private groupBorderRadius: Length = 16;
     private checkmark = $r('sys.symbol.checkmark_circle');
     private xmark = $r('sys.symbol.xmark_circle');
     private infoMark = $r('sys.symbol.info_circle');
@@ -468,6 +468,10 @@ export struct ExpressionsPage {
                 .padding(8)
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
+
+                ListItem() {
+                    Stack().height(144)
+                }
             }
             .padding({ left: 16, right: 16 })
             .width('100%')
