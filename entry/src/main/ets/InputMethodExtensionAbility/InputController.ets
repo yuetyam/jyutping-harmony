@@ -26,7 +26,23 @@ import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
 import { NineKeyResearcher } from './model/NineKeyResearcher';
 import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
+import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
 import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
+
+interface ReverseLookupQuery {
+    readonly method: ReverseLookupMethod;
+    readonly keys: VirtualInputKey[];
+}
+
+interface ReverseLookupSuggestion {
+    readonly lexicons: Lexicon[];
+    readonly pinyinSegmentation: PinyinSegmentation;
+}
+
+interface NineKeyReverseLookupQuery {
+    readonly method: ReverseLookupMethod;
+    readonly combos: Combo[];
+}
 
 @ObservedV2
 export class InputController {
@@ -456,13 +472,13 @@ export class InputController {
         let newLexicons: Lexicon[] = [];
         const keys = this.bufferEvents.map(event => event.key);
         let segmentation: Segmentation = [];
-        const isPinyinReverseLookup = this.isPinyinReverseLookup(keys);
-        const reverseLookupKeys = isPinyinReverseLookup ? keys.slice(1) : [];
-        let pinyinSegmentation: PinyinSegmentation = [];
+        const reverseLookupQuery = this.reverseLookupQueryForKeys(keys);
+        let reverseLookupSuggestion: ReverseLookupSuggestion = this.emptyReverseLookupSuggestion();
+        const isReverseLookup = this.isReverseLookup(reverseLookupQuery.method);
         if (this.store) {
-            if (isPinyinReverseLookup) {
-                pinyinSegmentation = PinyinSegmenter.segment(reverseLookupKeys, this.store);
-                newLexicons = PinyinResearcher.suggest(reverseLookupKeys, pinyinSegmentation, this.store);
+            if (isReverseLookup) {
+                reverseLookupSuggestion = this.suggestReverseLookup(reverseLookupQuery, this.store);
+                newLexicons = reverseLookupSuggestion.lexicons;
                 if (newLexicons.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
@@ -487,22 +503,22 @@ export class InputController {
             }
         } else {
             this.prepareStore();
-            if (!isPinyinReverseLookup && this.memory) {
+            if (!isReverseLookup && this.memory) {
                 const memoryLexicons = InputMemory.search(keys, this.memory);
                 const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
                 newLexicons = [...memoryLexicons, ...fallbackLexicons];
-            } else if (!isPinyinReverseLookup) {
+            } else if (!isReverseLookup) {
                 this.prepareMemory();
             }
         }
-        if (isPinyinReverseLookup) {
+        if (isReverseLookup) {
             const text = this.joinedBufferTexts();
-            this.updatePreviewText(this.buildPinyinReverseLookupPreview(text, reverseLookupKeys, pinyinSegmentation, newLexicons));
+            this.updatePreviewText(this.buildReverseLookupPreview(text, reverseLookupQuery, reverseLookupSuggestion));
         } else {
             const text = this.joinedBufferTexts();
             this.updatePreviewText(this.buildPreviewText(text, keys, segmentation, newLexicons));
         }
-        const conversionStore = isPinyinReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
+        const conversionStore = isReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
@@ -524,11 +540,11 @@ export class InputController {
         const newCandidates: Candidate[] = [];
         let newLexicons: Lexicon[] = [];
         const combos = [...this.comboBuffer];
-        const isPinyinReverseLookup = this.isNineKeyPinyinReverseLookup(combos);
-        const reverseLookupCombos = isPinyinReverseLookup ? combos.slice(1) : [];
+        const reverseLookupQuery = this.nineKeyReverseLookupQueryForCombos(combos);
+        const isReverseLookup = this.isReverseLookup(reverseLookupQuery.method);
         if (this.store) {
-            if (isPinyinReverseLookup) {
-                newLexicons = NineKeyPinyinResearcher.suggest(reverseLookupCombos, this.store);
+            if (isReverseLookup) {
+                newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.store);
             } else {
                 const queried = NineKeyResearcher.suggest(combos, this.store);
                 if (queried.length > 0) {
@@ -544,18 +560,18 @@ export class InputController {
             }
         } else {
             this.prepareStore();
-            if (!isPinyinReverseLookup && this.memory) {
+            if (!isReverseLookup && this.memory) {
                 newLexicons = InputMemory.nineKeySearch(combos, this.memory);
-            } else if (!isPinyinReverseLookup) {
+            } else if (!isReverseLookup) {
                 this.prepareMemory();
             }
         }
-        if (isPinyinReverseLookup) {
-            this.updatePreviewText(this.buildNineKeyPinyinReverseLookupPreview(reverseLookupCombos, newLexicons));
+        if (isReverseLookup) {
+            this.updatePreviewText(this.buildNineKeyReverseLookupPreview(reverseLookupQuery, newLexicons));
         } else {
             this.updatePreviewText(this.buildNineKeyPreviewText(combos, newLexicons));
         }
-        const conversionStore = isPinyinReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
+        const conversionStore = isReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
@@ -567,7 +583,7 @@ export class InputController {
             };
             newCandidates.push(instance);
         }
-        if (isPinyinReverseLookup) {
+        if (isReverseLookup) {
             this.nineKeyCachedCandidates = [];
             this.clearSidebarSyllables();
             this.candidates = newCandidates;
@@ -738,8 +754,88 @@ export class InputController {
         return scheme.map((syllable) => syllable.alias.map((key) => key.text).join("")).join(" ");
     }
 
-    private isPinyinReverseLookup(keys: VirtualInputKey[]): boolean {
-        return keys.length > 0 && keys[0] === VirtualInputKey.letterR;
+    private isReverseLookup(method: ReverseLookupMethod): boolean {
+        return ReverseLookupMethodCompanion.isReverseLookup(method);
+    }
+
+    private reverseLookupQueryForKeys(keys: VirtualInputKey[]): ReverseLookupQuery {
+        const method = ReverseLookupMethodCompanion.ofKey(keys[0]);
+        return {
+            method: method,
+            keys: this.isReverseLookup(method) ? keys.slice(1) : [],
+        };
+    }
+
+    private nineKeyReverseLookupQueryForCombos(combos: Combo[]): NineKeyReverseLookupQuery {
+        const method = combos.length > 0 && combos[0]?.isSpecial ? ReverseLookupMethod.Pinyin : ReverseLookupMethod.None;
+        return {
+            method: method,
+            combos: this.isReverseLookup(method) ? combos.slice(1) : [],
+        };
+    }
+
+    private emptyReverseLookupSuggestion(): ReverseLookupSuggestion {
+        return {
+            lexicons: [],
+            pinyinSegmentation: [],
+        };
+    }
+
+    private suggestReverseLookup(query: ReverseLookupQuery, store: relationalStore.RdbStore): ReverseLookupSuggestion {
+        switch (query.method) {
+            case ReverseLookupMethod.Pinyin: {
+                const pinyinSegmentation = PinyinSegmenter.segment(query.keys, store);
+                return {
+                    lexicons: PinyinResearcher.suggest(query.keys, pinyinSegmentation, store),
+                    pinyinSegmentation: pinyinSegmentation,
+                };
+            }
+            case ReverseLookupMethod.Cangjie:
+            case ReverseLookupMethod.Stroke:
+            case ReverseLookupMethod.Structure:
+            default:
+                return this.emptyReverseLookupSuggestion();
+        }
+    }
+
+    private suggestNineKeyReverseLookup(query: NineKeyReverseLookupQuery, store: relationalStore.RdbStore): Lexicon[] {
+        switch (query.method) {
+            case ReverseLookupMethod.Pinyin:
+                return NineKeyPinyinResearcher.suggest(query.combos, store);
+            case ReverseLookupMethod.Cangjie:
+            case ReverseLookupMethod.Stroke:
+            case ReverseLookupMethod.Structure:
+            default:
+                return [];
+        }
+    }
+
+    private buildReverseLookupPreview(bufferText: string, query: ReverseLookupQuery, suggestion: ReverseLookupSuggestion): string {
+        switch (query.method) {
+            case ReverseLookupMethod.Pinyin:
+                return this.buildPinyinReverseLookupPreview(bufferText, query.keys, suggestion.pinyinSegmentation,
+                    suggestion.lexicons);
+            case ReverseLookupMethod.Cangjie:
+            case ReverseLookupMethod.Stroke:
+            case ReverseLookupMethod.Structure:
+                return this.buildRawReverseLookupPreview(bufferText, query.keys, suggestion.lexicons);
+            default:
+                return bufferText;
+        }
+    }
+
+    private buildRawReverseLookupPreview(bufferText: string, keys: VirtualInputKey[], lexicons: Lexicon[]): string {
+        if (lexicons.length < 1) {
+            return bufferText;
+        }
+        const first = lexicons[0];
+        const prefix = bufferText.slice(0, 1);
+        const reverseText = bufferText.slice(1);
+        if (first.inputCount >= keys.length) {
+            return `${prefix} ${first.mark ?? reverseText}`.trim();
+        }
+        const tail = reverseText.slice(first.inputCount);
+        return `${prefix} ${first.mark ?? reverseText} ${tail}`.trim();
     }
 
     private buildPinyinReverseLookupPreview(bufferText: string, keys: VirtualInputKey[], segmentation: PinyinSegmentation,
@@ -776,11 +872,19 @@ export class InputController {
         const tail = this.joinedNineKeyTexts(combos.slice(first.inputCount));
         return `${first.mark ?? bufferText} ${tail}`.trim();
     }
-    private isNineKeyPinyinReverseLookup(combos: Combo[]): boolean {
-        return combos.length > 0 && combos[0]?.isSpecial;
+    private buildNineKeyReverseLookupPreview(query: NineKeyReverseLookupQuery, lexicons: Lexicon[]): string {
+        switch (query.method) {
+            case ReverseLookupMethod.Pinyin:
+                return this.buildNineKeyRawReverseLookupPreview(Combo.Special.leadingLetter, query.combos, lexicons);
+            case ReverseLookupMethod.Cangjie:
+            case ReverseLookupMethod.Stroke:
+            case ReverseLookupMethod.Structure:
+            default:
+                return this.joinedNineKeyTexts(this.comboBuffer);
+        }
     }
-    private buildNineKeyPinyinReverseLookupPreview(combos: Combo[], lexicons: Lexicon[]): string {
-        const prefix = Combo.Special.leadingLetter;
+
+    private buildNineKeyRawReverseLookupPreview(prefix: string, combos: Combo[], lexicons: Lexicon[]): string {
         const reverseText = this.joinedNineKeyTexts(combos);
         if (lexicons.length < 1) {
             return combos.length < 1 ? prefix : `${prefix} ${reverseText}`.trim();
@@ -811,18 +915,8 @@ export class InputController {
             return;
         }
         this.insert(candidate.text);
-        if (this.isPinyinReverseLookup(this.bufferEvents.map((event) => event.key))) {
-            this.selectedCandidates = [];
-            let tailEvents = this.bufferEvents.slice(candidate.lexicon.inputCount + 1);
-            while (tailEvents.length > 0 && tailEvents[0].key.isApostrophe) {
-                tailEvents = tailEvents.slice(1);
-            }
-            if (tailEvents.length < 1) {
-                this.clearBuffer();
-                return;
-            }
-            this.bufferEvents = [this.bufferEvents[0], ...tailEvents];
-            this.runInputSession();
+        const reverseLookupQuery = this.reverseLookupQueryForKeys(this.bufferEvents.map((event) => event.key));
+        if (this.consumeReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
         this.selectedCandidates.push(candidate);
@@ -836,17 +930,27 @@ export class InputController {
         }
         this.runInputSession();
     }
+    private consumeReverseLookupCandidate(candidate: Candidate, query: ReverseLookupQuery): boolean {
+        if (!this.isReverseLookup(query.method)) {
+            return false;
+        }
+        this.selectedCandidates = [];
+        let tailEvents = this.bufferEvents.slice(candidate.lexicon.inputCount + 1);
+        while (tailEvents.length > 0 && tailEvents[0].key.isApostrophe) {
+            tailEvents = tailEvents.slice(1);
+        }
+        if (tailEvents.length < 1) {
+            this.clearBuffer();
+            return true;
+        }
+        this.bufferEvents = [this.bufferEvents[0], ...tailEvents];
+        this.runInputSession();
+        return true;
+    }
     private consumeNineKeyCandidate(candidate: Candidate) {
         this.insert(candidate.text);
-        if (this.isNineKeyPinyinReverseLookup(this.comboBuffer)) {
-            this.selectedCandidates = [];
-            const tailCombos = this.comboBuffer.slice(candidate.lexicon.inputCount + 1);
-            if (tailCombos.length < 1) {
-                this.clearBuffer();
-                return;
-            }
-            this.comboBuffer = [this.comboBuffer[0], ...tailCombos];
-            this.runInputSession();
+        const reverseLookupQuery = this.nineKeyReverseLookupQueryForCombos(this.comboBuffer);
+        if (this.consumeNineKeyReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
         this.selectedCandidates.push(candidate);
@@ -859,6 +963,20 @@ export class InputController {
             this.selectedCandidates = [];
         }
         this.runInputSession();
+    }
+    private consumeNineKeyReverseLookupCandidate(candidate: Candidate, query: NineKeyReverseLookupQuery): boolean {
+        if (!this.isReverseLookup(query.method)) {
+            return false;
+        }
+        this.selectedCandidates = [];
+        const tailCombos = this.comboBuffer.slice(candidate.lexicon.inputCount + 1);
+        if (tailCombos.length < 1) {
+            this.clearBuffer();
+            return true;
+        }
+        this.comboBuffer = [this.comboBuffer[0], ...tailCombos];
+        this.runInputSession();
+        return true;
     }
     insert(text: string) {
         this.inputClient?.insertText(text).catch(() => {
