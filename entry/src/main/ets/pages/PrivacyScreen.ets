@@ -4,7 +4,10 @@ import { BusinessError } from '@kit.BasicServicesKit';
 
 @Component
 export struct PrivacyScreen {
-    @Link privacy: string
+    @Link privacy: string;
+    private settingsFileName: string ="shared";
+    private privacySettingsKey: string ="privacy";
+    private definedPrivacyValue: string = "2025";
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     build() {
@@ -54,12 +57,12 @@ export struct PrivacyScreen {
                 .backgroundColor($r('app.color.accent'))
                 .width('100%')
                 .onClick(() => {
-                    const options: preferences.Options = { name: "shared" };
+                    const options: preferences.Options = { name: this.settingsFileName };
                     try {
                         let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
-                        sharedPreferences.putSync("privacy", "2025");
+                        sharedPreferences.putSync(this.privacySettingsKey, this.definedPrivacyValue);
                         sharedPreferences.flush().then(() => {
-                            this.privacy = "2025";
+                            this.privacy = this.definedPrivacyValue;
                         }).catch(() => {
                             console.log("Failed to perform sharedPreferences.flush()");
                         });

@@ -5,7 +5,7 @@ import { AboutScreen } from './AboutScreen';
 import { PrivacyScreen } from './PrivacyScreen';
 import { preferences } from '@kit.ArkData';
 import { BusinessError, deviceInfo } from '@kit.BasicServicesKit';
-import { hdsMaterial, HdsTabs, HdsTabsController } from '@kit.UIDesignKit';
+import { hdsMaterial, HdsTabs } from '@kit.UIDesignKit';
 import { SymbolGlyphModifier } from "@kit.ArkUI";
 
 @Entry
@@ -15,7 +15,6 @@ struct Index {
     @StorageProp('topRectHeight') topRectHeight: number = 0;
     @StorageProp('bottomRectHeight') bottomRectHeight: number = 0;
 
-    private hdsTabsController: HdsTabsController = new HdsTabsController();
     private tabBarStyle(icon: Resource, label: Resource): BottomTabBarStyle {
         return new BottomTabBarStyle({
             normal: new SymbolGlyphModifier(icon).renderingStrategy(SymbolRenderingStrategy.SINGLE).fontColor([$r('sys.color.ohos_id_color_primary')]),
@@ -43,11 +42,16 @@ struct Index {
 
     @State private privacy: string = "0";
 
+    private settingsFileName: string ="shared";
+    private privacySettingsKey: string ="privacy";
+    private definedPrivacyValue: string = "2025";
+    private fallbackPrivacyValue: string = "0";
+
     aboutToAppear(): void {
         try {
-            const options: preferences.Options = { name: "shared" };
+            const options: preferences.Options = { name: this.settingsFileName };
             let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
-            this.privacy = sharedPreferences.getSync("privacy", "0") as string;
+            this.privacy = sharedPreferences.getSync(this.privacySettingsKey, this.fallbackPrivacyValue) as string;
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to fetch agreements value, message: " + err.message + ", code: " + err.code);
@@ -55,10 +59,10 @@ struct Index {
     }
 
     build() {
-        if (this.privacy != "2025") {
+        if (this.privacy != this.definedPrivacyValue) {
             PrivacyScreen({ privacy: this.privacy })
         } else if (deviceInfo.sdkApiVersion >= 23) {
-            HdsTabs({ controller: this.hdsTabsController }) {
+            HdsTabs() {
                 TabContent() {
                     HomeScreen()
                 }
