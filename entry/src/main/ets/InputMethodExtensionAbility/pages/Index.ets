@@ -61,7 +61,6 @@ struct Index {
             }
             .width("100%")
             .height("100%")
-            .backgroundColor($r('app.color.keyboard_background'))
         }
         .position({ x: 0, y: 0 })
         .zIndex(99999)

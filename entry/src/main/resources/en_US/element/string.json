@@ -239,6 +239,10 @@
     {
       "name": "layout_picker_layout_t9",
       "value": "9 Key"
+    },
+    {
+      "name": "keyboard_settings_numeric_layout",
+      "value": "Use 10 Key Number Pad"
     }
   ]
 }

@@ -104,6 +104,27 @@ export default struct SettingsPanel {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                ListItemGroup() {
+                    ListItem() {
+                        Row() {
+                            Text($r('app.string.keyboard_settings_numeric_layout'))
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: controller.useDedicatedNumberPad })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    controller.updateDedicatedNumberPadUsage(isOn);
+                                    controller.playModifierSound();
+                                    controller.triggerHapticFeedback();
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
+                    }
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
                 /*
                 ListItemGroup() {
                     ListItem() {
@@ -175,40 +196,6 @@ export default struct SettingsPanel {
                         .backgroundColor(Color.Transparent)
                         .width('100%')
                         .onClick((event: ClickEvent) => {})
-                    }
-                }
-                .backgroundColor(this.groupBackgroundColor)
-                .borderRadius(this.groupBorderRadius)
-
-                ListItemGroup() {
-                    ListItem() {
-                        Row() {
-                            Text("Sound Feedback")
-                            Blank()
-                            Toggle({ type: ToggleType.Switch, isOn: true })
-                                .selectedColor($r('app.color.accent'))
-                                .switchPointColor(Color.White)
-                                .onChange((isOn: boolean) => {
-                                    // TODO: Handle sound switch
-                                })
-                        }
-                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
-                        .width('100%')
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        Row() {
-                            Text("Haptic Feedback")
-                            Blank()
-                            Toggle({ type: ToggleType.Switch, isOn: true })
-                                .selectedColor($r('app.color.accent'))
-                                .switchPointColor(Color.White)
-                                .onChange((isOn: boolean) => {
-                                    // TODO: Handle haptic switch
-                                })
-                        }
-                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
-                        .width('100%')
                     }
                 }
                 .backgroundColor(this.groupBackgroundColor)

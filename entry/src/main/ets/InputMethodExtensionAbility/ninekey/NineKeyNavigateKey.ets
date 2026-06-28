@@ -8,11 +8,11 @@ export default struct NineKeyNavigateKey {
     @Local private isTouching: boolean = false;
     private keyText(): string {
         switch (this.destination) {
-            case KeyboardForm.Primary: return "ABC"
-            case KeyboardForm.DedicatedNumbers: return "123"
-            case KeyboardForm.Numeric: return "#@$"
-            case KeyboardForm.Symbolic: return "#+="
-            default: return "…"
+            case KeyboardForm.Primary: return "ABC";
+            case KeyboardForm.DedicatedNumbers: return "123";
+            case KeyboardForm.Numeric: return (controller.useDedicatedNumberPad ? "#@$" : "123");
+            case KeyboardForm.Symbolic: return "#+=";
+            default: return "…";
         }
     }
     build() {

@@ -78,7 +78,7 @@ export default struct CantoneseKeyboard {
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: KeyboardForm.Numeric }).width('20%')
+                TransformKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width('20%')
                 LeftKey().width('10%')
                 SpaceKey().width('40%')
                 RightKey().width('10%')

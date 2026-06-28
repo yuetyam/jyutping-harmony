@@ -7,12 +7,12 @@ export default struct TransformKey {
     destination: KeyboardForm | undefined = undefined;
     @State private isTouching: boolean = false;
     private keyText(): string {
-        if (this.destination === KeyboardForm.Numeric) {
-            return "123";
-        } else if (this.destination === KeyboardForm.Symbolic) {
-            return "#+="
-        } else {
-            return "ABC"
+        switch (this.destination) {
+            case KeyboardForm.Primary: return "ABC";
+            case KeyboardForm.DedicatedNumbers: return "123";
+            case KeyboardForm.Numeric: return "123";
+            case KeyboardForm.Symbolic: return "#+=";
+            default: return "…";
         }
     }
     build() {

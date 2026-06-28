@@ -89,7 +89,7 @@ export default struct NineKeyKeyboard {
                         alignItems: ItemAlign.Center,
                         justifyContent: FlexAlign.SpaceBetween
                     }) {
-                        NineKeyNavigateKey({ destination: KeyboardForm.DedicatedNumbers }).width("22.2%")
+                        NineKeyNavigateKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width("22.2%")
                         NineKeySpaceKey().width("77.8%")
                     }
                     .height("25%")
@@ -101,7 +101,7 @@ export default struct NineKeyKeyboard {
                     justifyContent: FlexAlign.SpaceBetween
                 }) {
                     NineKeyBackspaceKey().height("25%")
-                    NineKeyNavigateKey({ destination: KeyboardForm.Numeric }).height("25%")
+                    NineKeyNavigateKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.Numeric : KeyboardForm.Symbolic }).height("25%")
                     NineKeyEnterKey().height("50%")
                 }
                 .width("18.2%")

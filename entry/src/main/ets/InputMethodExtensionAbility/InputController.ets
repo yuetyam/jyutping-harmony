@@ -29,6 +29,8 @@ import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
 import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
 import { StructureResearcher } from './model/StructureResearcher';
+import { NumericLayout, NumericLayoutCompanion } from './numeric/NumericLayout';
+import { UserSettingsKey } from './model/UserSettingsKey';
 
 interface ReverseLookupQuery {
     readonly method: ReverseLookupMethod;
@@ -142,10 +144,11 @@ export class InputController {
     }
     @Trace isAudioFeedbackOn: boolean = true;
     updateAudioFeedbackState(isOn: boolean) {
+        if (this.isAudioFeedbackOn === isOn) { return; }
         this.isAudioFeedbackOn = isOn;
         const value: number = isOn ? 1 : 2;
         try {
-            this.sharedPreferences?.putSync("audio", value);
+            this.sharedPreferences?.putSync(UserSettingsKey.audio, value);
             this.sharedPreferences?.flush().catch(() => {
                 console.error("Failed to save value to the audio preferences");
             });
@@ -156,9 +159,7 @@ export class InputController {
     }
 
     triggerHapticFeedback(type: HapticType = HapticType.Hard) {
-        if (!(this.isHapticFeedbackOn)) {
-            return;
-        }
+        if (!(this.isHapticFeedbackOn)) { return; }
         try {
             const effectId = HapticEffectId.of(type);
             vibrator.isSupportEffect(effectId, (error: BusinessError, state: boolean) => {
@@ -193,10 +194,11 @@ export class InputController {
     }
     @Trace isHapticFeedbackOn: boolean = true;
     updateHapticFeedbackState(isOn: boolean) {
+        if (this.isHapticFeedbackOn === isOn) { return; }
         this.isHapticFeedbackOn = isOn;
         const value: number = isOn ? 1 : 2;
         try {
-            this.sharedPreferences?.putSync("haptic", value);
+            this.sharedPreferences?.putSync(UserSettingsKey.haptic, value);
             this.sharedPreferences?.flush().catch(() => {
                 console.error("Failed to save value to the haptic preferences");
             });
@@ -208,19 +210,33 @@ export class InputController {
 
     @Trace keyboardLayout: KeyboardLayout = KeyboardLayout.Qwerty;
     updateKeyboardLayout(layout: KeyboardLayout) {
-        if (this.keyboardLayout === layout) {
-            return;
-        }
+        if (this.keyboardLayout === layout) { return; }
         this.keyboardLayout = layout;
         this.updateKeyboardCase(KeyboardCase.lowercased);
         try {
-            this.sharedPreferences?.putSync("layout", layout);
+            this.sharedPreferences?.putSync(UserSettingsKey.keyboardLayout, layout);
             this.sharedPreferences?.flush().catch(() => {
                 console.error("Failed to save value to the keyboard layout preferences");
             });
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the keyboard layout preferences, message: " + err.message + ", code: " + err.code);
+        }
+    }
+
+    @Trace useDedicatedNumberPad: boolean = false;
+    updateDedicatedNumberPadUsage(isOn: boolean) {
+        if (this.useDedicatedNumberPad === isOn) { return; }
+        this.useDedicatedNumberPad = isOn;
+        const value: number = isOn ? NumericLayout.Dedicated : NumericLayout.Default
+        try {
+            this.sharedPreferences?.putSync(UserSettingsKey.numericLayout, value);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the NumericLayout preferences");
+            });
+        } catch (error) {
+            let err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the NumericLayout preferences, message: " + err.message + ", code: " + err.code);
         }
     }
 
@@ -338,7 +354,7 @@ export class InputController {
         this.isMutilated = !(this.isMutilated);
         const value: number = this.isMutilated ? 51 : 1;
         try {
-            this.sharedPreferences?.putSync("charset", value);
+            this.sharedPreferences?.putSync(UserSettingsKey.charset, value);
             this.sharedPreferences?.flush().catch(() => {
                 console.error("Failed to save value to the charset preferences");
             });
@@ -386,14 +402,16 @@ export class InputController {
         try {
             const sharedPreferences = this.obtainSharedPreferences();
             if (sharedPreferences !== undefined) {
-                const savedAudioFeedbackValue: number = sharedPreferences.getSync("audio", 1) as number;
+                const savedAudioFeedbackValue: number = sharedPreferences.getSync(UserSettingsKey.audio, 1) as number;
                 this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
-                const savedHapticFeedbackValue: number = sharedPreferences.getSync("haptic", 1) as number;
+                const savedHapticFeedbackValue: number = sharedPreferences.getSync(UserSettingsKey.haptic, 1) as number;
                 this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
-                const savedCharacterStandardValue: number = sharedPreferences.getSync("charset", 1) as number;
+                const savedCharacterStandardValue: number = sharedPreferences.getSync(UserSettingsKey.charset, 1) as number;
                 this.isMutilated = (savedCharacterStandardValue == 51);
-                const savedKeyboardLayoutValue: number = sharedPreferences.getSync("layout", KeyboardLayout.Qwerty) as number;
+                const savedKeyboardLayoutValue: number = sharedPreferences.getSync(UserSettingsKey.keyboardLayout, KeyboardLayout.Qwerty) as number;
                 this.keyboardLayout = KeyboardLayoutCompanion.layoutOf(savedKeyboardLayoutValue);
+                const numericLayoutSavedValue: number = sharedPreferences.getSync(UserSettingsKey.numericLayout, NumericLayout.Default) as number;
+                this.useDedicatedNumberPad = (numericLayoutSavedValue === NumericLayout.Dedicated);
             }
         } catch (error) {
             let err: BusinessError = error as BusinessError;

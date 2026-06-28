@@ -235,6 +235,10 @@
     {
       "name": "layout_picker_layout_t9",
       "value": "9 鍵"
+    },
+    {
+      "name": "keyboard_settings_numeric_layout",
+      "value": "使用九宮格數字鍵盤"
     }
   ]
 }
