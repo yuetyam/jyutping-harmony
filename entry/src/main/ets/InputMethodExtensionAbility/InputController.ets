@@ -1,9 +1,10 @@
 import { display } from '@kit.ArkUI';
 import { preferences, relationalStore } from '@kit.ArkData';
 import { audio } from '@kit.AudioKit';
-import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
+import { BusinessError, deviceInfo, pasteboard } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
+import { resourceManager } from '@kit.LocalizationKit';
 import { media } from '@kit.MediaKit';
 import { vibrator } from '@kit.SensorServiceKit';
 import { InputMode, InputModeCompanion } from './model/InputMode';
@@ -29,7 +30,7 @@ import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
 import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
 import { StructureResearcher } from './model/StructureResearcher';
-import { NumericLayout, NumericLayoutCompanion } from './numeric/NumericLayout';
+import { NumericLayout } from './numeric/NumericLayout';
 import { UserSettingsKey } from './model/UserSettingsKey';
 
 interface ReverseLookupQuery {
@@ -1142,6 +1143,7 @@ export class InputController {
                 this.panel = inputPanel;
                 if(this.panel) {
                     await this.panel.resize(screen.width, panelHeight);
+                    this.adoptImmersiveMode();
                     await this.panel.setUiContent('InputMethodExtensionAbility/pages/Index');
                 }
             })
@@ -1155,9 +1157,7 @@ export class InputController {
         const heightInPoint = displayHeight / density;
         const minDimension = Math.min(widthInPoint, heightInPoint);
         const isLandscape = (widthInPoint > heightInPoint) && (minDimension < 500);
-        if (this.isPhoneLandscape === isLandscape) {
-            return;
-        }
+        if (this.isPhoneLandscape === isLandscape) { return; }
         this.isPhoneLandscape = isLandscape;
         const toolBarHeight = 56;
         const landscapeKeyHeight = 36;
@@ -1167,15 +1167,29 @@ export class InputController {
         const panelHeight = this.keyboardHeight * density;
         return panelHeight;
     }
+    private adoptImmersiveMode() {
+        if (deviceInfo.sdkApiVersion >= 15) {
+            const isDarkMode = this.ctx?.resourceManager.getConfigurationSync().colorMode === resourceManager.ColorMode.DARK;
+            const immersiveMode = isDarkMode ? inputMethodEngine.ImmersiveMode.DARK_IMMERSIVE : inputMethodEngine.ImmersiveMode.LIGHT_IMMERSIVE;
+            try {
+                this.panel?.setImmersiveMode(immersiveMode);
+            } catch (error) {
+                const err: BusinessError = error as BusinessError;
+                console.error(`Failed to setImmersiveMode, message: ${err.message}}, code: ${err.code}}`);
+            }
+        }
+    }
 
     private registerListener() {
         this.ability.on('inputStart', (kbController, inputClient) => {
             this.inputClient = inputClient;
+            this.adoptImmersiveMode();
             try {
                 this.attribute = inputClient.getEditorAttributeSync();
                 this.isTextPreviewSupported = this.attribute.isTextPreviewSupported;
             } catch (error) {
-                console.error("Failed to getEditorAttributeSync()");
+                const err: BusinessError = error as BusinessError;
+                console.error(`Failed to getEditorAttributeSync, message: ${err.message}}, code: ${err.code}}`);
             }
             try {
                 const screen = display.getDefaultDisplaySync();
