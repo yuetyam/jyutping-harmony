@@ -33,6 +33,34 @@
       "value": "#FF9800"
     },
     {
+      "name": "apple_blue",
+      "value": "#0088FF"
+    },
+    {
+      "name": "apple_green",
+      "value": "#34C759"
+    },
+    {
+      "name": "apple_indigo",
+      "value": "#6155F5"
+    },
+    {
+      "name": "apple_orange",
+      "value": "#FF8D28"
+    },
+    {
+      "name": "apple_purple",
+      "value": "#CB30E0"
+    },
+    {
+      "name": "apple_red",
+      "value": "#FF3814"
+    },
+    {
+      "name": "apple_teal",
+      "value": "#00C3D0"
+    },
+    {
       "name": "keyboard_background",
       "value": "#E3E4E6"
     },

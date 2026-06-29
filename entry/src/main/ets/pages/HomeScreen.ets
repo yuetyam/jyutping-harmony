@@ -1,8 +1,7 @@
 import { common, Want } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError, deviceInfo } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
-import { inputMethod } from '@kit.IMEKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
 import { ChoHokHelper } from '../search/ChoHokHelper';
@@ -128,6 +127,7 @@ export struct HomeScreen {
         }
     }
 
+    /*
     @Local private shouldShowInputMethodButtons: boolean = true;
     private detectInputMethodState(): void {
         const packageName: string = "org.jyutping.jyutping";
@@ -136,8 +136,11 @@ export struct HomeScreen {
             let currentInputMethod = inputMethod.getCurrentInputMethod();
             this.shouldShowInputMethodButtons = (currentInputMethod.name != packageName);
         } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error(`Failed to getCurrentInputMethod, message: ${err.message}}, code: ${err.code}}`);
         }
     }
+    */
 
     aboutToAppear(): void {
         this.prepareStore();
@@ -145,18 +148,30 @@ export struct HomeScreen {
 
     build() {
         Navigation(this.pageStack) {
-            List({ space: 24 }) {
+            List({ space: 20 }) {
                 ListItem() {
-                    Search({
-                        value: this.inputText,
-                        placeholder: $r('app.string.search_placeholder'),
-                    }).onEditChange((changed: boolean) => {
-                        if (changed) {
-                            this.prepareStore();
-                        }
-                    }).onSubmit((text: string) => {
-                        this.submittedText = text;
-                    })
+                    if (deviceInfo.sdkApiVersion >= 15) {
+                        Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
+                            .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
+                            .onEditChange((changed: boolean) => {
+                                if (changed) {
+                                    this.prepareStore();
+                                }
+                            })
+                            .onSubmit((text: string) => {
+                                this.submittedText = text;
+                            })
+                    } else {
+                        Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
+                            .onEditChange((changed: boolean) => {
+                                if (changed) {
+                                    this.prepareStore();
+                                }
+                            })
+                            .onSubmit((text: string) => {
+                                this.submittedText = text;
+                            })
+                    }
                 }
                 ForEach(this.lexicons, (item: CantoneseLexicon) => {
                     ListItem() {
@@ -235,40 +250,39 @@ export struct HomeScreen {
                     }
                 }, (item: GwongWanLexicon) => item.word)
 
-                if (this.shouldShowInputMethodButtons) {
-                    ListItem() {
-                        Button() {
-                            Row({ space: 12 }) {
-                                Blank()
-                                SymbolGlyph($r('sys.symbol.keyboard')).fontColor([Color.White])
-                                Text($r('app.string.home_button_enable_keyboard')).fontColor(Color.White)
-                                SymbolGlyph($r('sys.symbol.arrow_right_up_and_square')).fontColor([Color.White])
-                                Blank()
-                            }
-                            .padding(8)
+                ListItem() {
+                    Button() {
+                        Row({ space: 12 }) {
+                            Blank()
+                            SymbolGlyph($r('sys.symbol.keyboard')).fontColor([Color.White])
+                            Text($r('app.string.home_button_enable_keyboard')).fontColor(Color.White)
+                            SymbolGlyph($r('sys.symbol.arrow_right_up_and_square')).fontColor([Color.White])
+                            Blank()
                         }
-                        .backgroundColor($r('app.color.accent'))
-                        .width('100%')
-                        .onClick((event: ClickEvent) => {
-                            let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
-                            let want: Want = {
-                                bundleName: 'com.huawei.hmos.settings',
-                                abilityName: 'com.huawei.hmos.settings.MainAbility',
-                                uri: 'set_input',
-                                parameters: {
-                                    bundleName: context.abilityInfo.bundleName,
-                                    pushParams: context.abilityInfo.bundleName
-                                }
-                            };
-                            context.startAbility(want).catch(() => {
-                                console.warn("Failed to jump to input method settings");
-                            });
-                        })
+                        .padding({ top: 10, bottom: 10 })
                     }
+                    .backgroundColor($r('app.color.accent'))
+                    .width('100%')
+                    .onClick(() => {
+                        let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+                        let want: Want = {
+                            bundleName: 'com.huawei.hmos.settings',
+                            abilityName: 'com.huawei.hmos.settings.MainAbility',
+                            uri: 'set_input',
+                            parameters: {
+                                bundleName: context.abilityInfo.bundleName,
+                                pushParams: context.abilityInfo.bundleName
+                            }
+                        };
+                        context.startAbility(want).catch(() => {
+                            console.warn("Failed to jump to input method settings");
+                        });
+                    })
                 }
+
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.full_mode_notes_title"))
+                        Text($r("app.string.full_mode_notes_title")).fontWeight(FontWeight.Medium)
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -289,7 +303,13 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.guide_abbreviated_input_heading")).fontWeight(FontWeight.Bold)
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_green')])
+                                Text("#").fontSize(16).fontColor($r('app.color.apple_green'))
+                            }
+                            Text($r("app.string.guide_abbreviated_input_heading")).fontWeight(FontWeight.Bold)
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -306,7 +326,13 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r('app.string.guide_pinyin_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_purple')])
+                                Text("R").fontSize(16).fontColor($r('app.color.apple_purple'))
+                            }
+                            Text($r('app.string.guide_pinyin_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -319,7 +345,13 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r('app.string.guide_structure_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_indigo')])
+                                Text("Q").fontSize(16).fontColor($r('app.color.apple_indigo'))
+                            }
+                            Text($r('app.string.guide_structure_reverse_lookup_heading')).fontWeight(FontWeight.Bold)
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
