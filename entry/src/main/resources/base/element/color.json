@@ -66,11 +66,11 @@
     },
     {
       "name": "key_shallow",
-      "value": "#FFFFFF"
+      "value": "#E2FFFFFF"
     },
     {
       "name": "key_emphatic",
-      "value": "#BBC0C8"
+      "value": "#40686E80"
     }
   ]
 }

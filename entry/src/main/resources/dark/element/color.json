@@ -18,11 +18,11 @@
     },
     {
       "name": "key_shallow",
-      "value": "#666666"
+      "value": "#55FFFFFF"
     },
     {
       "name": "key_emphatic",
-      "value": "#3D3D3D"
+      "value": "#22FFFFFF"
     }
   ]
 }
