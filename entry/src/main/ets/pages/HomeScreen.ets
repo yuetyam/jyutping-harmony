@@ -1,6 +1,6 @@
 import { common, Want } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
-import { BusinessError, deviceInfo } from '@kit.BasicServicesKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
@@ -150,28 +150,16 @@ export struct HomeScreen {
         Navigation(this.pageStack) {
             List({ space: 20 }) {
                 ListItem() {
-                    if (deviceInfo.sdkApiVersion >= 15) {
-                        Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
-                            .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
-                            .onEditChange((changed: boolean) => {
-                                if (changed) {
-                                    this.prepareStore();
-                                }
-                            })
-                            .onSubmit((text: string) => {
-                                this.submittedText = text;
-                            })
-                    } else {
-                        Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
-                            .onEditChange((changed: boolean) => {
-                                if (changed) {
-                                    this.prepareStore();
-                                }
-                            })
-                            .onSubmit((text: string) => {
-                                this.submittedText = text;
-                            })
-                    }
+                    Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
+                        .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
+                        .onEditChange((changed: boolean) => {
+                            if (changed) {
+                                this.prepareStore();
+                            }
+                        })
+                        .onSubmit((text: string) => {
+                            this.submittedText = text;
+                        })
                 }
                 ForEach(this.lexicons, (item: CantoneseLexicon) => {
                     ListItem() {

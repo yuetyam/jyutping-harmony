@@ -1,7 +1,7 @@
 import { display } from '@kit.ArkUI';
 import { preferences, relationalStore } from '@kit.ArkData';
 import { audio } from '@kit.AudioKit';
-import { BusinessError, deviceInfo, pasteboard } from '@kit.BasicServicesKit';
+import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
 import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { resourceManager } from '@kit.LocalizationKit';
@@ -1168,15 +1168,13 @@ export class InputController {
         return panelHeight;
     }
     private adoptImmersiveMode() {
-        if (deviceInfo.sdkApiVersion >= 15) {
-            const isDarkMode = this.ctx?.resourceManager.getConfigurationSync().colorMode === resourceManager.ColorMode.DARK;
-            const immersiveMode = isDarkMode ? inputMethodEngine.ImmersiveMode.DARK_IMMERSIVE : inputMethodEngine.ImmersiveMode.LIGHT_IMMERSIVE;
-            try {
-                this.panel?.setImmersiveMode(immersiveMode);
-            } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`Failed to setImmersiveMode, message: ${err.message}}, code: ${err.code}}`);
-            }
+        const isDarkMode = this.ctx?.resourceManager.getConfigurationSync().colorMode === resourceManager.ColorMode.DARK;
+        const immersiveMode = isDarkMode ? inputMethodEngine.ImmersiveMode.DARK_IMMERSIVE : inputMethodEngine.ImmersiveMode.LIGHT_IMMERSIVE;
+        try {
+            this.panel?.setImmersiveMode(immersiveMode);
+        } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error(`Failed to setImmersiveMode, message: ${err.message}}, code: ${err.code}}`);
         }
     }
 
