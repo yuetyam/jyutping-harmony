@@ -8,6 +8,7 @@ import CandidateBoard from './CandidateBoard';
 import CantoneseKeyboard from './CantoneseKeyboard';
 import CantoneseNumericKeyboard from './CantoneseNumericKeyboard';
 import CantoneseSymbolicKeyboard from './CantoneseSymbolicKeyboard';
+import EmojiBoard from '../emoji/EmojiBoard';
 import LayoutPickerPanel from './LayoutPickerPanel';
 import NineKeyKeyboard from '../ninekey/NineKeyKeyboard';
 import NumericKeyboard from './NumericKeyboard';
@@ -55,6 +56,8 @@ struct Index {
                     LayoutPickerPanel()
                 } else if (controller.keyboardForm === KeyboardForm.CandidateBoard) {
                     CandidateBoard()
+                } else if (controller.keyboardForm === KeyboardForm.EmojiBoard) {
+                    EmojiBoard()
                 } else {
                     CantoneseKeyboard()
                 }

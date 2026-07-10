@@ -21,7 +21,7 @@ export default struct SidebarPanel {
                     SymbolSidebarScrollView({ symbols: KeyboardFormCompanion.isDedicatedNumbers(controller.keyboardForm) ? this.symbols : this.punctuation })
                 }
             }
-            .backgroundColor($r('app.color.key_shallow'))
+            .backgroundColor($r('app.color.key_emphatic'))
             .clip(true)
             .borderRadius(PresetConstant.largeKeyCornerRadius)
             .shadow({

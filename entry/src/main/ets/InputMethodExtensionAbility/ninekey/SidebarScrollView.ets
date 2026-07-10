@@ -17,7 +17,7 @@ export default struct SidebarScrollView {
                             .fontSize(15)
                     }
                     .borderRadius(0)
-                    .backgroundColor(item.isSelected ? $r('app.color.key_emphatic') : Color.Transparent)
+                    .backgroundColor(item.isSelected ? $r('app.color.key_shallow') : Color.Transparent)
                     .width('100%')
                     .height(item.isSelected ? '15%' : '25%')
                     .onClick(() => {

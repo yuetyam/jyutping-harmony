@@ -30,7 +30,7 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.Settings);
@@ -50,7 +50,7 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.LayoutPicker);
@@ -70,16 +70,16 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
+                controller.transformTo(KeyboardForm.EmojiBoard);
             })
-            .opacity(0)
 
             InputModeSwitch({ isCantoneseMode: InputModeCompanion.isCantonese(controller.inputMode), isMutilated: controller.isMutilated })
                 .width('64vp')
                 .height('100%')
-                .onClick((event: ClickEvent) => {
+                .onClick(() => {
                     controller.playModifierSound();
                     controller.triggerHapticFeedback();
                     controller.toggleInputMode();
@@ -99,7 +99,7 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
                 controller.transformTo(KeyboardForm.EditingPanel);
@@ -108,7 +108,7 @@ export default struct ToolBar {
             CharacterSetSwitch({ isMutilated: controller.isMutilated })
                 .width(this.buttonLength)
                 .height('100%')
-                .onClick((event: ClickEvent) => {
+                .onClick(() => {
                     controller.playModifierSound();
                     controller.triggerHapticFeedback();
                     controller.toggleCharacterScriptVariant();
@@ -128,7 +128,7 @@ export default struct ToolBar {
             }
             .width(this.buttonLength)
             .height('100%')
-            .onClick((event: ClickEvent) => {
+            .onClick(() => {
                 controller.playModifierSound();
                 controller.triggerHapticFeedback();
                 controller.dismissKeyboard();

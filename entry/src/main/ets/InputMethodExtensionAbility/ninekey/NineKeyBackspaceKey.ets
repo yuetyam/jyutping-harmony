@@ -58,6 +58,8 @@ export default struct NineKeyBackspaceKey {
                     if (this.actionCounter < 2) {
                         this.actionCounter += 1;
                     } else {
+                        controller.playDeleteSound();
+                        controller.triggerHapticFeedback();
                         controller.backspace();
                     }
                 }),
