@@ -32,6 +32,9 @@ import { Scheme, Segmentation, Segmenter } from './model/Segmenter';
 import { StructureResearcher } from './model/StructureResearcher';
 import { NumericLayout } from './numeric/NumericLayout';
 import { UserSettingsKey } from './model/UserSettingsKey';
+import { Emoji } from './emoji/Emoji';
+import { EmojiCategory } from './emoji/EmojiCategory';
+import { EmojiDataHelper } from './emoji/EmojiDataHelper';
 
 interface ReverseLookupQuery {
     readonly method: ReverseLookupMethod;
@@ -367,12 +370,8 @@ export class InputController {
 
     private sharedPreferences: preferences.Preferences | undefined = undefined;
     private obtainSharedPreferences(): preferences.Preferences | undefined {
-        if (this.sharedPreferences) {
-            return this.sharedPreferences;
-        }
-        if (this.ctx === undefined) {
-            return undefined;
-        }
+        if (this.sharedPreferences) { return this.sharedPreferences; }
+        if (this.ctx === undefined) { return undefined; }
         try {
             const options: preferences.Options = { name: "kbsettings" };
             this.sharedPreferences = preferences.getPreferencesSync(this.ctx, options);
@@ -381,6 +380,55 @@ export class InputController {
             console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
         }
         return this.sharedPreferences;
+    }
+    private readonly frequentEmojiCount: number = 30;
+    private emojiSequence: Emoji[] = [];
+    private isEmojiBoardPrepared: boolean = false;
+    @Trace emojiBoardEmojis: Emoji[] = [];
+    prepareEmojiBoard() {
+        if (this.isEmojiBoardPrepared || this.store === undefined) { return; }
+        const defaultFrequent = EmojiDataHelper.fetchDefaultFrequent(this.store);
+        const sequence = EmojiDataHelper.fetchSequence(this.store);
+        if (defaultFrequent.length !== this.frequentEmojiCount || sequence.length < 1) { return; }
+        this.emojiSequence = sequence;
+        let savedValue: string = "";
+        try {
+            savedValue = this.obtainSharedPreferences()?.getSync(UserSettingsKey.emojiFrequent, "") as string;
+        } catch (error) {
+            const err = error as BusinessError;
+            console.error(`Failed to load frequently used emojis, message: ${err.message}, code: ${err.code}`);
+        }
+        const savedTexts: string[] = [];
+        for (const value of savedValue.split(",")) {
+            const text = Emoji.fromCodePointText(value.trim());
+            if (text !== undefined) {
+                savedTexts.push(text);
+            }
+        }
+        const frequent = (savedTexts.length === this.frequentEmojiCount) ? savedTexts.map((text, index) => Emoji.frequent(text, 50000 + index)) : defaultFrequent;
+        this.emojiBoardEmojis = [...frequent, ...sequence];
+        this.isEmojiBoardPrepared = true;
+    }
+    updateEmojiFrequent(latest: Emoji) {
+        if (!this.isEmojiBoardPrepared) { return; }
+        const current = this.emojiBoardEmojis
+            .filter((emoji) => emoji.category === EmojiCategory.Frequent)
+            .map((emoji) => emoji.text);
+        const updated = [latest.text, ...current.filter((text) => text !== latest.text)]
+            .slice(0, this.frequentEmojiCount);
+        if (updated.length !== this.frequentEmojiCount) { return; }
+        const frequent = updated.map((text, index) => Emoji.frequent(text, 50000 + index));
+        this.emojiBoardEmojis = [...frequent, ...this.emojiSequence];
+        try {
+            this.sharedPreferences?.putSync(UserSettingsKey.emojiFrequent,
+                updated.map((text) => Emoji.codePointText(text)).join(","));
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save frequently used emojis");
+            });
+        } catch (error) {
+            const err = error as BusinessError;
+            console.error(`Failed to save frequently used emojis, message: ${err.message}, code: ${err.code}`);
+        }
     }
     constructor() {}
     onCreate(context: InputMethodExtensionContext): void {
@@ -1103,6 +1151,9 @@ export class InputController {
         if (!(KeyboardFormCompanion.isBufferable(destination)) && this.isBuffering) {
             this.flushBufferText();
             this.clearBuffer();
+        }
+        if (destination === KeyboardForm.EmojiBoard) {
+            this.prepareEmojiBoard();
         }
         this.previousKeyboardForm = this.keyboardForm;
         this.keyboardForm = destination;

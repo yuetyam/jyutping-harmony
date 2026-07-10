@@ -239,6 +239,42 @@
     {
       "name": "keyboard_settings_numeric_layout",
       "value": "使用九宮格數字鍵盤"
+    },
+    {
+      "name": "emoji_board_header_frequently_used",
+      "value": "常用"
+    },
+    {
+      "name": "emoji_board_header_smileys_and_people",
+      "value": "表情與人物"
+    },
+    {
+      "name": "emoji_board_header_animals_and_nature",
+      "value": "動物與自然"
+    },
+    {
+      "name": "emoji_board_header_food_and_drink",
+      "value": "飲食"
+    },
+    {
+      "name": "emoji_board_header_activity",
+      "value": "活動"
+    },
+    {
+      "name": "emoji_board_header_travel_and_places",
+      "value": "旅行與地點"
+    },
+    {
+      "name": "emoji_board_header_objects",
+      "value": "物品"
+    },
+    {
+      "name": "emoji_board_header_symbols",
+      "value": "符號"
+    },
+    {
+      "name": "emoji_board_header_flags",
+      "value": "旗幟"
     }
   ]
 }

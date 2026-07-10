@@ -243,6 +243,42 @@
     {
       "name": "keyboard_settings_numeric_layout",
       "value": "Use 10 Key Number Pad"
+    },
+    {
+      "name": "emoji_board_header_frequently_used",
+      "value": "Frequently Used"
+    },
+    {
+      "name": "emoji_board_header_smileys_and_people",
+      "value": "Smileys and People"
+    },
+    {
+      "name": "emoji_board_header_animals_and_nature",
+      "value": "Animals and Nature"
+    },
+    {
+      "name": "emoji_board_header_food_and_drink",
+      "value": "Food and Drink"
+    },
+    {
+      "name": "emoji_board_header_activity",
+      "value": "Activity"
+    },
+    {
+      "name": "emoji_board_header_travel_and_places",
+      "value": "Travel and Places"
+    },
+    {
+      "name": "emoji_board_header_objects",
+      "value": "Objects"
+    },
+    {
+      "name": "emoji_board_header_symbols",
+      "value": "Symbols"
+    },
+    {
+      "name": "emoji_board_header_flags",
+      "value": "Flags"
     }
   ]
 }

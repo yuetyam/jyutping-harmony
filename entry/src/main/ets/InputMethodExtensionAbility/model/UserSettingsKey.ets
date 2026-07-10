@@ -9,4 +9,6 @@ export namespace UserSettingsKey {
     export const keyboardLayout: string = "layout";
 
     export const numericLayout: string = "numeric";
+
+    export const emojiFrequent: string = "emoji_frequent";
 }
