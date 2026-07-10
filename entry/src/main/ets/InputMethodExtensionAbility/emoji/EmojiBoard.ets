@@ -19,7 +19,7 @@ export default struct EmojiBoard {
                 Blank()
             }
             .width("100%")
-            .height("24vp")
+            .height("20vp")
             List({ scroller: this.scroller }) {
                 ForEach(this.emojiColumns(), (column: Emoji[]) => {
                     ListItem() {
@@ -51,9 +51,11 @@ export default struct EmojiBoard {
             .listDirection(Axis.Horizontal)
             .scrollBar(BarState.Off)
             .width("100%")
-            .height("calc(100% - 68vp)")
+            .height("calc(100% - 60vp)")
             Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-                BackButton().width("100%")
+                BackButton()
+                    .width("100%")
+                    .height("100%")
                 ForEach(EmojiCategoryCompanion.all(), (category: EmojiCategory) => {
                     Stack() {
                         Button() {
@@ -63,20 +65,22 @@ export default struct EmojiBoard {
                         .clipShape(this.indicatorShape)
                         .width("28vp")
                         .height("28vp")
-                        .onClick(() => {
-                            controller.playModifierSound();
-                            controller.triggerHapticFeedback();
-                            this.currentCategory = category;
-                            this.scroller.scrollToIndex(this.startIndexFor(category), false);
-                        })
                     }
                     .width("100%")
-                    .height("28vp")
+                    .height("100%")
+                    .onClick(() => {
+                        controller.playModifierSound();
+                        controller.triggerHapticFeedback();
+                        this.currentCategory = category;
+                        this.scroller.scrollToIndex(this.startIndexFor(category), false);
+                    })
                 }, (category: EmojiCategory) => category.toString())
-                BackspaceButton().width("100%")
+                BackspaceButton()
+                    .width("100%")
+                    .height("100%")
             }
             .width("100%")
-            .height("44vp")
+            .height("40vp")
         }
         .justifyContent(FlexAlign.Start)
         .width("100%")
@@ -115,8 +119,11 @@ struct BackButton {
     build() {
         Stack() {
             Text("ABC")
-                .padding(2)
+                .fontSize(15)
+                .fontColor($r('sys.color.ohos_id_color_primary'))
         }
+        .width("100%")
+        .height("100%")
         .onClick(() => {
             controller.playModifierSound();
             controller.triggerHapticFeedback();
