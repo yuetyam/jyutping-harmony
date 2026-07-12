@@ -12,10 +12,12 @@ import { KeyboardForm, KeyboardFormCompanion } from './model/KeyboardForm';
 import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
+import { TextMarkResearcher } from './model/TextMarkResearcher';
 import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
 import { InputMemory } from './model/InputMemory';
 import { Lexicon } from './model/Lexicon';
+import { LexiconType } from './model/LexiconType';
 import { Converter } from './model/Converter';
 import { HapticEffectId, HapticType } from './model/HapticType';
 import { VirtualInputKey } from './model/VirtualInputKey';
@@ -547,7 +549,8 @@ export class InputController {
         if (this.store) {
             if (isReverseLookup) {
                 reverseLookupSuggestion = this.suggestReverseLookup(reverseLookupQuery, this.store);
-                newLexicons = reverseLookupSuggestion.lexicons;
+                const textMarks = TextMarkResearcher.search(keys, this.store);
+                newLexicons = [...textMarks, ...reverseLookupSuggestion.lexicons];
                 if (newLexicons.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
@@ -567,8 +570,9 @@ export class InputController {
                 const queried = await Researcher.suggest(keys, segmentation, this.store);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
-                    newLexicons = Converter.dispatch(newLexicons, queried);
                 }
+                const textMarks = TextMarkResearcher.search(keys, this.store);
+                newLexicons = Converter.dispatch(newLexicons, [...textMarks, ...queried]);
             }
         } else {
             this.prepareStore();
@@ -591,9 +595,9 @@ export class InputController {
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
-                type: CandidateType.Cantonese,
+                type: item.type === LexiconType.Text ? CandidateType.Text : CandidateType.Cantonese,
                 text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
-                comment: item.romanization,
+                comment: item.type === LexiconType.Text ? undefined : item.romanization,
                 lexicon: item,
                 number: index,
             };
@@ -616,15 +620,16 @@ export class InputController {
                 newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.store);
             } else {
                 const queried = NineKeyResearcher.suggest(combos, this.store);
+                const textMarks = TextMarkResearcher.queryNineKey(combos, this.store);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
                 if (this.memory) {
                     const memoryLexicons = InputMemory.nineKeySearch(combos, this.memory);
-                    newLexicons = Converter.dispatch(memoryLexicons, queried);
+                    newLexicons = Converter.dispatch(memoryLexicons, [...textMarks, ...queried]);
                 } else {
                     this.prepareMemory();
-                    newLexicons = queried;
+                    newLexicons = [...textMarks, ...queried];
                 }
             }
         } else {
@@ -644,9 +649,9 @@ export class InputController {
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
-                type: CandidateType.Cantonese,
+                type: item.type === LexiconType.Text ? CandidateType.Text : CandidateType.Cantonese,
                 text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
-                comment: item.romanization,
+                comment: item.type === LexiconType.Text ? undefined : item.romanization,
                 lexicon: item,
                 number: index,
             };
