@@ -1,10 +1,11 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Lexicon } from "./Lexicon";
+import { LexiconType } from "./LexiconType";
 
 export class Converter {
     private static readonly compoundThreshold: number = 1000000;
-    static dispatch(memory: Lexicon[], queried: Lexicon[]): Lexicon[] {
+    static dispatch(memory: Lexicon[], marks: Lexicon[], symbols: Lexicon[], queried: Lexicon[]): Lexicon[] {
         const idealMemory = memory.filter((item) => item.number === -1);
         const notIdealMemory = memory.filter((item) => item.number === -2);
         let chained: Lexicon[] = idealMemory.length < 1 ?
@@ -22,8 +23,20 @@ export class Converter {
                 chained.push(entry);
             }
         }
+        for (let index = symbols.length - 1; index >= 0; index--) {
+            const symbol = symbols[index];
+            if (symbol === undefined) {
+                continue;
+            }
+            const insertIndex = chained.findIndex((item) => item.type === LexiconType.Cantonese &&
+                item.text === symbol.note && item.romanization === symbol.romanization);
+            if (insertIndex >= 0) {
+                chained.splice(insertIndex + 1, 0, symbol);
+            }
+        }
         return Converter.distinctLexicons([
             ...idealMemory.slice(0, 3),
+            ...marks,
             ...idealMemory,
             ...chained,
         ]);

@@ -13,6 +13,7 @@ import { Researcher } from './model/Researcher';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
 import { TextMarkResearcher } from './model/TextMarkResearcher';
+import { SymbolResearcher } from './model/SymbolResearcher';
 import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
 import { InputMemory } from './model/InputMemory';
@@ -572,7 +573,8 @@ export class InputController {
                     this.isCoreStoreFunctional = true;
                 }
                 const textMarks = TextMarkResearcher.search(keys, this.store);
-                newLexicons = Converter.dispatch(newLexicons, [...textMarks, ...queried]);
+                const symbols = SymbolResearcher.search(keys, segmentation, this.store);
+                newLexicons = Converter.dispatch(newLexicons, textMarks, symbols, queried);
             }
         } else {
             this.prepareStore();
@@ -595,9 +597,9 @@ export class InputController {
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
-                type: item.type === LexiconType.Text ? CandidateType.Text : CandidateType.Cantonese,
+                type: this.candidateType(item.type),
                 text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
-                comment: item.type === LexiconType.Text ? undefined : item.romanization,
+                comment: item.type === LexiconType.Cantonese ? item.romanization : undefined,
                 lexicon: item,
                 number: index,
             };
@@ -621,15 +623,16 @@ export class InputController {
             } else {
                 const queried = NineKeyResearcher.suggest(combos, this.store);
                 const textMarks = TextMarkResearcher.queryNineKey(combos, this.store);
+                const symbols = SymbolResearcher.searchNineKey(combos, this.store);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
                 if (this.memory) {
                     const memoryLexicons = InputMemory.nineKeySearch(combos, this.memory);
-                    newLexicons = Converter.dispatch(memoryLexicons, [...textMarks, ...queried]);
+                    newLexicons = Converter.dispatch(memoryLexicons, textMarks, symbols, queried);
                 } else {
                     this.prepareMemory();
-                    newLexicons = [...textMarks, ...queried];
+                    newLexicons = Converter.dispatch([], textMarks, symbols, queried);
                 }
             }
         } else {
@@ -649,9 +652,9 @@ export class InputController {
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
-                type: item.type === LexiconType.Text ? CandidateType.Text : CandidateType.Cantonese,
+                type: this.candidateType(item.type),
                 text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
-                comment: item.type === LexiconType.Text ? undefined : item.romanization,
+                comment: item.type === LexiconType.Cantonese ? item.romanization : undefined,
                 lexicon: item,
                 number: index,
             };
@@ -726,6 +729,17 @@ export class InputController {
     private clearSidebarSyllables() {
         this.sidebarSyllables = [];
         this.selectedSyllables = [];
+    }
+
+    private candidateType(type: LexiconType): CandidateType {
+        switch (type) {
+            case LexiconType.Text: return CandidateType.Text;
+            case LexiconType.Emoji: return CandidateType.Emoji;
+            case LexiconType.Symbol: return CandidateType.Symbol;
+            case LexiconType.Compose: return CandidateType.Compose;
+            case LexiconType.Cantonese:
+            default: return CandidateType.Cantonese;
+        }
     }
 
     private firstRomanizationSyllable(candidate: Candidate): string {
