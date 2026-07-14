@@ -26,9 +26,8 @@ export class SymbolResearcher {
             return [];
         }
         const input = combos.map((combo) => combo.leadingLetter).join("");
-        return SymbolResearcher.query(
-            "SELECT category, code_point, cantonese, romanization FROM symbol_table " +
-                "WHERE nine_key_code = ? ORDER BY rowid;", [code], input, store);
+        const command: string = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE nine_key_code = ? ORDER BY rowid;";
+        return SymbolResearcher.query(command, [code], input, store);
     }
 
     private static match(text: string, input: string, store: relationalStore.RdbStore): Lexicon[] {
@@ -36,9 +35,8 @@ export class SymbolResearcher {
             return [];
         }
         const spell = SymbolResearcher.javaStringHashCode(text);
-        return SymbolResearcher.query(
-            "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE spell = ? ORDER BY rowid;",
-            [spell], input, store);
+        const command: string = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE spell = ? ORDER BY rowid;";
+        return SymbolResearcher.query(command, [spell], input, store);
     }
 
     private static query(command: string, bindArgs: relationalStore.ValueType[], input: string,
@@ -76,10 +74,11 @@ export class SymbolResearcher {
     }
 
     private static skinToneTarget(source: string, store: relationalStore.RdbStore): string | undefined {
+        const command: string = "SELECT target FROM emoji_skin_map WHERE source = ? LIMIT 1;";
         let target: string | undefined = undefined;
         let resultSet: relationalStore.ResultSet | undefined = undefined;
         try {
-            resultSet = store.querySqlSync("SELECT target FROM emoji_skin_map WHERE source = ? LIMIT 1;", [source]);
+            resultSet = store.querySqlSync(command, [source]);
             if (resultSet.goToFirstRow()) {
                 target = resultSet.getString(0);
             }

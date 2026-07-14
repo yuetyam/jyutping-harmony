@@ -1041,7 +1041,11 @@ export class InputController {
         if (this.consumeReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
-        this.selectedCandidates.push(candidate);
+        if (candidate.type === CandidateType.Cantonese) {
+            this.selectedCandidates.push(candidate);
+        } else {
+            this.selectedCandidates = [];
+        }
         const inputLength = candidate.lexicon.inputCount;
         this.bufferEvents.splice(0, inputLength);
         if (this.bufferEvents.length < 1) {
@@ -1075,7 +1079,11 @@ export class InputController {
         if (this.consumeNineKeyReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
-        this.selectedCandidates.push(candidate);
+        if (candidate.type === CandidateType.Cantonese) {
+            this.selectedCandidates.push(candidate);
+        } else {
+            this.selectedCandidates = [];
+        }
         this.selectedSyllables = [];
         this.comboBuffer = this.comboBuffer.slice(candidate.lexicon.inputCount);
         if (this.comboBuffer.length < 1) {

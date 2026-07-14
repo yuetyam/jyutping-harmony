@@ -9,6 +9,7 @@ import { LexiconType } from "./LexiconType";
 import { Segmentation, Scheme, Segmenter } from "./Segmenter";
 import { CharCode } from "./CharCode";
 import { Combo } from "../ninekey/Combo";
+import { CandidateType } from "./CandidateType";
 
 interface InternalLexicon {
     readonly word: string;
@@ -736,6 +737,7 @@ export class InputMemory {
                 const romanization = res.getString(1);
                 const frequency = res.getLong(2);
                 const latest = res.getLong(3);
+                if (InputMemory.containsNonIdeographic(word)) { continue; }
                 lexicons.push(InputMemory.makeInternalLexicon(word, romanization, frequency, latest, input, mark ?? input));
             }
         } catch (error) {
@@ -765,6 +767,7 @@ export class InputMemory {
                 const romanization = res.getString(1);
                 const frequency = res.getLong(2);
                 const latest = res.getLong(3);
+                if (InputMemory.containsNonIdeographic(word)) { continue; }
                 lexicons.push(InputMemory.makeInternalLexicon(
                     word,
                     romanization,
@@ -800,6 +803,7 @@ export class InputMemory {
                 const romanization = res.getString(1);
                 const frequency = res.getLong(2);
                 const latest = res.getLong(3);
+                if (InputMemory.containsNonIdeographic(word)) { continue; }
                 lexicons.push(InputMemory.makeInternalLexicon(
                     word,
                     romanization,
@@ -823,6 +827,9 @@ export class InputMemory {
         return lexicons;
     }
 
+    private static containsNonIdeographic(text: string): boolean {
+        return /[^\p{Unified_Ideograph}]/u.test(text);
+    }
 
     static nineKeySearch(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
         if (InputMemory.isMigrating) {
@@ -866,6 +873,7 @@ export class InputMemory {
                 const frequency = res.getLong(2);
                 const latest = res.getLong(3);
                 const anchors = InputMemory.anchorsText(romanization);
+                if (InputMemory.containsNonIdeographic(word)) { continue; }
                 lexicons.push(InputMemory.makeInternalLexicon(word, romanization, frequency, latest, anchors, anchors));
             }
         } catch (error) {
@@ -895,6 +903,7 @@ export class InputMemory {
                 const romanization = res.getString(1);
                 const frequency = res.getLong(2);
                 const latest = res.getLong(3);
+                if (InputMemory.containsNonIdeographic(word)) { continue; }
                 const mark = InputMemory.stripTones(romanization).replace(/\s+/g, " ").trim();
                 const input = mark.replace(/\s+/g, "");
                 lexicons.push(InputMemory.makeInternalLexicon(word, romanization, frequency, latest, input, mark));
@@ -937,9 +946,10 @@ export class InputMemory {
         }
     }
     static process(candidates: Candidate[], store: relationalStore.RdbStore) {
-        if (InputMemory.isMigrating) {
-            return;
-        }
+        if (InputMemory.isMigrating) { return; }
+        if (candidates.length < 1) { return; }
+        const containsNonCantonese: boolean = candidates.some((item) => item.type != CandidateType.Cantonese);
+        if (containsNonCantonese) { return; }
         const text: string = candidates.map(item => item.lexicon.text).join("");
         const romanization: string = candidates.map(item => item.lexicon.romanization ?? "").join(" ");
         const concatenated: Lexicon = {
