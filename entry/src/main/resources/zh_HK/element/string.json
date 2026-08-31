@@ -30,6 +30,10 @@
     },
     {
       "name": "full_mode_notes_title",
+      "value": "重要提示"
+    },
+    {
+      "name": "full_mode_notes_subtitle",
       "value": "以下功能需要「完整體驗模式」"
     },
     {
@@ -43,6 +47,14 @@
     {
       "name": "full_mode_notes_row3",
       "value": "3. 按鍵聲音以及振動"
+    },
+    {
+      "name": "full_mode_fixes_title",
+      "value": "如果「完整體驗模式」沒有起效"
+    },
+    {
+      "name": "full_mode_fixes_body",
+      "value": "可以試下：先卸載本app，再重啓一下手機；重新下載之後，立即開啓「完整體驗模式」。"
     },
     {
       "name": "guide_abbreviated_input_heading",

@@ -30,6 +30,10 @@
     },
     {
       "name": "full_mode_notes_title",
+      "value": "Important Notice"
+    },
+    {
+      "name": "full_mode_notes_subtitle",
       "value": "The following features require “Full Mode”:"
     },
     {
@@ -38,11 +42,19 @@
     },
     {
       "name": "full_mode_notes_row2",
-      "value": "2. Habitual spelling compatibility"
+      "value": "2. Habitual spelling compatibility and abbreviated input"
     },
     {
       "name": "full_mode_notes_row3",
       "value": "3. Sound and haptic feedbacks"
+    },
+    {
+      "name": "full_mode_fixes_title",
+      "value": "If “Full Mode” is not working"
+    },
+    {
+      "name": "full_mode_fixes_body",
+      "value": "First, uninstall this app and restart your phone. After reinstalling it, immediately enable “Full Mode”."
     },
     {
       "name": "guide_abbreviated_input_heading",

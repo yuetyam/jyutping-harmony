@@ -60,10 +60,12 @@ export struct FinalsPage {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
                 ListItemGroup({ space: 4 }) {
+                    /*
                     ListItem() {
                         FinalLabel({ word: "㗎", syllable: "ga3", jyutping: "a", ipa: "[ ɐ ]" })
                     }
                     ListItem() { Divider() }
+                    */
                     ListItem() {
                         FinalLabel({ word: "計", syllable: "gai3", jyutping: "ai", ipa: "[ ɐi ]" })
                     }
@@ -248,10 +250,12 @@ export struct FinalsPage {
                         FinalLabel({ word: "姜", syllable: "goeng1", jyutping: "oeng", ipa: "[ œːŋ ]" })
                     }
                     ListItem() { Divider() }
+                    /*
                     ListItem() {
                         FinalLabel({ word: "*", syllable: "goet4", jyutping: "oet", ipa: "[ œːt̚ ]" })
                     }
                     ListItem() { Divider() }
+                    */
                     ListItem() {
                         FinalLabel({ word: "腳", syllable: "goek3", jyutping: "oek", ipa: "[ œːk̚ ]" })
                     }

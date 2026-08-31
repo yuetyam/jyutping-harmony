@@ -148,7 +148,7 @@ export struct HomeScreen {
 
     build() {
         Navigation(this.pageStack) {
-            List({ space: 20 }) {
+            List({ space: 24 }) {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
                         .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
@@ -270,7 +270,11 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.full_mode_notes_title")).fontWeight(FontWeight.Medium)
+                        Text($r("app.string.full_mode_notes_title")).fontWeight(FontWeight.Bold).fontSize(28)
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r("app.string.full_mode_notes_subtitle")).fontWeight(FontWeight.Bold)
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -283,6 +287,19 @@ export struct HomeScreen {
                     ListItem() { Divider() }
                     ListItem() {
                         Text($r("app.string.full_mode_notes_row3"))
+                    }
+                }
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
+                ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Text($r("app.string.full_mode_fixes_title")).fontWeight(FontWeight.Bold)
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r("app.string.full_mode_fixes_body"))
                     }
                 }
                 .padding(8)
