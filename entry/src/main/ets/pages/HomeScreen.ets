@@ -270,7 +270,16 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.full_mode_notes_title")).fontWeight(FontWeight.Bold).fontSize(28)
+                        Row() {
+                            Text($r("app.string.full_mode_notes_title"))
+                                .fontWeight(FontWeight.Bold)
+                                .fontSize(28)
+                                .fontColor(Color.White)
+                                .padding({ left: 14, right: 14, top: 4, bottom: 4 })
+                                .backgroundColor(Color.Red)
+                                .borderRadius(999)
+                            Blank()
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -295,7 +304,13 @@ export struct HomeScreen {
 
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
-                        Text($r("app.string.full_mode_fixes_title")).fontWeight(FontWeight.Bold)
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_green')])
+                                Text("i").fontSize(16).fontColor($r('app.color.apple_green'))
+                            }
+                            Text($r("app.string.full_mode_fixes_title")).fontWeight(FontWeight.Bold)
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -310,8 +325,8 @@ export struct HomeScreen {
                     ListItem() {
                         Row({ space: 10 }) {
                             Stack() {
-                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_green')])
-                                Text("#").fontSize(16).fontColor($r('app.color.apple_green'))
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_blue')])
+                                Text("#").fontSize(16).fontColor($r('app.color.apple_blue'))
                             }
                             Text($r("app.string.guide_abbreviated_input_heading")).fontWeight(FontWeight.Bold)
                         }
