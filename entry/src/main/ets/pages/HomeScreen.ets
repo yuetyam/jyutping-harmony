@@ -148,7 +148,7 @@ export struct HomeScreen {
 
     build() {
         Navigation(this.pageStack) {
-            List({ space: 24 }) {
+            List({ space: 20 }) {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
                         .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
@@ -269,6 +269,9 @@ export struct HomeScreen {
                 }
 
                 ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Image($r("app.media.full_mode")).borderRadius(8).padding(2)
+                    }
                     ListItem() {
                         Row() {
                             Text($r("app.string.full_mode_notes_title"))
