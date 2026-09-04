@@ -264,27 +264,76 @@ export class InputController {
             }
         }
     }
-    private async copyKeyboardDatabase(context: Context) {
+    private async copyKeyboardDatabase(context: Context, shouldReplace: boolean = false): Promise<boolean> {
         const desFileName: string = "ime-20260712-tmp.sqlite3";
-        const desPath: string = context.databaseDir + "/rdb/ime/" + desFileName;
+        const databaseDirectory: string = context.databaseDir + "/rdb/ime";
+        const desPath: string = databaseDirectory + "/" + desFileName;
+        const temporaryPath: string = desPath + ".copying";
         try {
-            if (fs.accessSync(desPath)) {
+            const srcFileName: string = "ime.sqlite3";
+            const srcPath: string = context.resourceDir + "/" + srcFileName;
+            const srcSize: number = fs.statSync(srcPath).size;
+            if (!shouldReplace && fs.accessSync(desPath) && fs.statSync(desPath).size === srcSize) {
                 console.debug("keyboard database path: " + desPath);
-            } else {
-                const srcFileName: string = "ime.sqlite3";
-                const srcPath: string = context.resourceDir + "/" + srcFileName;
-                console.debug("src database path: " + srcPath);
-                console.debug("des database path: " + desPath);
-                await fs.copyFile(srcPath, desPath);
+                return true;
             }
+            if (!fs.accessSync(databaseDirectory)) {
+                fs.mkdirSync(databaseDirectory, true);
+            }
+            if (fs.accessSync(temporaryPath)) {
+                fs.unlinkSync(temporaryPath);
+            }
+            console.debug("src database path: " + srcPath);
+            console.debug("des database path: " + desPath);
+            const sourceFile = fs.openSync(srcPath, fs.OpenMode.READ_ONLY);
+            try {
+                const destinationFile = fs.openSync(temporaryPath, fs.OpenMode.WRITE_ONLY | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+                try {
+                    const buffer: ArrayBuffer = new ArrayBuffer(1024 * 1024);
+                    while (true) {
+                        const bytesRead: number = await fs.read(sourceFile.fd, buffer);
+                        if (bytesRead < 1) {
+                            break;
+                        }
+                        let bytesWritten: number = 0;
+                        while (bytesWritten < bytesRead) {
+                            const remaining: ArrayBuffer = buffer.slice(bytesWritten, bytesRead);
+                            const count: number = await fs.write(destinationFile.fd, remaining);
+                            if (count < 1) {
+                                throw new Error("Failed to write keyboard database");
+                            }
+                            bytesWritten += count;
+                        }
+                    }
+                } finally {
+                    fs.closeSync(destinationFile);
+                }
+            } finally {
+                fs.closeSync(sourceFile);
+            }
+            if (fs.statSync(temporaryPath).size !== srcSize) {
+                throw new Error("Copied keyboard database has an unexpected size");
+            }
+            fs.renameSync(temporaryPath, desPath);
+            return true;
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("copyKeyboardDatabase() failed, message: " + err.message + ", code: " + err.code);
+            try {
+                if (fs.accessSync(temporaryPath)) {
+                    fs.unlinkSync(temporaryPath);
+                }
+            } catch (cleanupError) {
+                const err: BusinessError = cleanupError as BusinessError;
+                console.error("Failed to delete temporary keyboard database, message: " + err.message + ", code: " + err.code);
+            }
+            return false;
+        } finally {
+            await this.deleteOldDatabases(context);
         }
-        this.deleteOldDatabases(context);
     }
-    private store: relationalStore.RdbStore | undefined = undefined;
-    private async obtainStore() {
+    private coreStore: relationalStore.RdbStore | undefined = undefined;
+    private async obtainCoreStore(context: Context): Promise<void> {
         const fileName: string = "ime-20260712-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
             name: fileName,
@@ -293,36 +342,51 @@ export class InputController {
             customDir: 'ime',
             isReadOnly: true
         };
-        relationalStore.getRdbStore(this.ctx, storeConfig,
-            async (err: BusinessError, rdbStore: relationalStore.RdbStore) => {
-                if (err) {
-                    console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
-                    return;
-                }
-                this.store = rdbStore;
-            });
+        try {
+            this.coreStore = await relationalStore.getRdbStore(context, storeConfig);
+        } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
+        }
     }
     private isCoreStoreFunctional: boolean = false;
-    private async prepareStore() {
-        if (this.store) {
-            const rowID: number = Researcher.test(this.store);
+    private coreStorePreparation: Promise<void> | undefined = undefined;
+    private async prepareCoreStore(): Promise<void> {
+        if (this.coreStorePreparation) {
+            await this.coreStorePreparation;
+            return;
+        }
+        this.coreStorePreparation = this.prepareCoreStoreOnce();
+        try {
+            await this.coreStorePreparation;
+        } finally {
+            this.coreStorePreparation = undefined;
+        }
+    }
+    private async prepareCoreStoreOnce(): Promise<void> {
+        let shouldReplace: boolean = false;
+        if (this.coreStore) {
+            const rowID: number = Researcher.test(this.coreStore);
             if (rowID > 0) {
                 this.isCoreStoreFunctional = true;
                 return;
             }
             this.isCoreStoreFunctional = false;
             try {
-                await this.store.close();
+                await this.coreStore.close();
             } catch (error) {
                 let err: BusinessError = error as BusinessError;
                 console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
             } finally {
-                this.store = undefined;
+                this.coreStore = undefined;
             }
+            shouldReplace = true;
         }
         if (this.ctx) {
-            await this.copyKeyboardDatabase(this.ctx);
-            await this.obtainStore();
+            const copied: boolean = await this.copyKeyboardDatabase(this.ctx, shouldReplace);
+            if (copied) {
+                await this.obtainCoreStore(this.ctx);
+            }
         }
     }
     private async prepareMemory() {
@@ -389,9 +453,9 @@ export class InputController {
     private isEmojiBoardPrepared: boolean = false;
     @Trace emojiBoardEmojis: Emoji[] = [];
     prepareEmojiBoard() {
-        if (this.isEmojiBoardPrepared || this.store === undefined) { return; }
-        const defaultFrequent = EmojiDataHelper.fetchDefaultFrequent(this.store);
-        const sequence = EmojiDataHelper.fetchSequence(this.store);
+        if (this.isEmojiBoardPrepared || this.coreStore === undefined) { return; }
+        const defaultFrequent = EmojiDataHelper.fetchDefaultFrequent(this.coreStore);
+        const sequence = EmojiDataHelper.fetchSequence(this.coreStore);
         if (defaultFrequent.length !== this.frequentEmojiCount || sequence.length < 1) { return; }
         this.emojiSequence = sequence;
         let savedValue: string = "";
@@ -445,10 +509,9 @@ export class InputController {
         }
         this.registerListener();
         this.prepareSoundPool();
-        this.prepareStore();
+        this.prepareCoreStore();
         this.prepareMemory();
         setTimeout(() => {
-            this.prepareStore();
             this.prepareMemory();
         }, 1000);
         try {
@@ -547,19 +610,19 @@ export class InputController {
         const reverseLookupQuery = this.reverseLookupQueryForKeys(keys);
         let reverseLookupSuggestion: ReverseLookupSuggestion = this.emptyReverseLookupSuggestion();
         const isReverseLookup = this.isReverseLookup(reverseLookupQuery.method);
-        if (this.store) {
+        if (this.coreStore) {
             if (isReverseLookup) {
-                reverseLookupSuggestion = this.suggestReverseLookup(reverseLookupQuery, this.store);
-                const textMarks = TextMarkResearcher.search(keys, this.store);
+                reverseLookupSuggestion = this.suggestReverseLookup(reverseLookupQuery, this.coreStore);
+                const textMarks = TextMarkResearcher.search(keys, this.coreStore);
                 newLexicons = [...textMarks, ...reverseLookupSuggestion.lexicons];
                 if (newLexicons.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
             } else {
-                segmentation = Segmenter.segment(keys, this.store);
+                segmentation = Segmenter.segment(keys, this.coreStore);
                 if (this.memory) {
                     if (this.isCoreStoreFunctional) {
-                        newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.store);
+                        newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.coreStore);
                     } else {
                         const memoryLexicons = InputMemory.search(keys, this.memory);
                         const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
@@ -568,16 +631,16 @@ export class InputController {
                 } else {
                     this.prepareMemory();
                 }
-                const queried = await Researcher.suggest(keys, segmentation, this.store);
+                const queried = await Researcher.suggest(keys, segmentation, this.coreStore);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
-                const textMarks = TextMarkResearcher.search(keys, this.store);
-                const symbols = SymbolResearcher.search(keys, segmentation, this.store);
+                const textMarks = TextMarkResearcher.search(keys, this.coreStore);
+                const symbols = SymbolResearcher.search(keys, segmentation, this.coreStore);
                 newLexicons = Converter.dispatch(newLexicons, textMarks, symbols, queried);
             }
         } else {
-            this.prepareStore();
+            this.prepareCoreStore();
             if (!isReverseLookup && this.memory) {
                 const memoryLexicons = InputMemory.search(keys, this.memory);
                 const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
@@ -593,7 +656,7 @@ export class InputController {
             const text = this.joinedBufferTexts();
             this.updatePreviewText(this.buildPreviewText(text, keys, segmentation, newLexicons));
         }
-        const conversionStore = isReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
+        const conversionStore = isReverseLookup ? this.coreStore : (this.isCoreStoreFunctional ? this.coreStore : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
@@ -617,13 +680,13 @@ export class InputController {
         const combos = [...this.comboBuffer];
         const reverseLookupQuery = this.nineKeyReverseLookupQueryForCombos(combos);
         const isReverseLookup = this.isReverseLookup(reverseLookupQuery.method);
-        if (this.store) {
+        if (this.coreStore) {
             if (isReverseLookup) {
-                newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.store);
+                newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.coreStore);
             } else {
-                const queried = NineKeyResearcher.suggest(combos, this.store);
-                const textMarks = TextMarkResearcher.queryNineKey(combos, this.store);
-                const symbols = SymbolResearcher.searchNineKey(combos, this.store);
+                const queried = NineKeyResearcher.suggest(combos, this.coreStore);
+                const textMarks = TextMarkResearcher.queryNineKey(combos, this.coreStore);
+                const symbols = SymbolResearcher.searchNineKey(combos, this.coreStore);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
@@ -636,7 +699,7 @@ export class InputController {
                 }
             }
         } else {
-            this.prepareStore();
+            this.prepareCoreStore();
             if (!isReverseLookup && this.memory) {
                 newLexicons = InputMemory.nineKeySearch(combos, this.memory);
             } else if (!isReverseLookup) {
@@ -648,7 +711,7 @@ export class InputController {
         } else {
             this.updatePreviewText(this.buildNineKeyPreviewText(combos, newLexicons));
         }
-        const conversionStore = isReverseLookup ? this.store : (this.isCoreStoreFunctional ? this.store : this.memory);
+        const conversionStore = isReverseLookup ? this.coreStore : (this.isCoreStoreFunctional ? this.coreStore : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
