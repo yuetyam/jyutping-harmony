@@ -621,13 +621,7 @@ export class InputController {
             } else {
                 segmentation = Segmenter.segment(keys, this.coreStore);
                 if (this.memory) {
-                    if (this.isCoreStoreFunctional) {
-                        newLexicons = InputMemory.suggest(keys, segmentation, this.memory, this.coreStore);
-                    } else {
-                        const memoryLexicons = InputMemory.search(keys, this.memory);
-                        const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
-                        newLexicons = [...memoryLexicons, ...fallbackLexicons];
-                    }
+                    newLexicons = this.isCoreStoreFunctional ? InputMemory.suggest(keys, segmentation, this.memory, this.coreStore) : InputMemory.search(keys, this.memory);
                 } else {
                     this.prepareMemory();
                 }
@@ -641,12 +635,12 @@ export class InputController {
             }
         } else {
             this.prepareCoreStore();
-            if (!isReverseLookup && this.memory) {
-                const memoryLexicons = InputMemory.search(keys, this.memory);
-                const fallbackLexicons = InputMemory.fallbackSearch(keys, this.memory);
-                newLexicons = [...memoryLexicons, ...fallbackLexicons];
-            } else if (!isReverseLookup) {
-                this.prepareMemory();
+            if (!isReverseLookup) {
+                if (this.memory) {
+                    newLexicons = InputMemory.search(keys, this.memory);
+                } else {
+                    this.prepareMemory();
+                }
             }
         }
         if (isReverseLookup) {
@@ -656,12 +650,11 @@ export class InputController {
             const text = this.joinedBufferTexts();
             this.updatePreviewText(this.buildPreviewText(text, keys, segmentation, newLexicons));
         }
-        const conversionStore = isReverseLookup ? this.coreStore : (this.isCoreStoreFunctional ? this.coreStore : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
                 type: this.candidateType(item.type),
-                text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
+                text: needsConversion ? Converter.convert(item.text, true, this.coreStore) : item.text,
                 comment: item.type === LexiconType.Cantonese ? item.romanization : undefined,
                 lexicon: item,
                 number: index,
@@ -711,12 +704,11 @@ export class InputController {
         } else {
             this.updatePreviewText(this.buildNineKeyPreviewText(combos, newLexicons));
         }
-        const conversionStore = isReverseLookup ? this.coreStore : (this.isCoreStoreFunctional ? this.coreStore : this.memory);
         for (let index = 0; index < newLexicons.length; index++) {
             const item = newLexicons[index];
             let instance: Candidate = {
                 type: this.candidateType(item.type),
-                text: needsConversion ? Converter.convert(item.text, true, conversionStore) : item.text,
+                text: needsConversion ? Converter.convert(item.text, true, this.coreStore) : item.text,
                 comment: item.type === LexiconType.Cantonese ? item.romanization : undefined,
                 lexicon: item,
                 number: index,

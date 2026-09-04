@@ -1,8 +1,6 @@
 import { preferences, relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Candidate } from "./Candidate";
-import { FallbackLexiconHelper } from "./FallbackLexiconHelper";
-import { FallbackT2SHelper } from "./FallbackT2SHelper";
 import { VirtualInputKey } from "./VirtualInputKey";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
@@ -581,12 +579,8 @@ export class InputMemory {
             return InputMemory.strictMatch(spellCode, shortcutCode, text, store, InputMemory.schemeMark(scheme), InputMemory.defaultStrictLimit);
         });
         const queried = InputMemory.query(segmentation, idealSchemes, deepSearch, store);
-        const partialMatched = deepSearch ?
-            InputMemory.partialMatch(keys, text, inputLength, segmentation, idealSchemes, store, syllableStore, tailSyllableCache) :
-            [];
-        const partialFallback = segmentation.length < 1 ?
-            partialMatched.filter((item) => item.inputCount < inputLength) :
-            [];
+        const partialMatched = deepSearch ? InputMemory.partialMatch(keys, text, inputLength, segmentation, idealSchemes, store, syllableStore, tailSyllableCache) : [];
+        const partialFallback = (segmentation.length < 1) ? partialMatched.filter((item) => item.inputCount < inputLength) : [];
         if (fullMatched.length > 0 || idealQueried.length > 0) {
             return [...InputMemory.idealLexicons([...fullMatched, ...idealQueried], inputLength), ...partialFallback, ...queried];
         }
@@ -926,21 +920,6 @@ export class InputMemory {
         InputMemory.ensureCoreMemoryTable(store);
         InputMemory.ensureCoreMemoryIndexes(store);
         InputMemory.ensureLegacyLatestColumn(store);
-        try {
-            const command: string = "CREATE TABLE IF NOT EXISTS fallback(word TEXT NOT NULL, romanization TEXT NOT NULL, shortcut INTEGER NOT NULL, ping INTEGER NOT NULL);";
-            store.executeSync(command);
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`);
-        }
-        try {
-            const command: string = "CREATE TABLE IF NOT EXISTS variant_sim(left INTEGER NOT NULL, right INTEGER NOT NULL);";
-            store.executeSync(command);
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`error in prepare(), message: ${err.message}, code: ${err.code}`);
-        }
-        InputMemory.prepareFallbackTables(store);
         if (settings !== undefined) {
             InputMemory.performMigration(store, settings);
         }
@@ -1015,116 +994,5 @@ export class InputMemory {
             let err: BusinessError = error as BusinessError;
             console.error(`message: ${err.message}, code: ${err.code}`);
         }
-    }
-
-
-    // Fallback searching
-
-    static fallbackSearch(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        return InputMemory.fallBackProcessSlices(keys, store);
-    }
-    private static fallBackProcessSlices(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
-        const inputLength: number = keys.length;
-        const range = [...Array(inputLength)].map((_value: number, index: number) => index);
-        let items: Lexicon[] = range.flatMap(num => {
-            const leadingKeys = keys.slice(0, inputLength - num);
-            const leadingText = leadingKeys.map((key) => key.text).join("")
-            const code = InputMemory.hashCode(leadingText);
-            return InputMemory.fallBackMatch(leadingText, code, store);
-        })
-        return items;
-    }
-    private static fallBackMatch(text: string, code: number, store: relationalStore.RdbStore): Lexicon[] {
-        const inputCount = text.length;
-        const lexicons: Lexicon[] = [];
-        const limit = 50;
-        const command: string = "SELECT rowid, word, romanization FROM fallback WHERE ping = ? OR shortcut = ? LIMIT ?;";
-        let res: relationalStore.ResultSet | undefined = undefined;
-        try {
-            res = store.querySqlSync(command, [code, code, limit]);
-            while (res.goToNextRow()) {
-                const num = res.getLong(0);
-                const word = res.getString(1);
-                const romanization = res.getString(2);
-                const instance: Lexicon = {
-                    type: LexiconType.Cantonese,
-                    text: word,
-                    romanization: romanization,
-                    input: text,
-                    inputCount: inputCount,
-                    number: num,
-                };
-                lexicons.push(instance);
-            }
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        } finally {
-            try {
-                res?.close();
-            } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
-            }
-        }
-        return lexicons;
-    }
-
-
-    // Fallback tables preparation
-
-    private static prepareFallbackTables(store: relationalStore.RdbStore) {
-        const needs = InputMemory.needsFallbackInsertion(store);
-        if (needs) {
-            InputMemory.fallbackInsert(store);
-            InputMemory.t2sInsert(store);
-        }
-    }
-    private static fallbackInsert(store: relationalStore.RdbStore) {
-        const valuesText = FallbackLexiconHelper.generate();
-        const leadingText: string = "INSERT INTO fallback (word, romanization, shortcut, ping) VALUES ";
-        const trailingText: string = `;`;
-        const command: string = leadingText + valuesText + trailingText;
-        try {
-            store.executeSync(command);
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        }
-    }
-    private static t2sInsert(store: relationalStore.RdbStore) {
-        const valuesText = FallbackT2SHelper.generate();
-        const leadingText: string = "INSERT INTO variant_sim (left, right) VALUES ";
-        const trailingText: string = `;`;
-        const command: string = leadingText + valuesText + trailingText;
-        try {
-            store.executeSync(command);
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        }
-    }
-    private static needsFallbackInsertion(store: relationalStore.RdbStore): boolean {
-        let needs: boolean = true;
-        const command: string = "SELECT shortcut FROM fallback WHERE ping = 109014 LIMIT 1;";
-        let res: relationalStore.ResultSet | undefined = undefined;
-        try {
-            res = store.querySqlSync(command);
-            if (res.goToFirstRow()) {
-                const shortcut = res.getLong(0);
-                needs = (shortcut != 110);
-            }
-        } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        } finally {
-            try {
-                res?.close();
-            } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
-            }
-        }
-        return needs;
     }
 }
