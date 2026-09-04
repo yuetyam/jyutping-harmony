@@ -18,6 +18,8 @@ import { YingWaaHelper } from '../search/YingWaaHelper';
 import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
 import { YingWaaLexicon } from '../search/YingWaaUnit';
 
+const APP_DATABASE_FILE_NAME: string = "app-20260712-tmp.sqlite3";
+
 @ComponentV2
 export struct HomeScreen {
     private pageStack: NavPathStack = new NavPathStack();
@@ -25,24 +27,8 @@ export struct HomeScreen {
     private groupBorderRadius: Length = 16;
     @Local private inputText: string = '';
     @Local private submittedText: string = '';
-    @Monitor('submittedText') performSearch() {
-        if (this.store) {
-            if (this.submittedText) {
-                this.lexicons = CantoneseDataHelper.search(this.submittedText, this.store);
-                this.yingWaaLexicons = YingWaaHelper.search(this.submittedText, this.store);
-                this.choHokLexicons = ChoHokHelper.search(this.submittedText, this.store);
-                this.fanWanLexicons = FanWanHelper.search(this.submittedText, this.store);
-                this.gwongWanLexicons = GwongWanHelper.search(this.submittedText, this.store);
-            } else {
-                this.lexicons = [];
-                this.yingWaaLexicons = [];
-                this.choHokLexicons = [];
-                this.fanWanLexicons = [];
-                this.gwongWanLexicons = [];
-            }
-        } else {
-            this.prepareStore();
-        }
+    @Monitor('submittedText') performSearch(): void {
+        this.searchSubmittedText();
     }
     @Local private lexicons: CantoneseLexicon[] = [];
     @Local private yingWaaLexicons: YingWaaLexicon[] = [];
@@ -67,64 +53,163 @@ export struct HomeScreen {
             }
         }
     }
-    private async copyAppDatabase(context: Context) {
-        const desFileName: string = "app-20260712-tmp.sqlite3";
-        const desPath: string = context.databaseDir + "/rdb/app/" + desFileName;
+    private async copyAppDatabase(context: Context, shouldReplace: boolean = false): Promise<boolean> {
+        const databaseDirectory: string = context.databaseDir + "/rdb/app";
+        const desPath: string = databaseDirectory + "/" + APP_DATABASE_FILE_NAME;
+        const temporaryPath: string = desPath + ".copying";
         try {
-            if (fs.accessSync(desPath)) {
+            const srcFileName: string = "app.sqlite3";
+            const srcPath: string = context.resourceDir + "/" + srcFileName;
+            const srcSize: number = fs.statSync(srcPath).size;
+            if (!shouldReplace && fs.accessSync(desPath) && fs.statSync(desPath).size === srcSize) {
                 console.debug("app database path: " + desPath);
-            } else {
-                const srcFileName: string = "app.sqlite3";
-                const srcPath: string = context.resourceDir + "/" + srcFileName;
-                console.debug("src database path: " + srcPath);
-                console.debug("des database path: " + desPath);
-                await fs.copyFile(srcPath, desPath);
+                return true;
             }
+            if (!fs.accessSync(databaseDirectory)) {
+                fs.mkdirSync(databaseDirectory, true);
+            }
+            if (fs.accessSync(temporaryPath)) {
+                fs.unlinkSync(temporaryPath);
+            }
+            console.debug("src database path: " + srcPath);
+            console.debug("des database path: " + desPath);
+            const sourceFile = fs.openSync(srcPath, fs.OpenMode.READ_ONLY);
+            try {
+                const destinationFile = fs.openSync(temporaryPath, fs.OpenMode.WRITE_ONLY | fs.OpenMode.CREATE | fs.OpenMode.TRUNC);
+                try {
+                    const buffer: ArrayBuffer = new ArrayBuffer(1024 * 1024);
+                    while (true) {
+                        const bytesRead: number = await fs.read(sourceFile.fd, buffer);
+                        if (bytesRead < 1) {
+                            break;
+                        }
+                        let bytesWritten: number = 0;
+                        while (bytesWritten < bytesRead) {
+                            const remaining: ArrayBuffer = buffer.slice(bytesWritten, bytesRead);
+                            const count: number = await fs.write(destinationFile.fd, remaining);
+                            if (count < 1) {
+                                throw new Error("Failed to write app database");
+                            }
+                            bytesWritten += count;
+                        }
+                    }
+                } finally {
+                    fs.closeSync(destinationFile);
+                }
+            } finally {
+                fs.closeSync(sourceFile);
+            }
+            if (fs.statSync(temporaryPath).size !== srcSize) {
+                throw new Error("Copied app database has an unexpected size");
+            }
+            fs.renameSync(temporaryPath, desPath);
+            return true;
         } catch (error) {
             let err: BusinessError = error as BusinessError;
             console.error("copyAppDatabase() failed, message: " + err.message + ", code: " + err.code);
+            try {
+                if (fs.accessSync(temporaryPath)) {
+                    fs.unlinkSync(temporaryPath);
+                }
+            } catch (cleanupError) {
+                const err: BusinessError = cleanupError as BusinessError;
+                console.error("Failed to delete temporary app database, message: " + err.message + ", code: " + err.code);
+            }
+            return false;
         }
-        this.deleteOldDatabases(context);
     }
     private store: relationalStore.RdbStore | undefined = undefined;
-    private async obtainStore() {
-        const fileName: string = "app-20260712-tmp.sqlite3";
+    private async obtainStore(context: Context): Promise<void> {
         let storeConfig: relationalStore.StoreConfig = {
-            name: fileName,
+            name: APP_DATABASE_FILE_NAME,
             securityLevel: relationalStore.SecurityLevel.S1,
             encrypt: false,
             customDir: 'app',
             isReadOnly: true
         };
-        relationalStore.getRdbStore(this.getUIContext().getHostContext(), storeConfig,
-            async (err: BusinessError, rdbStore: relationalStore.RdbStore) => {
-                if (err) {
-                    console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
-                    return;
-                }
-                this.store = rdbStore;
-            });
+        try {
+            this.store = await relationalStore.getRdbStore(context, storeConfig);
+        } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error(`Error in getRdbStore(). message: ${err.message}, code: ${err.code}`);
+        }
     }
-    private async prepareStore() {
+    private async closeStore(): Promise<void> {
+        const store = this.store;
+        this.store = undefined;
+        try {
+            await store?.close();
+        } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
+        }
+    }
+    private storePreparation: Promise<void> | undefined = undefined;
+    private async prepareStore(): Promise<void> {
+        if (this.storePreparation) {
+            await this.storePreparation;
+            return;
+        }
+        this.storePreparation = this.prepareStoreOnce();
+        try {
+            await this.storePreparation;
+        } finally {
+            this.storePreparation = undefined;
+        }
+    }
+    private async prepareStoreOnce(): Promise<void> {
+        let shouldReplace: boolean = false;
         if (this.store) {
             const rowID: number = CantoneseDataHelper.test(this.store);
             if (rowID > 0) {
                 return;
             }
-            try {
-                await this.store.close();
-            } catch (error) {
-                let err: BusinessError = error as BusinessError;
-                console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
-            } finally {
-                this.store = undefined;
-            }
+            await this.closeStore();
+            shouldReplace = true;
         }
-        let context = this.getUIContext().getHostContext();
-        if (context) {
-            await this.copyAppDatabase(context);
-            await this.obtainStore();
+        const context = this.getUIContext().getHostContext();
+        if (!context) {
+            return;
         }
+        const copied: boolean = await this.copyAppDatabase(context, shouldReplace);
+        if (!copied) {
+            return;
+        }
+        await this.obtainStore(context);
+        if (this.store && CantoneseDataHelper.test(this.store) > 0) {
+            await this.deleteOldDatabases(context);
+            return;
+        }
+        await this.closeStore();
+        if (shouldReplace || !(await this.copyAppDatabase(context, true))) {
+            return;
+        }
+        await this.obtainStore(context);
+        if (this.store && CantoneseDataHelper.test(this.store) > 0) {
+            await this.deleteOldDatabases(context);
+        } else {
+            await this.closeStore();
+        }
+    }
+    private async searchSubmittedText(): Promise<void> {
+        const submittedText: string = this.submittedText;
+        if (!submittedText) {
+            this.lexicons = [];
+            this.yingWaaLexicons = [];
+            this.choHokLexicons = [];
+            this.fanWanLexicons = [];
+            this.gwongWanLexicons = [];
+            return;
+        }
+        await this.prepareStore();
+        if (submittedText !== this.submittedText || !this.store) {
+            return;
+        }
+        this.lexicons = CantoneseDataHelper.search(submittedText, this.store);
+        this.yingWaaLexicons = YingWaaHelper.search(submittedText, this.store);
+        this.choHokLexicons = ChoHokHelper.search(submittedText, this.store);
+        this.fanWanLexicons = FanWanHelper.search(submittedText, this.store);
+        this.gwongWanLexicons = GwongWanHelper.search(submittedText, this.store);
     }
 
     /*
