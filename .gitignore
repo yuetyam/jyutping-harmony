@@ -11,6 +11,10 @@
 **/.test
 /.appanalyzer
 
+### Databases ###
 *.sqlite3
 *.sqlite
 *.db
+
+### Rust & Cargo ###
+/preparing/target/
