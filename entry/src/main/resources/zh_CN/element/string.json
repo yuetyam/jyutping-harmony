@@ -30,31 +30,15 @@
     },
     {
       "name": "full_mode_notes_title",
-      "value": "重要提示"
-    },
-    {
-      "name": "full_mode_notes_subtitle",
       "value": "以下功能需要「完整体验模式」"
     },
     {
       "name": "full_mode_notes_row1",
-      "value": "1. 完整词库以及拼音反查"
+      "value": "1. 按键声音以及振动"
     },
     {
       "name": "full_mode_notes_row2",
-      "value": "2. 兼容各种习惯拼法以及简拼"
-    },
-    {
-      "name": "full_mode_notes_row3",
-      "value": "3. 按键声音以及振动"
-    },
-    {
-      "name": "full_mode_fixes_title",
-      "value": "如果「完整体验模式」没有起效"
-    },
-    {
-      "name": "full_mode_fixes_body",
-      "value": "可以尝试：先卸载本app，再重启一下手机；重新下载之后，立即开启「完整体验模式」。"
+      "value": "2. 从系统剪贴板粘贴文字到输入框"
     },
     {
       "name": "guide_abbreviated_input_heading",

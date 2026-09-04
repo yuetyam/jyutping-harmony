@@ -233,7 +233,7 @@ export struct HomeScreen {
 
     build() {
         Navigation(this.pageStack) {
-            List({ space: 20 }) {
+            List({ space: 24 }) {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
                         .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
@@ -357,21 +357,15 @@ export struct HomeScreen {
                     ListItem() {
                         Image($r("app.media.full_mode")).borderRadius(8).padding(2)
                     }
-                    ListItem() {
-                        Row() {
-                            Text($r("app.string.full_mode_notes_title"))
-                                .fontWeight(FontWeight.Bold)
-                                .fontSize(28)
-                                .fontColor(Color.White)
-                                .padding({ left: 14, right: 14, top: 4, bottom: 4 })
-                                .backgroundColor(Color.Red)
-                                .borderRadius(999)
-                            Blank()
-                        }
-                    }
                     ListItem() { Divider() }
                     ListItem() {
-                        Text($r("app.string.full_mode_notes_subtitle")).fontWeight(FontWeight.Bold)
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_green')])
+                                Text("i").fontSize(16).fontColor($r('app.color.apple_green'))
+                            }
+                            Text($r("app.string.full_mode_notes_title")).fontWeight(FontWeight.Bold)
+                        }
                     }
                     ListItem() { Divider() }
                     ListItem() {
@@ -380,29 +374,6 @@ export struct HomeScreen {
                     ListItem() { Divider() }
                     ListItem() {
                         Text($r("app.string.full_mode_notes_row2"))
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        Text($r("app.string.full_mode_notes_row3"))
-                    }
-                }
-                .padding(8)
-                .backgroundColor(this.groupBackgroundColor)
-                .borderRadius(this.groupBorderRadius)
-
-                ListItemGroup({ space: 8 }) {
-                    ListItem() {
-                        Row({ space: 10 }) {
-                            Stack() {
-                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_green')])
-                                Text("i").fontSize(16).fontColor($r('app.color.apple_green'))
-                            }
-                            Text($r("app.string.full_mode_fixes_title")).fontWeight(FontWeight.Bold)
-                        }
-                    }
-                    ListItem() { Divider() }
-                    ListItem() {
-                        Text($r("app.string.full_mode_fixes_body"))
                     }
                 }
                 .padding(8)
