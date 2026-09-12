@@ -1,7 +1,7 @@
 import { CharCode, DigitCode } from "./CharCode";
 import { VirtualInputKey } from "./VirtualInputKey";
 
-/** Exact database codes. Legacy InputMemory continues to use CharCode. */
+/** Exact database codes used by the bundled and learned lexicons. */
 export class EngineCode {
     static radix100Overflowed(values: number[]): bigint {
         let result = BigInt(0);

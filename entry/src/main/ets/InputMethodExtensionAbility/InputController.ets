@@ -28,6 +28,7 @@ import { Combo } from './ninekey/Combo';
 import { SidebarSyllable } from './ninekey/SidebarSyllable';
 import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
 import { NineKeyEngine } from './model/NineKeyEngine';
+import { NineKeySegmenter } from './model/NineKeySegmenter';
 import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
@@ -676,14 +677,15 @@ export class InputController {
             if (isReverseLookup) {
                 newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.coreStore);
             } else {
-                const queried = NineKeyEngine.suggest(combos, this.coreStore);
+                const segmentation = NineKeySegmenter.segment(combos, this.coreStore);
+                const queried = NineKeyEngine.suggest(combos, segmentation, this.coreStore);
                 const textMarks = PlainText.queryNineKey(combos, this.coreStore);
                 const symbols = SymbolResearcher.searchNineKey(combos, this.coreStore);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
                 if (this.memory) {
-                    const memoryLexicons = InputMemory.nineKeySearch(combos, this.memory);
+                    const memoryLexicons = InputMemory.nineKeySearch(combos, segmentation, this.memory);
                     newLexicons = Converter.dispatch(memoryLexicons, textMarks, symbols, queried);
                 } else {
                     this.prepareMemory();
@@ -693,7 +695,7 @@ export class InputController {
         } else {
             this.prepareCoreStore();
             if (!isReverseLookup && this.memory) {
-                newLexicons = InputMemory.nineKeySearch(combos, this.memory);
+                newLexicons = InputMemory.nineKeySearch(combos, [], this.memory);
             } else if (!isReverseLookup) {
                 this.prepareMemory();
             }

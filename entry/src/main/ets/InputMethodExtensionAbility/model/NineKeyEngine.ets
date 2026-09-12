@@ -5,12 +5,11 @@ import { EngineCode } from "./EngineCode";
 import { EngineLexicon } from "./EngineLexicon";
 import { ExtraEntry } from "./ExtraEntry";
 import { Lexicon } from "./Lexicon";
-import { NineKeyScheme, NineKeySegmenter } from "./NineKeySegmenter";
+import { NineKeyScheme, NineKeySegmentation, NineKeySegmenter } from "./NineKeySegmenter";
 
 export class NineKeyEngine {
-    static suggest(combos: Combo[], store: relationalStore.RdbStore, limit: number = -1): Lexicon[] {
+    static suggest(combos: Combo[], segmentation: NineKeySegmentation, store: relationalStore.RdbStore, limit: number = -1): Lexicon[] {
         if (combos.length === 0 || combos.some((combo) => combo.isSpecial)) return [];
-        const segmentation = NineKeySegmenter.segment(combos, store);
         if (segmentation.length === 0) return NineKeyEngine.slices(combos, store, limit);
         if (combos.length === 1) return NineKeyEngine.anchors(combos, store, limit);
         const ideal = segmentation.filter((scheme) => NineKeyEngine.schemeLength(scheme) === combos.length);
@@ -22,7 +21,8 @@ export class NineKeyEngine {
         if (fetched.length === 0) return NineKeyEngine.slices(combos, store, limit);
         const head = fetched[0];
         if (head.inputCount >= combos.length) return fetched;
-        const tails = NineKeyEngine.suggest(combos.slice(head.inputCount), store, 20);
+        const tailCombos = combos.slice(head.inputCount);
+        const tails = NineKeyEngine.suggest(tailCombos, NineKeySegmenter.segment(tailCombos, store), store, 20);
         const compounds = tails.map((tail) => EngineLexicon.concatenate(head, tail)).sort(EngineLexicon.compare).slice(0, 1);
         return [...compounds, ...fetched];
     }
