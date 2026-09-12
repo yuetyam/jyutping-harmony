@@ -1,63 +1,56 @@
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Combo } from "../ninekey/Combo";
+import { EngineCode } from "./EngineCode";
 import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
 import { LexiconType } from "./LexiconType";
 import { VirtualInputKey } from "./VirtualInputKey";
 
-export class TextMarkResearcher {
+export class PlainText {
     static search(keys: VirtualInputKey[], store: relationalStore.RdbStore): Lexicon[] {
         const input = CharCode.keysText(keys);
         if (input.length < 1) {
             return [];
         }
-        const spell = TextMarkResearcher.javaStringHashCode(input);
+        const spell = EngineCode.keys(keys);
         const items: Lexicon[] = [];
-        const command = "SELECT mark FROM mark_table WHERE spell = ? ORDER BY rowid;";
+        const command = "SELECT word FROM plain_text_table WHERE spell = CAST(? AS INTEGER) AND letter_count = ? ORDER BY rowid;";
         let resultSet: relationalStore.ResultSet | undefined = undefined;
         try {
-            resultSet = store.querySqlSync(command, [spell]);
+            resultSet = store.querySqlSync(command, [spell, keys.length]);
             while (resultSet.goToNextRow()) {
-                items.push(TextMarkResearcher.makeLexicon(resultSet.getString(0), input, input));
+                items.push(PlainText.makeLexicon(resultSet.getString(0), input, input));
             }
         } catch (error) {
-            TextMarkResearcher.logError(error);
+            PlainText.logError(error);
         } finally {
-            TextMarkResearcher.closeResultSet(resultSet);
+            PlainText.closeResultSet(resultSet);
         }
         return items;
     }
 
     static queryNineKey(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
-        const code = CharCode.comboCode(combos);
-        if (code < 1) {
+        const code = EngineCode.combos(combos);
+        if (combos.length < 1) {
             return [];
         }
         const items: Lexicon[] = [];
-        const command = "SELECT input, mark FROM mark_table WHERE nine_key_code = ? ORDER BY rowid;";
+        const command = "SELECT input, word FROM plain_text_table WHERE spell_9key = CAST(? AS INTEGER) AND letter_count = ? ORDER BY rowid;";
         let resultSet: relationalStore.ResultSet | undefined = undefined;
         try {
-            resultSet = store.querySqlSync(command, [code]);
+            resultSet = store.querySqlSync(command, [code, combos.length]);
             while (resultSet.goToNextRow()) {
                 const input = resultSet.getString(0);
                 const mark = resultSet.getString(1);
-                items.push(TextMarkResearcher.makeLexicon(mark, input, mark));
+                items.push(PlainText.makeLexicon(mark, input, input));
             }
         } catch (error) {
-            TextMarkResearcher.logError(error);
+            PlainText.logError(error);
         } finally {
-            TextMarkResearcher.closeResultSet(resultSet);
+            PlainText.closeResultSet(resultSet);
         }
         return items;
-    }
-
-    private static javaStringHashCode(text: string): number {
-        let hash = 0;
-        for (let index = 0; index < text.length; index++) {
-            hash = ((hash * 31) + text.charCodeAt(index)) | 0;
-        }
-        return hash;
     }
 
     private static makeLexicon(text: string, input: string, romanization: string): Lexicon {
@@ -76,7 +69,7 @@ export class TextMarkResearcher {
         try {
             resultSet?.close();
         } catch (error) {
-            TextMarkResearcher.logError(error);
+            PlainText.logError(error);
         }
     }
 

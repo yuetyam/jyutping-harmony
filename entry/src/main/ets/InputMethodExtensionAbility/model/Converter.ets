@@ -23,6 +23,7 @@ export class Converter {
                 chained.push(entry);
             }
         }
+        chained = [...idealMemory.slice(0, 3), ...marks, ...idealMemory, ...chained];
         for (let index = symbols.length - 1; index >= 0; index--) {
             const symbol = symbols[index];
             if (symbol === undefined) {
@@ -34,12 +35,7 @@ export class Converter {
                 chained.splice(insertIndex + 1, 0, symbol);
             }
         }
-        return Converter.distinctLexicons([
-            ...idealMemory.slice(0, 3),
-            ...marks,
-            ...idealMemory,
-            ...chained,
-        ]);
+        return Converter.distinctLexicons(chained);
     }
     static convert(text: string, simplify: boolean, store: relationalStore.RdbStore | undefined): string {
         if (store) {

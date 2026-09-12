@@ -1,4 +1,5 @@
-import { BusinessError } from '@kit.BasicServicesKit';
+import { SegmentationGraph } from "./SegmentationGraph";
+import { BusinessError } from "@kit.BasicServicesKit";
 import { relationalStore } from "@kit.ArkData";
 import { CharCode } from "./CharCode";
 import { VirtualInputKey } from "./VirtualInputKey";
@@ -25,122 +26,52 @@ export type Scheme = Syllable[];
 export type Segmentation = Scheme[];
 
 export class Segmenter {
-    private static match(code: number, store: relationalStore.RdbStore): number | undefined {
-        const command: string = `SELECT origin_code FROM core_syllable_table WHERE alias_code = ${code} LIMIT 1;`;
-        let res: relationalStore.ResultSet | undefined = undefined;
-        let originCode: number | undefined = undefined;
+    private static store: relationalStore.RdbStore | undefined;
+    private static syllables: Map<number, Syllable> = new Map();
+
+    private static prepare(store: relationalStore.RdbStore): void {
+        if (Segmenter.store === store) return;
+        Segmenter.syllables = new Map();
+        Segmenter.store = undefined;
+        const syllables: Map<number, Syllable> = new Map();
+        let result: relationalStore.ResultSet | undefined;
         try {
-            res = store.querySqlSync(command);
-            if (res.goToFirstRow()) {
-                originCode = res.getLong(0);
+            result = store.querySqlSync("SELECT alias_code, origin_code FROM syllable_core_table;");
+            while (result.goToNextRow()) {
+                const alias = result.getLong(0);
+                syllables.set(alias, new Syllable(alias, result.getLong(1)));
             }
+            Segmenter.syllables = syllables;
+            Segmenter.store = store;
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
+            console.error(`Failed to prepare Cantonese syllables: ${(error as BusinessError).message}`);
         } finally {
             try {
-                res?.close();
+                result?.close();
             } catch (error) {
-                let err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
+                console.error(`Failed to close engine result: ${(error as BusinessError).message}`);
             }
         }
-        return originCode;
     }
-    private static splitLeading(keys: VirtualInputKey[], store: relationalStore.RdbStore): Syllable[] {
-        const maxLength = Math.min(keys.length, 6);
-        if (maxLength === 0) {
-            return [];
-        }
-        const syllables: Syllable[] = [];
-        for (let num = maxLength; num >= 1; num--) {
-            const code = CharCode.keysCode(keys.slice(0, num));
-            const originCode: number = Segmenter.match(code, store) ?? 0;
-            if (originCode > 0) {
-                const syllable = new Syllable(code, originCode);
-                syllables.push(syllable);
-            }
-        }
-        return syllables;
+
+    static syllableText(keys: VirtualInputKey[], store: relationalStore.RdbStore): string | undefined {
+        if (keys.length > 6) return undefined;
+        Segmenter.prepare(store);
+        const syllable = Segmenter.syllables.get(CharCode.keysCode(keys));
+        return syllable === undefined ? undefined : CharCode.keysText(syllable.origin);
     }
-    private static split(keys: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
-        const headSyllables = Segmenter.splitLeading(keys, store);
-        if (headSyllables.length === 0) {
-            return [];
-        }
-        const inputLength = keys.length;
-        const segmentation: Segmentation = [];
-        let pending: Scheme[] = headSyllables.map((syllable) => [syllable]);
-        while (pending.length > 0) {
-            const nextPending: Scheme[] = [];
-            for (const scheme of pending) {
-                segmentation.push(scheme);
-                const handledLength = scheme.reduce((acc, syllable) => acc + syllable.alias.length, 0);
-                if (handledLength >= inputLength) {
-                    continue;
-                }
-                const tailKeys = keys.slice(handledLength);
-                const tailSyllables = Segmenter.splitLeading(tailKeys, store);
-                for (const syllable of tailSyllables) {
-                    nextPending.push([...scheme, syllable]);
-                }
-            }
-            pending = nextPending;
-        }
-        return segmentation
-            .filter((scheme) => Segmenter.valid(scheme))
-            .sort((lhs, rhs) => {
-                const lhsKeyCount = lhs.map((syllable) => syllable.alias.length).reduce((acc, i) => acc + i, 0);
-                const rhsKeyCount = rhs.map((syllable) => syllable.alias.length).reduce((acc, i) => acc + i, 0);
-                return (lhsKeyCount === rhsKeyCount) ? (lhs.length - rhs.length) : (rhsKeyCount - lhsKeyCount);
-            });
-    }
+
     static segment(keys: VirtualInputKey[], store: relationalStore.RdbStore): Segmentation {
-        switch (keys.length) {
-            case 0: return [];
-            case 1:
-                switch (keys[0]) {
-                    case VirtualInputKey.letterA: return Segmenter.letterA;
-                    case VirtualInputKey.letterO: return Segmenter.letterO;
-                    case VirtualInputKey.letterM: return Segmenter.letterM;
-                    default: return [];
-                }
-            case 4:
-                const combinedCode = CharCode.keysCode(keys);
-                switch (combinedCode) {
-                    case 32203220: return Segmenter.mama;
-                    case 32203228: return Segmenter.mami;
-                    default: return Segmenter.split(keys, store);
-                }
-            default:
-                return Segmenter.split(keys, store);
+        Segmenter.prepare(store);
+        const letters = keys.filter((key) => key.isSyllableLetter);
+        if (keys.length === 1) {
+            switch (letters[0]) {
+                case VirtualInputKey.letterA: return [[new Syllable(20, 2020)]];
+                case VirtualInputKey.letterO: return [[new Syllable(34, 34)]];
+                case VirtualInputKey.letterM: return [[new Syllable(32, 32)]];
+                default: return [];
+            }
         }
-    }
-    private static readonly letterA: Segmentation = [[new Syllable(20, 2020)]];
-    private static readonly letterO: Segmentation = [[new Syllable(34, 34)]];
-    private static readonly letterM: Segmentation = [[new Syllable(32, 32)]];
-    private static readonly mama: Segmentation = [[
-        new Syllable(3220, 322020),
-        new Syllable(3220, 322020)
-    ]];
-    private static readonly mami: Segmentation = [[
-        new Syllable(3220, 322020),
-        new Syllable(3228, 3228)
-    ]];
-    private static valid(scheme: Scheme): boolean {
-        switch (scheme.length) {
-            case 0: return false;
-            case 1: return true;
-            default: break;
-        }
-        const tailLetterA = scheme.slice(0, -2).find((syllable) => syllable.origin[syllable.origin.length - 1] === VirtualInputKey.letterA)
-        if (tailLetterA == undefined) { return true; }
-        const originText = scheme.flatMap((syllable) => syllable.origin).map((key) => key.text).join("");
-        const originNumber = originText.match("am(m|ng)")?.length ?? 0;
-        if (originNumber === 0) { return true; }
-        const aliasText = scheme.flatMap((syllable) => syllable.alias).map((key) => key.text).join("");
-        const aliasNumber = aliasText.match("am(m|ng)")?.length ?? 0;
-        if (aliasNumber === 0) { return false; }
-        return originNumber === aliasNumber;
+        return SegmentationGraph.split(letters.map((key) => key.code), 100, Segmenter.syllables);
     }
 }

@@ -1,3 +1,5 @@
+import { EngineCode } from "./EngineCode";
+import { NineKeySegmenter } from "./NineKeySegmenter";
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { Emoji } from "../emoji/Emoji";
@@ -11,32 +13,21 @@ import { VirtualInputKey } from "./VirtualInputKey";
 export class SymbolResearcher {
     static search(keys: VirtualInputKey[], segmentation: Segmentation, store: relationalStore.RdbStore): Lexicon[] {
         const input = CharCode.keysText(keys);
-        const symbols = SymbolResearcher.match(input, input, store);
-        const idealSchemes = segmentation.filter((scheme) => SymbolResearcher.schemeLength(scheme) === keys.length);
-        for (const scheme of idealSchemes) {
-            const originText = scheme.flatMap((syllable) => syllable.origin).map((key) => key.text).join("");
-            symbols.push(...SymbolResearcher.match(originText, input, store));
-        }
-        return SymbolResearcher.distinct(symbols);
+        const length = keys.filter((key) => key.isSyllableLetter).length;
+        const command = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE spell = CAST(? AS INTEGER) AND complexity = CAST(? AS INTEGER) ORDER BY rowid;";
+        return SymbolResearcher.distinct(segmentation.filter((scheme) => SymbolResearcher.schemeLength(scheme) === length).flatMap((scheme) => {
+            return SymbolResearcher.query(command, [EngineCode.keys(scheme.flatMap((syllable) => syllable.origin)), EngineCode.complexity(scheme.map((syllable) => syllable.origin.length))], input, store);
+        }));
     }
 
     static searchNineKey(combos: Combo[], store: relationalStore.RdbStore): Lexicon[] {
-        const code = CharCode.comboCode(combos);
-        if (code < 1) {
-            return [];
-        }
-        const input = combos.map((combo) => combo.leadingLetter).join("");
-        const command: string = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE nine_key_code = ? ORDER BY rowid;";
-        return SymbolResearcher.query(command, [code], input, store);
-    }
-
-    private static match(text: string, input: string, store: relationalStore.RdbStore): Lexicon[] {
-        if (text.length < 1) {
-            return [];
-        }
-        const spell = SymbolResearcher.javaStringHashCode(text);
-        const command: string = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE spell = ? ORDER BY rowid;";
-        return SymbolResearcher.query(command, [spell], input, store);
+        const segmentation = NineKeySegmenter.segment(combos, store);
+        const command = "SELECT category, code_point, cantonese, romanization FROM symbol_table WHERE spell_9key = CAST(? AS INTEGER) AND complexity = CAST(? AS INTEGER) ORDER BY rowid;";
+        const letters: string[] = ["", "r", "a", "d", "g", "j", "m", "p", "t", "w"];
+        return SymbolResearcher.distinct(segmentation.filter((scheme) => scheme.reduce((total, syllable) => total + syllable.alias.length, 0) === combos.length).flatMap((scheme) => {
+            const digits = scheme.flatMap((syllable) => syllable.origin);
+            return SymbolResearcher.query(command, [EngineCode.decimalOverflowed(digits).toString(), EngineCode.complexity(scheme.map((syllable) => syllable.origin.length))], digits.map((digit) => letters[digit]).join(""), store);
+        }));
     }
 
     private static query(command: string, bindArgs: relationalStore.ValueType[], input: string,
@@ -92,14 +83,6 @@ export class SymbolResearcher {
 
     private static schemeLength(scheme: Scheme): number {
         return scheme.reduce((total, syllable) => total + syllable.alias.length, 0);
-    }
-
-    private static javaStringHashCode(text: string): number {
-        let hash = 0;
-        for (let index = 0; index < text.length; index++) {
-            hash = ((hash * 31) + text.charCodeAt(index)) | 0;
-        }
-        return hash;
     }
 
     private static distinct(items: Lexicon[]): Lexicon[] {

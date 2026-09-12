@@ -9,10 +9,10 @@ import { media } from '@kit.MediaKit';
 import { vibrator } from '@kit.SensorServiceKit';
 import { InputMode, InputModeCompanion } from './model/InputMode';
 import { KeyboardForm, KeyboardFormCompanion } from './model/KeyboardForm';
-import { Researcher } from './model/Researcher';
+import { Engine } from './model/Engine';
 import { Candidate } from './model/Candidate';
 import { CandidateType } from './model/CandidateType';
-import { TextMarkResearcher } from './model/TextMarkResearcher';
+import { PlainText } from './model/PlainText';
 import { SymbolResearcher } from './model/SymbolResearcher';
 import { EditingAction } from './editing/EditingAction';
 import { KeyboardCase, KeyboardCaseCompanion } from './model/KeyboardCase';
@@ -27,7 +27,7 @@ import { KeyboardLayout, KeyboardLayoutCompanion } from './model/KeyboardLayout'
 import { Combo } from './ninekey/Combo';
 import { SidebarSyllable } from './ninekey/SidebarSyllable';
 import { NineKeyPinyinResearcher } from './model/NineKeyPinyinResearcher';
-import { NineKeyResearcher } from './model/NineKeyResearcher';
+import { NineKeyEngine } from './model/NineKeyEngine';
 import { PinyinResearcher } from './model/PinyinResearcher';
 import { PinyinSegmentation, PinyinSegmenter } from './model/PinyinSegmenter';
 import { ReverseLookupMethod, ReverseLookupMethodCompanion } from './model/ReverseLookupMethod';
@@ -248,7 +248,7 @@ export class InputController {
     }
 
     private async deleteOldDatabases(context: Context) {
-        const fileNames: string[] = ["ime-20260620-tmp.sqlite3", "imedb-20260505-tmp.sqlite3", "imedb-20260311-tmp.sqlite3"];
+        const fileNames: string[] = ["ime-20260712-tmp.sqlite3", "ime-20260620-tmp.sqlite3", "imedb-20260505-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/ime/";
         for (let index = 0; index < fileNames.length; index++) {
             const name: string = fileNames[index];
@@ -264,10 +264,10 @@ export class InputController {
             }
         }
     }
+    private coreDatabaseFileName: string = "ime-260913-db.sqlite3";
     private async copyKeyboardDatabase(context: Context, shouldReplace: boolean = false): Promise<boolean> {
-        const desFileName: string = "ime-20260712-tmp.sqlite3";
         const databaseDirectory: string = context.databaseDir + "/rdb/ime";
-        const desPath: string = databaseDirectory + "/" + desFileName;
+        const desPath: string = databaseDirectory + "/" + this.coreDatabaseFileName;
         const temporaryPath: string = desPath + ".copying";
         try {
             const srcFileName: string = "ime.sqlite3";
@@ -334,9 +334,8 @@ export class InputController {
     }
     private coreStore: relationalStore.RdbStore | undefined = undefined;
     private async obtainCoreStore(context: Context): Promise<void> {
-        const fileName: string = "ime-20260712-tmp.sqlite3";
         let storeConfig: relationalStore.StoreConfig = {
-            name: fileName,
+            name: this.coreDatabaseFileName,
             securityLevel: relationalStore.SecurityLevel.S1,
             encrypt: false,
             customDir: 'ime',
@@ -366,7 +365,7 @@ export class InputController {
     private async prepareCoreStoreOnce(): Promise<void> {
         let shouldReplace: boolean = false;
         if (this.coreStore) {
-            const rowID: number = Researcher.test(this.coreStore);
+            const rowID: number = Engine.test(this.coreStore);
             if (rowID > 0) {
                 this.isCoreStoreFunctional = true;
                 return;
@@ -582,7 +581,7 @@ export class InputController {
     }
     private isTextPreviewSupported: boolean = true;
     @Trace inlinePreEditText: string = "";
-    private async runInputSession() {
+    private runInputSession() {
         this.candidates = [];
         if (this.isBufferEmpty) {
             this.inputClient?.setPreviewText("", { start: -1, end: -1 }).catch(() => { console.error("Failed to setPreviewText()"); });
@@ -613,7 +612,7 @@ export class InputController {
         if (this.coreStore) {
             if (isReverseLookup) {
                 reverseLookupSuggestion = this.suggestReverseLookup(reverseLookupQuery, this.coreStore);
-                const textMarks = TextMarkResearcher.search(keys, this.coreStore);
+                const textMarks = PlainText.search(keys, this.coreStore);
                 newLexicons = [...textMarks, ...reverseLookupSuggestion.lexicons];
                 if (newLexicons.length > 0) {
                     this.isCoreStoreFunctional = true;
@@ -625,11 +624,11 @@ export class InputController {
                 } else {
                     this.prepareMemory();
                 }
-                const queried = await Researcher.suggest(keys, segmentation, this.coreStore);
+                const queried = Engine.suggest(keys, segmentation, this.coreStore);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
                 }
-                const textMarks = TextMarkResearcher.search(keys, this.coreStore);
+                const textMarks = PlainText.search(keys, this.coreStore);
                 const symbols = SymbolResearcher.search(keys, segmentation, this.coreStore);
                 newLexicons = Converter.dispatch(newLexicons, textMarks, symbols, queried);
             }
@@ -677,8 +676,8 @@ export class InputController {
             if (isReverseLookup) {
                 newLexicons = this.suggestNineKeyReverseLookup(reverseLookupQuery, this.coreStore);
             } else {
-                const queried = NineKeyResearcher.suggest(combos, this.coreStore);
-                const textMarks = TextMarkResearcher.queryNineKey(combos, this.coreStore);
+                const queried = NineKeyEngine.suggest(combos, this.coreStore);
+                const textMarks = PlainText.queryNineKey(combos, this.coreStore);
                 const symbols = SymbolResearcher.searchNineKey(combos, this.coreStore);
                 if (queried.length > 0) {
                     this.isCoreStoreFunctional = true;
@@ -851,7 +850,7 @@ export class InputController {
             return bufferText;
         }
         if (this.isPeculiarInput(keys)) {
-            return this.formatPreviewMark(this.toneConvertedText(bufferText));
+            return BasicInputEvent.normalizedPreviewMark(this.bufferEvents);
         }
         const first = lexicons[0];
         if (first.inputCount === keys.length) {

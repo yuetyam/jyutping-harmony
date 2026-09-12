@@ -1,8 +1,11 @@
+import { Lookup } from "./Lookup";
+import { EngineCode } from "./EngineCode";
+import { InputFilter } from "./InputFilter";
+import { EngineLexicon } from "./EngineLexicon";
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
-import { LexiconType } from "./LexiconType";
 import { PinyinScheme, PinyinSegmentation, PinyinSegmenter } from "./PinyinSegmenter";
 import { VirtualInputKey } from "./VirtualInputKey";
 
@@ -24,148 +27,35 @@ class PinyinLexicon {
     }
 }
 
-class RomanizationMatch {
-    readonly romanization: string;
-    readonly order: number;
-
-    constructor(romanization: string, order: number) {
-        this.romanization = romanization;
-        this.order = order;
-    }
-}
-
-class ReverseLookupLexicon implements Lexicon {
-    readonly type: LexiconType;
-    readonly text: string;
-    readonly romanization?: string;
-    readonly input: string;
-    readonly inputCount: number;
-    readonly number: number;
-    readonly mark?: string;
-    readonly note?: string;
-
-    constructor(text: string, romanization: string, input: string, inputCount: number, number: number, mark: string) {
-        this.type = LexiconType.Cantonese;
-        this.text = text;
-        this.romanization = romanization;
-        this.input = input;
-        this.inputCount = inputCount;
-        this.number = number;
-        this.mark = mark;
-    }
-}
-
-class LeadingRomanizationMatch {
-    readonly romanization: string | undefined;
-    readonly charCount: number;
-
-    constructor(charCount: number, romanization?: string) {
-        this.romanization = romanization;
-        this.charCount = charCount;
-    }
-}
-
 export class PinyinResearcher {
     private static readonly defaultAnchorsLimit: number = 100;
-    private static readonly defaultPrefixLimit: number = 500;
     private static readonly defaultGainedLimit: number = 300;
-    private static readonly processSliceAnchorsLimit: number = 300;
     private static readonly processSliceResultLimit: number = 72;
-    private static readonly maxConcatenatedInputLength: number = 18;
 
     static suggest(keys: VirtualInputKey[], segmentation: PinyinSegmentation, store: relationalStore.RdbStore): Lexicon[] {
-        if (keys.length < 1 || keys.some((key) => !key.isLetter)) {
+        if (keys.length < 1 || keys.some((key) => !key.isLetter && !key.isApostrophe)) {
             return [];
         }
-        const matched = segmentation.length > 0 ?
-            PinyinResearcher.search(keys, segmentation, store) :
-            PinyinResearcher.processSlices(keys, PinyinResearcher.keysText(keys), store);
-        return PinyinResearcher.distinctLexicons(
-            matched.flatMap((item) => PinyinResearcher.reverseLookup(item.text, item.input, item.mark, item.order, store))
-        );
+        const letters = keys.filter((key) => key.isLetter);
+        let matched = segmentation.length > 0 ? PinyinResearcher.search(letters, segmentation, store) : PinyinResearcher.processSlices(letters, PinyinResearcher.keysText(letters), store);
+        if (keys.some((key) => key.isApostrophe)) {
+            // Qualify separators against Pinyin before mapping the words to Jyutping.
+            const lexicons = matched.map((item) => EngineLexicon.make(item.text, item.pinyin, item.input, item.order, item.mark));
+            matched = InputFilter.separators(keys, lexicons).map((item) => new PinyinLexicon(item.text, item.romanization ?? "", item.input, item.mark ?? item.input, item.number));
+        }
+        return PinyinResearcher.distinctLexicons(matched.flatMap((item) => Lookup.reverse(item.text, item.input, store, item.mark)));
     }
 
-    private static reverseLookup(text: string, input: string, mark: string, order: number,
-        store: relationalStore.RdbStore): Lexicon[] {
-        return PinyinResearcher.lookup(text, store).map((item, index): Lexicon => {
-            return PinyinResearcher.makeLexicon(text, item.romanization, input, input.length, order + index, mark);
-        });
-    }
-
-    private static lookup(text: string, store: relationalStore.RdbStore): RomanizationMatch[] {
-        if (text.length < 1) {
-            return [];
-        }
-        const matched = PinyinResearcher.matchWord(text, store);
-        if (matched.length > 0) {
-            return matched;
-        }
-        if (text.length === 1) {
-            return [];
-        }
-        let remaining = text;
-        const fetches: string[] = [];
-        while (remaining.length > 0) {
-            const leading = PinyinResearcher.fetchLeading(remaining, store);
-            if (leading.romanization !== undefined) {
-                fetches.push(leading.romanization);
-                remaining = remaining.slice(Math.max(1, leading.charCount));
-            } else {
-                fetches.push("?");
-                remaining = remaining.slice(1);
-            }
-        }
-        if (fetches.length < 1) {
-            return [];
-        }
-        return [PinyinResearcher.makeRomanizationMatch(fetches.join(" "), Number.MAX_SAFE_INTEGER)];
-    }
-
-    private static fetchLeading(word: string, store: relationalStore.RdbStore): LeadingRomanizationMatch {
-        let chars = word;
-        while (chars.length > 0) {
-            const matched = PinyinResearcher.matchWord(chars, store);
-            if (matched.length > 0) {
-                return new LeadingRomanizationMatch(chars.length, matched[0].romanization);
-            }
-            chars = chars.slice(0, -1);
-        }
-        return new LeadingRomanizationMatch(0);
-    }
-
-    private static matchWord(text: string, store: relationalStore.RdbStore): RomanizationMatch[] {
-        const matches: RomanizationMatch[] = [];
-        const command = "SELECT rowid, romanization FROM core_lexicon WHERE word = ?;";
-        let res: relationalStore.ResultSet | undefined = undefined;
-        try {
-            res = store.querySqlSync(command, [text]);
-            while (res.goToNextRow()) {
-                matches.push(PinyinResearcher.makeRomanizationMatch(res.getString(1), res.getLong(0)));
-            }
-        } catch (error) {
-            const err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        } finally {
-            try {
-                res?.close();
-            } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
-            }
-        }
-        return matches;
-    }
-
-    private static processSlices(keys: VirtualInputKey[], text: string, store: relationalStore.RdbStore): PinyinLexicon[] {
+    private static processSlices(keys: VirtualInputKey[], text: string, store: relationalStore.RdbStore, limit: number = -1): PinyinLexicon[] {
         const inputLength = keys.length;
         const items: PinyinLexicon[] = [];
         for (let offset = 0; offset < inputLength; offset++) {
             const leadingKeys = keys.slice(0, inputLength - offset);
             const leadingText = PinyinResearcher.keysText(leadingKeys);
-            const spellMatched = PinyinResearcher.spellMatch(leadingText, store)
+            const spellMatched = PinyinResearcher.spellMatch(leadingText, store, leadingText.length.toString(), limit)
                 .map((item) => PinyinResearcher.modify(item, text, inputLength));
             const anchorsMatched = PinyinResearcher.sortPinyinLexicons(
-                PinyinResearcher.anchorsMatch(leadingKeys, leadingText, store, PinyinResearcher.processSliceAnchorsLimit)
+                PinyinResearcher.anchorsMatch(leadingKeys, leadingText, store, limit < 0 ? 300 : 100)
                     .map((item) => PinyinResearcher.modify(item, text, inputLength))
             ).slice(0, PinyinResearcher.processSliceResultLimit);
             items.push(...spellMatched, ...anchorsMatched);
@@ -190,14 +80,12 @@ export class PinyinResearcher {
         return isMatched ? converted : item;
     }
 
-    private static search(keys: VirtualInputKey[], segmentation: PinyinSegmentation, store: relationalStore.RdbStore): PinyinLexicon[] {
+    private static search(keys: VirtualInputKey[], segmentation: PinyinSegmentation, store: relationalStore.RdbStore, limit: number = -1): PinyinLexicon[] {
         const inputLength = keys.length;
         const text = PinyinResearcher.keysText(keys);
-        const spellMatched = PinyinResearcher.spellMatch(text, store);
-        const anchorsMatched = PinyinResearcher.anchorsMatch(keys, text, store);
-        const queried = PinyinResearcher.query(inputLength, segmentation, store);
-        const shouldMatchPrefixes = spellMatched.length < 1 &&
-            queried.every((item) => item.inputCount !== inputLength) &&
+        const anchorsMatched = PinyinResearcher.anchorsMatch(keys, text, store, limit < 0 ? 100 : limit);
+        const queried = PinyinResearcher.query(inputLength, segmentation, store, limit);
+        const shouldMatchPrefixes = queried.every((item) => item.inputCount !== inputLength) &&
             segmentation.every((scheme) => PinyinSegmenter.schemeLength(scheme) !== inputLength);
         const prefixMatched = shouldMatchPrefixes ? segmentation.flatMap((scheme) => {
             const handledLength = PinyinSegmenter.schemeLength(scheme);
@@ -218,7 +106,7 @@ export class PinyinResearcher {
             const schemeMark = PinyinSegmenter.schemeMark(scheme);
             const mark = `${schemeMark} ${PinyinResearcher.keysText(tail)}`.trim();
             const tailAnchorText = tail.map((key) => key.text[0]).join("");
-            const conjoinedMatched = PinyinResearcher.anchorsMatch(conjoined, undefined, store, PinyinResearcher.defaultPrefixLimit)
+            const conjoinedMatched = PinyinResearcher.anchorsMatch(conjoined, undefined, store, limit < 0 ? 500 : 200)
                 .flatMap((item) => {
                     if (!item.pinyin.startsWith(schemeMark)) {
                         return [];
@@ -230,7 +118,7 @@ export class PinyinResearcher {
                     }
                     return [PinyinResearcher.makePinyinLexicon(item.text, item.pinyin, text, mark, item.order)];
                 });
-            const leadingAnchorsMatched = PinyinResearcher.anchorsMatch(anchors, undefined, store, PinyinResearcher.defaultPrefixLimit)
+            const leadingAnchorsMatched = PinyinResearcher.anchorsMatch(anchors, undefined, store, limit < 0 ? 500 : 200)
                 .flatMap((item) => {
                     if (!item.pinyin.startsWith(mark)) {
                         return [];
@@ -263,7 +151,6 @@ export class PinyinResearcher {
             PinyinResearcher.sortPinyinLexicons(queried.filter((item) => item.inputCount < inputLength))
         );
         const fullInput = PinyinResearcher.distinctPinyinLexicons([
-            ...spellMatched,
             ...idealQueried,
             ...anchorsMatched,
             ...prefixMatched,
@@ -278,12 +165,9 @@ export class PinyinResearcher {
             ...notIdealQueried,
         ]);
         if (fetched.length < 1) {
-            return PinyinResearcher.processSlices(keys, text, store);
+            return PinyinResearcher.processSlices(keys, text, store, limit);
         }
         if (fetched[0].inputCount >= inputLength) {
-            return fetched;
-        }
-        if (inputLength > PinyinResearcher.maxConcatenatedInputLength) {
             return fetched;
         }
         const headInputLengths = PinyinResearcher.distinctNumbers(fetched.map((item) => item.inputCount));
@@ -291,7 +175,7 @@ export class PinyinResearcher {
             PinyinResearcher.distinctPinyinLexicons(headInputLengths.flatMap((headLength) => {
                 const tailKeys = keys.slice(headLength);
                 const tailSegmentation = PinyinSegmenter.segment(tailKeys, store);
-                const tailLexicon = PinyinResearcher.search(tailKeys, tailSegmentation, store)[0];
+                const tailLexicon = PinyinResearcher.search(tailKeys, tailSegmentation, store, 50)[0];
                 const headLexicon = fetched.find((item) => item.inputCount === headLength);
                 if (tailLexicon === undefined || headLexicon === undefined) {
                     return [];
@@ -302,11 +186,11 @@ export class PinyinResearcher {
         return [...concatenated, ...fetched];
     }
 
-    private static query(inputLength: number, segmentation: PinyinSegmentation, store: relationalStore.RdbStore): PinyinLexicon[] {
+    private static query(inputLength: number, segmentation: PinyinSegmentation, store: relationalStore.RdbStore, limit: number): PinyinLexicon[] {
         const idealSchemes = segmentation.filter((scheme) => PinyinSegmenter.schemeLength(scheme) === inputLength);
         if (idealSchemes.length < 1) {
             return segmentation.flatMap((scheme) => {
-                return PinyinResearcher.spellMatch(scheme.map((syllable) => syllable.text).join(""), store);
+                return PinyinResearcher.spellMatch(scheme.map((syllable) => syllable.text).join(""), store, EngineCode.complexity(scheme.map((syllable) => syllable.keys.length)), limit);
             });
         }
         return idealSchemes.flatMap((scheme) => {
@@ -318,17 +202,17 @@ export class PinyinResearcher {
                 prefixes.push(scheme.slice(0, index));
             }
             return prefixes.flatMap((slice) => {
-                return PinyinResearcher.spellMatch(slice.map((syllable) => syllable.text).join(""), store);
+                return PinyinResearcher.spellMatch(slice.map((syllable) => syllable.text).join(""), store, EngineCode.complexity(slice.map((syllable) => syllable.keys.length)), limit);
             });
         });
     }
 
-    private static spellMatch(text: string, store: relationalStore.RdbStore): PinyinLexicon[] {
+    private static spellMatch(text: string, store: relationalStore.RdbStore, complexity: string = text.length.toString(), limit: number = -1): PinyinLexicon[] {
         const lexicons: PinyinLexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE spell = ?;";
+        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE spell = CAST(? AS INTEGER) AND complexity = CAST(? AS INTEGER) ORDER BY rowid LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
-            res = store.querySqlSync(command, [PinyinResearcher.hashCode(text)]);
+            res = store.querySqlSync(command, [EngineCode.text(text), complexity, limit]);
             while (res.goToNextRow()) {
                 lexicons.push(PinyinResearcher.makePinyinLexicon(
                     res.getString(1),
@@ -354,15 +238,15 @@ export class PinyinResearcher {
 
     private static anchorsMatch(keys: VirtualInputKey[], input: string | undefined, store: relationalStore.RdbStore,
         limit: number = PinyinResearcher.defaultAnchorsLimit): PinyinLexicon[] {
-        const code = CharCode.keysCode(keys);
-        if (code < 1) {
+        const code = EngineCode.keys(keys);
+        if (keys.length === 0 || keys.length > 9) {
             return [];
         }
         const lexicons: PinyinLexicon[] = [];
-        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE anchors = ? LIMIT ?;";
+        const command = "SELECT rowid, word, romanization FROM pinyin_lexicon WHERE anchors = CAST(? AS INTEGER) AND char_count = ? ORDER BY rowid LIMIT ?;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
-            res = store.querySqlSync(command, [code, limit]);
+            res = store.querySqlSync(command, [code, keys.length, limit]);
             const inputText = input ?? PinyinResearcher.keysText(keys);
             while (res.goToNextRow()) {
                 lexicons.push(PinyinResearcher.makePinyinLexicon(
@@ -387,13 +271,6 @@ export class PinyinResearcher {
         return lexicons;
     }
 
-    private static hashCode(str: string): number {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = Math.imul(31, hash) + str.charCodeAt(i) | 0;
-        }
-        return hash;
-    }
 
     private static keysText(keys: VirtualInputKey[]): string {
         return CharCode.keysText(keys);
@@ -415,15 +292,6 @@ export class PinyinResearcher {
         return new PinyinLexicon(text, pinyin, input, mark, order);
     }
 
-    private static makeLexicon(text: string, romanization: string, input: string, inputCount: number,
-        number: number, mark: string): Lexicon {
-        return new ReverseLookupLexicon(text, romanization, input, inputCount, number, mark);
-    }
-
-    private static makeRomanizationMatch(romanization: string, order: number): RomanizationMatch {
-        return new RomanizationMatch(romanization, order);
-    }
-
     private static replacedInput(item: PinyinLexicon, input: string, mark: string): PinyinLexicon {
         return PinyinResearcher.makePinyinLexicon(item.text, item.pinyin, input, mark, item.order);
     }
@@ -441,14 +309,14 @@ export class PinyinResearcher {
     }
 
     private static distinctLexicons(items: Lexicon[]): Lexicon[] {
-        const handled: string[] = [];
+        const handled: Set<string> = new Set();
         const results: Lexicon[] = [];
         for (const item of items) {
             const key = PinyinResearcher.lexiconKey(item);
-            if (handled.includes(key)) {
+            if (handled.has(key)) {
                 continue;
             }
-            handled.push(key);
+            handled.add(key);
             results.push(item);
         }
         return results;
@@ -459,14 +327,14 @@ export class PinyinResearcher {
     }
 
     private static distinctPinyinLexicons(items: PinyinLexicon[]): PinyinLexicon[] {
-        const handled: string[] = [];
+        const handled: Set<string> = new Set();
         const results: PinyinLexicon[] = [];
         for (const item of items) {
             const key = PinyinResearcher.pinyinKey(item);
-            if (handled.includes(key)) {
+            if (handled.has(key)) {
                 continue;
             }
-            handled.push(key);
+            handled.add(key);
             results.push(item);
         }
         return results;

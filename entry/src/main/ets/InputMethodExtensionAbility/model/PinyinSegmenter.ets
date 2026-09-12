@@ -1,3 +1,4 @@
+import { SegmentationGraph } from "./SegmentationGraph";
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { CharCode } from "./CharCode";
@@ -19,8 +20,11 @@ export type PinyinScheme = PinyinSyllable[];
 export type PinyinSegmentation = PinyinScheme[];
 
 export class PinyinSegmenter {
+    private static store: relationalStore.RdbStore | undefined;
+    private static syllables: Map<number, PinyinSyllable> = new Map();
+
     static schemeLength(scheme: PinyinScheme): number {
-        return scheme.reduce((acc, syllable) => acc + syllable.keys.length, 0);
+        return scheme.reduce((total, syllable) => total + syllable.keys.length, 0);
     }
 
     static schemeMark(scheme: PinyinScheme): string {
@@ -28,90 +32,29 @@ export class PinyinSegmenter {
     }
 
     static segment(keys: VirtualInputKey[], store: relationalStore.RdbStore): PinyinSegmentation {
-        const letters = keys.filter((key) => key.isLetter);
-        if (letters.length < 1) {
-            return [];
-        }
-        return PinyinSegmenter.split(letters, store);
-    }
-
-    private static split(keys: VirtualInputKey[], store: relationalStore.RdbStore): PinyinSegmentation {
-        const headSyllables = PinyinSegmenter.splitLeading(keys, store);
-        if (headSyllables.length < 1) {
-            return [];
-        }
-        const inputLength = keys.length;
-        const segmentation: PinyinSegmentation = [];
-        const handled: string[] = [];
-        let pending: PinyinScheme[] = headSyllables.map((syllable) => [syllable]);
-        while (pending.length > 0) {
-            const nextPending: PinyinScheme[] = [];
-            for (const scheme of pending) {
-                const key = PinyinSegmenter.schemeKey(scheme);
-                if (!handled.includes(key)) {
-                    handled.push(key);
-                    segmentation.push(scheme);
-                }
-                const handledLength = PinyinSegmenter.schemeLength(scheme);
-                if (handledLength >= inputLength) {
-                    continue;
-                }
-                const tailKeys = keys.slice(handledLength);
-                const tailSyllables = PinyinSegmenter.splitLeading(tailKeys, store);
-                for (const syllable of tailSyllables) {
-                    nextPending.push([...scheme, syllable]);
-                }
-            }
-            pending = nextPending;
-        }
-        return segmentation.sort((lhs, rhs) => {
-            const lhsLength = PinyinSegmenter.schemeLength(lhs);
-            const rhsLength = PinyinSegmenter.schemeLength(rhs);
-            return (lhsLength === rhsLength) ? (lhs.length - rhs.length) : (rhsLength - lhsLength);
-        });
-    }
-
-    private static splitLeading(keys: VirtualInputKey[], store: relationalStore.RdbStore): PinyinSyllable[] {
-        const maxLength = Math.min(keys.length, 6);
-        if (maxLength < 1) {
-            return [];
-        }
-        const syllables: PinyinSyllable[] = [];
-        for (let length = maxLength; length >= 1; length--) {
-            const leadingKeys = keys.slice(0, length);
-            const code = CharCode.keysCode(leadingKeys);
-            const text = PinyinSegmenter.match(code, store);
-            if (text === undefined) {
-                continue;
-            }
-            syllables.push(new PinyinSyllable(code, leadingKeys, text));
-        }
-        return syllables;
-    }
-
-    private static match(code: number, store: relationalStore.RdbStore): string | undefined {
-        const command = "SELECT syllable FROM pinyin_syllable_table WHERE code = ? LIMIT 1;";
-        let res: relationalStore.ResultSet | undefined = undefined;
-        try {
-            res = store.querySqlSync(command, [code]);
-            if (res.goToFirstRow()) {
-                return res.getString(0);
-            }
-        } catch (error) {
-            const err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        } finally {
+        if (PinyinSegmenter.store !== store) {
+            PinyinSegmenter.syllables = new Map();
+            PinyinSegmenter.store = undefined;
+            const syllables: Map<number, PinyinSyllable> = new Map();
+            let result: relationalStore.ResultSet | undefined;
             try {
-                res?.close();
+                result = store.querySqlSync("SELECT code, syllable FROM syllable_pinyin_table;");
+                while (result.goToNextRow()) {
+                    const code = result.getLong(0);
+                    syllables.set(code, new PinyinSyllable(code, CharCode.matchedInputKeys(code), result.getString(1)));
+                }
+                PinyinSegmenter.syllables = syllables;
+                PinyinSegmenter.store = store;
             } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
+                console.error(`Failed to prepare Pinyin syllables: ${(error as BusinessError).message}`);
+            } finally {
+                try {
+                    result?.close();
+                } catch (error) {
+                    console.error(`Failed to close engine result: ${(error as BusinessError).message}`);
+                }
             }
         }
-        return undefined;
-    }
-
-    private static schemeKey(scheme: PinyinScheme): string {
-        return scheme.map((syllable) => syllable.code.toString()).join("-");
+        return SegmentationGraph.split(keys.filter((key) => key.isLetter).map((key) => key.code), 100, PinyinSegmenter.syllables);
     }
 }

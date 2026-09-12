@@ -18,7 +18,7 @@ import { YingWaaHelper } from '../search/YingWaaHelper';
 import { YingWaaLexiconView } from '../search/YingWaaLexiconView';
 import { YingWaaLexicon } from '../search/YingWaaUnit';
 
-const APP_DATABASE_FILE_NAME: string = "app-20260712-tmp.sqlite3";
+const APP_DATABASE_FILE_NAME: string = "app-260913-db.sqlite3";
 
 @ComponentV2
 export struct HomeScreen {
@@ -37,7 +37,7 @@ export struct HomeScreen {
     @Local private gwongWanLexicons: GwongWanLexicon[] = [];
 
     private async deleteOldDatabases(context: Context) {
-        const fileNames: string[] = ["app-20260620-tmp.sqlite3", "appdb-20260505-tmp.sqlite3", "appdb-20260311-tmp.sqlite3"];
+        const fileNames: string[] = ["app-20260712-tmp.sqlite3", "app-20260620-tmp.sqlite3", "appdb-20260505-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/app/";
         for (let index = 0; index < fileNames.length; index++) {
             const name: string = fileNames[index];

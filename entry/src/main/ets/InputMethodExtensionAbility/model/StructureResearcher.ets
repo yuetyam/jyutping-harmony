@@ -1,8 +1,9 @@
+import { Lookup } from "./Lookup";
+import { EngineCode } from "./EngineCode";
 import { relationalStore } from "@kit.ArkData";
 import { BusinessError } from "@kit.BasicServicesKit";
 import { CharCode } from "./CharCode";
 import { Lexicon } from "./Lexicon";
-import { LexiconType } from "./LexiconType";
 import { Scheme, Segmentation } from "./Segmenter";
 import { VirtualInputKey } from "./VirtualInputKey";
 
@@ -15,47 +16,6 @@ class StructureMatch {
         this.text = text;
         this.romanization = romanization;
         this.order = order;
-    }
-}
-
-class RomanizationMatch {
-    readonly romanization: string;
-    readonly order: number;
-
-    constructor(romanization: string, order: number) {
-        this.romanization = romanization;
-        this.order = order;
-    }
-}
-
-class LeadingRomanizationMatch {
-    readonly romanization: string | undefined;
-    readonly charCount: number;
-
-    constructor(charCount: number, romanization?: string) {
-        this.romanization = romanization;
-        this.charCount = charCount;
-    }
-}
-
-class StructureReverseLookupLexicon implements Lexicon {
-    readonly type: LexiconType;
-    readonly text: string;
-    readonly romanization?: string;
-    readonly input: string;
-    readonly inputCount: number;
-    readonly number: number;
-    readonly mark?: string;
-    readonly note?: string;
-
-    constructor(text: string, romanization: string, input: string, number: number) {
-        this.type = LexiconType.Cantonese;
-        this.text = text;
-        this.romanization = romanization;
-        this.input = input;
-        this.inputCount = input.length;
-        this.number = number;
-        this.mark = input;
     }
 }
 
@@ -129,22 +89,18 @@ export class StructureResearcher {
     }
 
     private static search(text: string, segmentation: Segmentation, store: relationalStore.RdbStore): StructureMatch[] {
-        const matched = StructureResearcher.match(text, store);
-        const queried = segmentation
-            .filter((scheme) => StructureResearcher.schemeLength(scheme) === text.length)
-            .flatMap((scheme) => StructureResearcher.match(StructureResearcher.schemeOriginText(scheme), store));
-        return [...matched, ...queried];
+        return segmentation.filter((scheme) => StructureResearcher.schemeLength(scheme) === text.length).flatMap((scheme) => StructureResearcher.match(StructureResearcher.schemeOriginText(scheme), store, EngineCode.complexity(scheme.map((syllable) => syllable.origin.length))));
     }
 
-    private static match(text: string, store: relationalStore.RdbStore): StructureMatch[] {
+    private static match(text: string, store: relationalStore.RdbStore, complexity: string): StructureMatch[] {
         if (text.length < 1) {
             return [];
         }
         const items: StructureMatch[] = [];
-        const command = "SELECT rowid, word, romanization FROM structure_table WHERE spell = ?;";
+        const command = "SELECT rowid, word, romanization FROM structure_table WHERE spell = CAST(? AS INTEGER) AND complexity = CAST(? AS INTEGER) ORDER BY rowid;";
         let res: relationalStore.ResultSet | undefined = undefined;
         try {
-            res = store.querySqlSync(command, [StructureResearcher.hashCode(text)]);
+            res = store.querySqlSync(command, [EngineCode.text(text), complexity]);
             while (res.goToNextRow()) {
                 items.push(new StructureMatch(res.getString(1), res.getString(2), res.getLong(0)));
             }
@@ -164,85 +120,8 @@ export class StructureResearcher {
 
     private static reverseLookupMatches(matches: StructureMatch[], input: string, store: relationalStore.RdbStore): Lexicon[] {
         return StructureResearcher.distinctLexicons(matches.flatMap((item) => {
-            return StructureResearcher.reverseLookup(item.text, input, item.order, store);
+            return Lookup.reverse(item.text, input, store);
         }));
-    }
-
-    private static reverseLookup(text: string, input: string, order: number, store: relationalStore.RdbStore): Lexicon[] {
-        return StructureResearcher.lookup(text, store).map((item, index): Lexicon => {
-            return new StructureReverseLookupLexicon(text, item.romanization, input, order + index);
-        });
-    }
-
-    private static lookup(text: string, store: relationalStore.RdbStore): RomanizationMatch[] {
-        if (text.length < 1) {
-            return [];
-        }
-        const matched = StructureResearcher.matchWord(text, store);
-        if (matched.length > 0) {
-            return matched;
-        }
-        if (text.length === 1) {
-            return [];
-        }
-        let remaining = text;
-        const fetches: string[] = [];
-        while (remaining.length > 0) {
-            const leading = StructureResearcher.fetchLeading(remaining, store);
-            if (leading.romanization === undefined) {
-                fetches.length = 0;
-                break;
-            }
-            fetches.push(leading.romanization);
-            remaining = remaining.slice(Math.max(1, leading.charCount));
-        }
-        if (fetches.length < 1) {
-            return [];
-        }
-        return [new RomanizationMatch(fetches.join(" "), Number.MAX_SAFE_INTEGER)];
-    }
-
-    private static fetchLeading(word: string, store: relationalStore.RdbStore): LeadingRomanizationMatch {
-        let chars = word;
-        while (chars.length > 0) {
-            const matched = StructureResearcher.matchWord(chars, store);
-            if (matched.length > 0) {
-                return new LeadingRomanizationMatch(chars.length, matched[0].romanization);
-            }
-            chars = chars.slice(0, -1);
-        }
-        return new LeadingRomanizationMatch(0);
-    }
-
-    private static matchWord(text: string, store: relationalStore.RdbStore): RomanizationMatch[] {
-        const matches: RomanizationMatch[] = [];
-        const command = "SELECT rowid, romanization FROM core_lexicon WHERE word = ? ORDER BY rowid;";
-        let res: relationalStore.ResultSet | undefined = undefined;
-        try {
-            res = store.querySqlSync(command, [text]);
-            while (res.goToNextRow()) {
-                matches.push(new RomanizationMatch(res.getString(1), res.getLong(0)));
-            }
-        } catch (error) {
-            const err: BusinessError = error as BusinessError;
-            console.error(`message: ${err.message}, code: ${err.code}`);
-        } finally {
-            try {
-                res?.close();
-            } catch (error) {
-                const err: BusinessError = error as BusinessError;
-                console.error(`message: ${err.message}, code: ${err.code}`);
-            }
-        }
-        return matches;
-    }
-
-    private static hashCode(str: string): number {
-        let hash = 0;
-        for (let i = 0; i < str.length; i++) {
-            hash = Math.imul(31, hash) + str.charCodeAt(i) | 0;
-        }
-        return hash;
     }
 
     private static keysText(keys: VirtualInputKey[]): string {
