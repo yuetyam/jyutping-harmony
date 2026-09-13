@@ -1088,27 +1088,20 @@ export class InputController {
     }
 
     private consumeCandidate(candidate: Candidate) {
+        this.insert(candidate.text);
+        this.updateSelectedCandidates(candidate);
         if (this.isNineKeyActive()) {
             this.consumeNineKeyCandidate(candidate);
             return;
         }
-        this.insert(candidate.text);
         const reverseLookupQuery = this.reverseLookupQueryForKeys(this.bufferEvents.map((event) => event.key));
         if (this.consumeReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
-        if (candidate.type === CandidateType.Cantonese) {
-            this.selectedCandidates.push(candidate);
-        } else {
-            this.selectedCandidates = [];
-        }
         const inputLength = candidate.lexicon.inputCount;
         this.bufferEvents.splice(0, inputLength);
         if (this.bufferEvents.length < 1) {
-            if (this.memory) {
-                InputMemory.process(this.selectedCandidates, this.memory);
-            }
-            this.selectedCandidates = [];
+            this.processSelectedCandidates();
         }
         this.runInputSession();
     }
@@ -1116,12 +1109,12 @@ export class InputController {
         if (!this.isReverseLookup(query.method)) {
             return false;
         }
-        this.selectedCandidates = [];
         let tailEvents = this.bufferEvents.slice(candidate.lexicon.inputCount + 1);
         while (tailEvents.length > 0 && tailEvents[0].key.isApostrophe) {
             tailEvents = tailEvents.slice(1);
         }
         if (tailEvents.length < 1) {
+            this.processSelectedCandidates();
             this.clearBuffer();
             return true;
         }
@@ -1130,33 +1123,37 @@ export class InputController {
         return true;
     }
     private consumeNineKeyCandidate(candidate: Candidate) {
-        this.insert(candidate.text);
         const reverseLookupQuery = this.nineKeyReverseLookupQueryForCombos(this.comboBuffer);
         if (this.consumeNineKeyReverseLookupCandidate(candidate, reverseLookupQuery)) {
             return;
         }
+        this.selectedSyllables = [];
+        this.comboBuffer = this.comboBuffer.slice(candidate.lexicon.inputCount);
+        if (this.comboBuffer.length < 1) {
+            this.processSelectedCandidates();
+        }
+        this.runInputSession();
+    }
+    private updateSelectedCandidates(candidate: Candidate) {
         if (candidate.type === CandidateType.Cantonese) {
             this.selectedCandidates.push(candidate);
         } else {
             this.selectedCandidates = [];
         }
-        this.selectedSyllables = [];
-        this.comboBuffer = this.comboBuffer.slice(candidate.lexicon.inputCount);
-        if (this.comboBuffer.length < 1) {
-            if (this.memory) {
-                InputMemory.process(this.selectedCandidates, this.memory);
-            }
-            this.selectedCandidates = [];
+    }
+    private processSelectedCandidates() {
+        if (this.memory) {
+            InputMemory.process(this.selectedCandidates, this.memory);
         }
-        this.runInputSession();
+        this.selectedCandidates = [];
     }
     private consumeNineKeyReverseLookupCandidate(candidate: Candidate, query: NineKeyReverseLookupQuery): boolean {
         if (!this.isReverseLookup(query.method)) {
             return false;
         }
-        this.selectedCandidates = [];
         const tailCombos = this.comboBuffer.slice(candidate.lexicon.inputCount + 1);
         if (tailCombos.length < 1) {
+            this.processSelectedCandidates();
             this.clearBuffer();
             return true;
         }
