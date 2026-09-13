@@ -441,6 +441,29 @@ export struct HomeScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                ListItemGroup({ space: 8 }) {
+                    ListItem() {
+                        Row({ space: 10 }) {
+                            Stack() {
+                                SymbolGlyph($r('sys.symbol.circle')).fontSize(22).fontColor([$r('app.color.apple_orange')])
+                                Text("6").fontSize(16).fontColor($r('app.color.apple_orange'))
+                            }
+                            Text($r('app.string.guide_tones_input_heading')).fontWeight(FontWeight.Bold)
+                        }
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r('app.string.guide_tones_input_body')).fontFamily('Noto Sans Mono')
+                    }
+                    ListItem() { Divider() }
+                    ListItem() {
+                        Text($r('app.string.guide_tones_input_examples'))
+                    }
+                }
+                .padding(8)
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
                 /*
                 ListItemGroup({ space: 8 }) {
                     ListItem() {
@@ -481,33 +504,6 @@ export struct HomeScreen {
                     ListItem() {
                         Text($r('app.string.guide_stroke_reverse_lookup_examples'))
                             .fontFamily('Noto Sans Mono')
-                    }
-                }
-                .padding(8)
-                .backgroundColor(this.groupBackgroundColor)
-                .borderRadius(this.groupBorderRadius)
-
-                ListItemGroup({ space: 8 }) {
-                    ListItem() {
-                        Text($r('app.string.guide_tones_input_heading'))
-                            .fontWeight(FontWeight.Bold)
-                    }
-
-                    ListItem() {
-                        Divider()
-                    }
-
-                    ListItem() {
-                        Text($r('app.string.guide_tones_input_body'))
-                            .fontFamily('Noto Sans Mono')
-                    }
-
-                    ListItem() {
-                        Divider()
-                    }
-
-                    ListItem() {
-                        Text($r('app.string.guide_tones_input_examples'))
                     }
                 }
                 .padding(8)
