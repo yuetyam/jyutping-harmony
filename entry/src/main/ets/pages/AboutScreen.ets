@@ -4,7 +4,6 @@ import { WebLinkView } from './WebLinkView';
 
 @Component
 export struct AboutScreen {
-    private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     @State private version: string = '_error';
@@ -14,7 +13,7 @@ export struct AboutScreen {
         })
     }
     build() {
-        Navigation(this.pageStack) {
+        Navigation() {
             List({ space: 20 }) {
                 ListItem() {
                     Row({ space: 12 }) {
@@ -126,6 +125,7 @@ export struct AboutScreen {
                 */
             }
             .padding({ left: 16, right: 16 })
+            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }

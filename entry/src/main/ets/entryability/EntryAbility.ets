@@ -1,5 +1,4 @@
 import { AbilityConstant, ConfigurationConstant, UIAbility, Want } from '@kit.AbilityKit';
-import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 
@@ -29,45 +28,6 @@ export default class EntryAbility extends UIAbility {
                 return;
             }
             hilog.info(DOMAIN, 'testTag', 'Succeeded in loading the content.');
-
-            let windowClass: window.Window = windowStage.getMainWindowSync();
-            windowClass.setWindowLayoutFullScreen(true).then(() => {
-                console.debug('Succeeded in setting the window layout to full-screen mode.');
-            }).catch((err: BusinessError) => {
-                console.error(`Failed to set the window layout to full-screen mode. Code is ${err.code}, message is ${err.message}`);
-            });
-
-            try {
-                const orientation = window.Orientation.AUTO_ROTATION;
-                windowClass.setPreferredOrientation(orientation, (err) => {
-                    if (err.code) {
-                        console.error('Failed to set window orientation. Cause: ' + JSON.stringify(err));
-                    }
-                    console.debug('Succeeded in setting window orientation.');
-                });
-            } catch (exception) {
-                console.error('Failed to set window orientation. Cause: ' + JSON.stringify(exception));
-            }
-
-            let type = window.AvoidAreaType.TYPE_SYSTEM;
-            let avoidArea = windowClass.getWindowAvoidArea(type);
-            let topRectHeight = avoidArea.topRect.height;
-            AppStorage.setOrCreate('topRectHeight', topRectHeight);
-
-            type = window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR;
-            avoidArea = windowClass.getWindowAvoidArea(type);
-            let bottomRectHeight = avoidArea.bottomRect.height;
-            AppStorage.setOrCreate('bottomRectHeight', bottomRectHeight);
-
-            windowClass.on('avoidAreaChange', (data) => {
-                if (data.type === window.AvoidAreaType.TYPE_SYSTEM) {
-                    let topRectHeight = data.area.topRect.height;
-                    AppStorage.setOrCreate('topRectHeight', topRectHeight);
-                } else if (data.type === window.AvoidAreaType.TYPE_NAVIGATION_INDICATOR) {
-                    let bottomRectHeight = data.area.bottomRect.height;
-                    AppStorage.setOrCreate('bottomRectHeight', bottomRectHeight);
-                }
-            });
         });
     }
 

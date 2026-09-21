@@ -306,9 +306,10 @@ export struct FinalsPage {
                 ListItem() {
                     Text("本表所用國際音標爲寬式轉寫，着重於輔助粵拼標示，而非精確描述發音。").fontSize(13)
                 }
-                .padding({ left: 8, right: 8, top: 20, bottom: 144 })
+                .padding({ left: 8, right: 8, top: 20, bottom: 20 })
             }
             .padding({ left: 16, right: 16 })
+            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }

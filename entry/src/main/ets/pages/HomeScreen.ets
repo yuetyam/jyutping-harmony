@@ -22,7 +22,6 @@ const APP_DATABASE_FILE_NAME: string = "app-260913-db.sqlite3";
 
 @ComponentV2
 export struct HomeScreen {
-    private pageStack: NavPathStack = new NavPathStack();
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     @Local private inputText: string = '';
@@ -232,7 +231,7 @@ export struct HomeScreen {
     }
 
     build() {
-        Navigation(this.pageStack) {
+        Navigation() {
             List({ space: 24 }) {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
@@ -511,11 +510,9 @@ export struct HomeScreen {
                 .borderRadius(this.groupBorderRadius)
                 */
 
-                ListItem() {
-                    Stack().height(144)
-                }
             }
             .padding({ left: 16, right: 16 })
+            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }

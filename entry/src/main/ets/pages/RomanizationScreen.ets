@@ -143,15 +143,13 @@ export struct RomanizationScreen {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
-                ListItem() {
-                    Stack().height(144)
-                }
             }
             .padding({ left: 16, right: 16 })
+            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }
-        .mode(NavigationMode.Stack)
+        .mode(NavigationMode.Auto)
         .title($r('app.string.tab_bar_romanization'))
         .width('100%')
         .height('100%')

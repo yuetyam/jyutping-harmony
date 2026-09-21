@@ -86,10 +86,11 @@ export struct CantoneseScreen {
                 .borderRadius(this.groupBorderRadius)
             }
             .padding({ left: 16, right: 16 })
+            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }
-        .mode(NavigationMode.Stack)
+        .mode(NavigationMode.Auto)
         .title($r('app.string.tab_bar_cantonese'))
         .width('100%')
         .height('100%')

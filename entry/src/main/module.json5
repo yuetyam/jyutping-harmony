@@ -11,6 +11,12 @@
     "installationFree": false,
     "pages": "$profile:main_pages",
     "routerMap": "$profile:route_map",
+    "metadata": [
+      {
+        "name": "avoid_cutout",
+        "value": "true"
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",
@@ -29,7 +35,12 @@
             ]
           }
         ],
-        "orientation": "auto_rotation"
+        "orientation": "auto_rotation",
+        "supportWindowMode": [
+          "fullscreen",
+          "split",
+          "floating"
+        ]
       }
     ],
     "extensionAbilities": [
