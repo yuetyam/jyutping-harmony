@@ -121,8 +121,9 @@ export struct InitialsPage {
                 .borderRadius(this.groupBorderRadius)
 
                 ListItem() {
-                    Stack().height(144)
+                    Text("本表所用國際音標爲寬式轉寫，着重於輔助粵拼標示，而非精確描述發音。").fontSize(13)
                 }
+                .padding({ left: 8, right: 8, top: 20, bottom: 144 })
             }
             .padding({ left: 16, right: 16 })
             .width('100%')
