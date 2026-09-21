@@ -11,17 +11,14 @@ export struct PrivacyScreen {
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     build() {
-        List() {
+        List({ space: 20 }) {
             ListItem() {
-                Text("粤拼输入法隐私布告")
-                    .fontSize(20)
-                    .fontWeight(FontWeight.Bold)
+                Text("粤拼输入法隐私布告").fontSize(20).fontWeight(FontWeight.Bold)
             }
-            .padding(8)
+            .padding({ left: 10, right: 10 })
             ListItemGroup() {
                 ListItem() {
-                    Text(this.contentText.trimStart())
-                        .fontSize(14)
+                    Text(this.contentText.trimStart()).fontSize(14)
                 }
                 ListItem() {
                     Row() {
@@ -50,9 +47,7 @@ export struct PrivacyScreen {
             .borderRadius(this.groupBorderRadius)
             ListItem() {
                 Button() {
-                    Text("我已阅读并同意")
-                        .fontColor(Color.White)
-                        .padding(8)
+                    Text("我已阅读并同意").fontColor(Color.White).padding(8)
                 }
                 .backgroundColor($r('app.color.accent'))
                 .width('100%')
@@ -72,12 +67,10 @@ export struct PrivacyScreen {
                     }
                 })
             }
-            .padding({ left: 8, right: 8, top: 28 })
+            .padding({ left: 10, right: 10 })
             ListItem() {
                 Button() {
-                    Text("不同意并退出")
-                        .fontColor($r('app.color.accent'))
-                        .padding(8)
+                    Text("不同意并退出").fontColor($r('app.color.accent')).padding(8)
                 }
                 .backgroundColor(this.groupBackgroundColor)
                 .width('100%')
@@ -87,15 +80,15 @@ export struct PrivacyScreen {
                     });
                 })
             }
-            .padding({ left: 8, right: 8, top: 20 })
+            .padding({ left: 10, right: 10 })
         }
-        .padding({ left: 16, right: 16, top: 72, bottom: 72 })
+        .padding(16)
         .width('100%')
         .height('100%')
-        .backgroundColor($r('app.color.window_background'))
+        .background($r('app.color.window_background'))
     }
 
-    private contentText: string = `
+private contentText: string = `
 我们不会收集或分享用户个人信息。
 这句话概括了我们的隐私政策。
 下面是更多细节描述。
