@@ -126,7 +126,7 @@ export struct InitialsPage {
                 .padding({ left: 8, right: 8, top: 20, bottom: 20 })
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.main_page_bottom_content_offset'))
+            .contentEndOffset($r('app.float.app_bottom_content_offset'))
             .width('100%')
             .height('100%')
         }

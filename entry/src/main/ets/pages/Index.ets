@@ -65,14 +65,13 @@ struct Index {
                 adaptToHandedness: true,
                 systemMaterial: new uiMaterial.ImmersiveMaterial({
                     style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
-                    applyShadow: true,
                     interactive: true,
-                    lightEffect: { color: Color.White }
+                    lightEffect: {}
                 })
             })
             .width('100%')
             .height('100%')
-            .backgroundColor($r('app.color.window_background'))
+            .background($r('app.color.window_background'))
         }
     }
 }
