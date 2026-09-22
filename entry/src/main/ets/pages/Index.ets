@@ -4,8 +4,8 @@ import { CantoneseScreen } from './CantoneseScreen';
 import { AboutScreen } from './AboutScreen';
 import { PrivacyScreen } from './PrivacyScreen';
 import { preferences } from '@kit.ArkData';
-import { BusinessError } from '@kit.BasicServicesKit';
 import { SymbolGlyphModifier, uiMaterial } from "@kit.ArkUI";
+import { BusinessError } from '@kit.BasicServicesKit';
 
 @Entry
 @Component
@@ -21,19 +21,18 @@ struct Index {
     }
 
     @State private privacy: string = "0";
-
-    private settingsFileName: string ="shared";
-    private privacySettingsKey: string ="privacy";
+    private settingsFileName: string = "shared";
+    private privacySettingsKey: string = "privacy";
     private definedPrivacyValue: string = "2025";
     private fallbackPrivacyValue: string = "0";
 
     aboutToAppear(): void {
         try {
             const options: preferences.Options = { name: this.settingsFileName };
-            let sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
+            const sharedPreferences = preferences.getPreferencesSync(this.getUIContext().getHostContext(), options);
             this.privacy = sharedPreferences.getSync(this.privacySettingsKey, this.fallbackPrivacyValue) as string;
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to fetch agreements value, message: " + err.message + ", code: " + err.code);
         }
     }

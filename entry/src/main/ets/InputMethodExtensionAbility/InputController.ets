@@ -161,7 +161,7 @@ export class InputController {
                 console.error("Failed to save value to the audio preferences");
             });
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the audio preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -190,13 +190,13 @@ export class InputController {
                             }
                         });
                     } catch (caughtError) {
-                        let err: BusinessError = caughtError as BusinessError;
+                        const err: BusinessError = caughtError as BusinessError;
                         console.error(`An unexpected error occurred. Code: ${err.code}, message: ${err.message}`);
                     }
                 }
             })
         } catch (caughtError) {
-            let err: BusinessError = caughtError as BusinessError;
+            const err: BusinessError = caughtError as BusinessError;
             console.error(`An unexpected error occurred. Code: ${err.code}, message: ${err.message}`);
         }
     }
@@ -211,7 +211,7 @@ export class InputController {
                 console.error("Failed to save value to the haptic preferences");
             });
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the haptic preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -227,7 +227,7 @@ export class InputController {
                 console.error("Failed to save value to the keyboard layout preferences");
             });
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the keyboard layout preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -243,7 +243,7 @@ export class InputController {
                 console.error("Failed to save value to the NumericLayout preferences");
             });
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the NumericLayout preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -260,7 +260,7 @@ export class InputController {
                     console.debug("Successfully delete file " + name);
                 }
             } catch (error) {
-                let err: BusinessError = error as BusinessError;
+                const err: BusinessError = error as BusinessError;
                 console.error(`Failed to delete file ${name}, message: ${err.message}, code: ${err.code}`);
             }
         }
@@ -318,7 +318,7 @@ export class InputController {
             fs.renameSync(temporaryPath, desPath);
             return true;
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("copyKeyboardDatabase() failed, message: " + err.message + ", code: " + err.code);
             try {
                 if (fs.accessSync(temporaryPath)) {
@@ -375,7 +375,7 @@ export class InputController {
             try {
                 await this.coreStore.close();
             } catch (error) {
-                let err: BusinessError = error as BusinessError;
+                const err: BusinessError = error as BusinessError;
                 console.error("error at closing data store, message: " + err.message + ", code: " + err.code);
             } finally {
                 this.coreStore = undefined;
@@ -430,7 +430,7 @@ export class InputController {
                 console.error("Failed to save value to the charset preferences");
             });
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to save value to the charset preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -443,7 +443,7 @@ export class InputController {
             const options: preferences.Options = { name: "kbsettings" };
             this.sharedPreferences = preferences.getPreferencesSync(this.ctx, options);
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
         }
         return this.sharedPreferences;
@@ -501,10 +501,10 @@ export class InputController {
     onCreate(context: InputMethodExtensionContext): void {
         this.ctx = context;
         try {
-            const defaultDisplay = display.getDefaultDisplaySync();
-            this.initWindow(defaultDisplay);
+            const screen = display.getDefaultDisplaySync();
+            this.createInputPanel(screen);
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to getDefaultDisplaySync(), message: " + err.message + ", code: " + err.code);
         }
         this.registerListener();
@@ -529,7 +529,7 @@ export class InputController {
                 this.useDedicatedNumberPad = (numericLayoutSavedValue === NumericLayout.Dedicated);
             }
         } catch (error) {
-            let err: BusinessError = error as BusinessError;
+            const err: BusinessError = error as BusinessError;
             console.error("Failed to load keyboard preferences, message: " + err.message + ", code: " + err.code);
         }
     }
@@ -540,9 +540,7 @@ export class InputController {
         if(this.panel) {
             this.ability.destroyPanel(this.panel);
         }
-        if(this.ctx) {
-            this.ctx.destroy();
-        }
+        this.ctx?.destroy();
     }
     @Trace candidates: Candidate[] = [];
     private selectedCandidates: Candidate[] = [];
@@ -1259,11 +1257,8 @@ export class InputController {
 
     @Trace keyHeight: Length = 53;
     @Trace keyboardHeight: Length = 268;
-    @Trace isPhoneLandscape: boolean | undefined = undefined;
-    private initWindow(screen: display.Display) {
-        if(this.ctx === undefined) {
-            return;
-        }
+    private createInputPanel(screen: display.Display) {
+        if(this.ctx === undefined) { return; }
         const panelHeight = this.responsiveKeyboard(screen);
         const panelInfo: inputMethodEngine.PanelInfo = {
             type: inputMethodEngine.PanelType.SOFT_KEYBOARD,
@@ -1272,28 +1267,24 @@ export class InputController {
         this.ability.createPanel(this.ctx, panelInfo)
             .then(async (inputPanel: inputMethodEngine.Panel) => {
                 this.panel = inputPanel;
-                if(this.panel) {
-                    await this.panel.resize(screen.width, panelHeight);
-                    this.adoptImmersiveMode();
-                    await this.panel.setUiContent('InputMethodExtensionAbility/pages/Index');
-                }
+                await this.panel?.resize(screen.width, panelHeight);
+                this.adoptImmersiveMode();
+                await this.panel?.setUiContent('InputMethodExtensionAbility/pages/Index');
             })
             .catch(() => { console.error("Failed to createPanel()"); });
     }
-    private responsiveKeyboard(screen: display.Display): number | undefined {
+    private responsiveKeyboard(screen: display.Display): number {
         const displayWidth = screen.width;
         const displayHeight = screen.height;
         const density = screen.scaledDensity;
         const widthInPoint = displayWidth / density;
         const heightInPoint = displayHeight / density;
         const minDimension = Math.min(widthInPoint, heightInPoint);
-        const isLandscape = (widthInPoint > heightInPoint) && (minDimension < 500);
-        if (this.isPhoneLandscape === isLandscape) { return; }
-        this.isPhoneLandscape = isLandscape;
-        const toolBarHeight = 56;
+        const isPhoneLandscape = (widthInPoint > heightInPoint) && (minDimension < 500);
         const landscapeKeyHeight = 36;
         const portraitKeyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
-        this.keyHeight = isLandscape ? landscapeKeyHeight : portraitKeyHeight;
+        this.keyHeight = isPhoneLandscape ? landscapeKeyHeight : Math.min(portraitKeyHeight, 58);
+        const toolBarHeight = 56;
         this.keyboardHeight = (this.keyHeight * 4) + toolBarHeight;
         const panelHeight = this.keyboardHeight * density;
         return panelHeight;
@@ -1323,12 +1314,10 @@ export class InputController {
             try {
                 const screen = display.getDefaultDisplaySync();
                 const panelHeight = this.responsiveKeyboard(screen);
-                if (panelHeight) {
-                    this.panel?.resize(screen.width, panelHeight);
-                    this.panel?.setUiContent('InputMethodExtensionAbility/pages/Index');
-                }
+                this.panel?.resize(screen.width, panelHeight);
+                this.panel?.setUiContent('InputMethodExtensionAbility/pages/Index');
             } catch (error) {
-                let err: BusinessError = error as BusinessError;
+                const err: BusinessError = error as BusinessError;
                 console.error(`Failed to responsive keyboard, error: ${err.message}}, code: ${err.code}}`);
             }
             this.keyboardController = kbController;
