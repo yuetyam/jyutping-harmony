@@ -11,6 +11,7 @@ import SpaceKey from './SpaceKey';
 import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
 import GlobeKey from './GlobeKey';
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct ABCKeyboard {
@@ -24,7 +25,7 @@ export default struct ABCKeyboard {
         }) {
             ToolBar()
                 .width('100%')
-                .height('56vp')
+                .height(PresetConstant.toolBarHeight)
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 LetterKey({ virtual: VirtualInputKey.letterQ })
                 LetterKey({ virtual: VirtualInputKey.letterW })

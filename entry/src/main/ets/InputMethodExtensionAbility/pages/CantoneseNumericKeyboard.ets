@@ -1,5 +1,6 @@
 import controller from '../InputController';
 import { KeyboardForm } from '../model/KeyboardForm';
+import { PresetConstant } from '../model/PresetConstant';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
 import GlobeKey from './GlobeKey';
@@ -21,7 +22,7 @@ export default struct CantoneseNumericKeyboard {
         }) {
             ToolBar()
                 .width('100%')
-                .height('56vp')
+                .height(PresetConstant.toolBarHeight)
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 SymbolKey({ keyText: "1" })
                 SymbolKey({ keyText: "2" })

@@ -1,5 +1,6 @@
 import controller from '../InputController';
 import { KeyboardForm } from '../model/KeyboardForm';
+import { PresetConstant } from '../model/PresetConstant';
 import ABCLeftKey from './ABCLeftKey';
 import ABCRightKey from './ABCRightKey';
 import BackspaceKey from './BackspaceKey';
@@ -21,7 +22,7 @@ export default struct SymbolicKeyboard {
         }) {
             ToolBar()
                 .width('100%')
-                .height('56vp')
+                .height(PresetConstant.toolBarHeight)
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 SymbolKey({ keyText: "[" })
                 SymbolKey({ keyText: "]" })

@@ -8,6 +8,7 @@ import NineKeySpaceKey from '../ninekey/NineKeySpaceKey';
 import { VirtualInputKey } from '../model/VirtualInputKey';
 import TailoredNumericDotKey from './TailoredNumericDotKey';
 import SidebarPanel from '../ninekey/SidebarPanel';
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct TailoredNumericKeyboard {
@@ -21,7 +22,7 @@ export default struct TailoredNumericKeyboard {
                 ToolBar()
             }
             .width("100%")
-            .height("56vp")
+            .height(PresetConstant.toolBarHeight)
 
             Flex({
                 direction: FlexDirection.Row,
