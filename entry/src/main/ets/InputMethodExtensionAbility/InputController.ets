@@ -249,6 +249,22 @@ export class InputController {
         }
     }
 
+    @Trace needsGlobeKey: boolean = false;
+    updateGlobeKeyUsage(isOn: boolean) {
+        if (this.needsGlobeKey === isOn) { return; }
+        this.needsGlobeKey = isOn;
+        const value: number = isOn ? 1 : 2;
+        try {
+            this.sharedPreferences?.putSync(UserSettingsKey.globeKey, value);
+            this.sharedPreferences?.flush().catch(() => {
+                console.error("Failed to save value to the GlobeKey preferences");
+            });
+        } catch (error) {
+            const err: BusinessError = error as BusinessError;
+            console.error("Failed to save value to the GlobeKey preferences, message: " + err.message + ", code: " + err.code);
+        }
+    }
+
     private async deleteOldDatabases(context: Context) {
         const fileNames: string[] = ["ime-20260712-tmp.sqlite3", "ime-20260620-tmp.sqlite3", "imedb-20260505-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/ime/";
@@ -403,9 +419,8 @@ export class InputController {
     }
     private memory: relationalStore.RdbStore | undefined = undefined;
     private async attachMemory() {
-        let fileName: string = "memory.sqlite3";
-        let storeConfig: relationalStore.StoreConfig = {
-            name: fileName,
+        const storeConfig: relationalStore.StoreConfig = {
+            name: UserSettingsKey.inputMemoryDatabaseFileName,
             securityLevel: relationalStore.SecurityLevel.S1,
             encrypt: false,
             customDir: 'ime',
@@ -441,7 +456,7 @@ export class InputController {
         if (this.sharedPreferences) { return this.sharedPreferences; }
         if (this.ctx === undefined) { return undefined; }
         try {
-            const options: preferences.Options = { name: "kbsettings" };
+            const options: preferences.Options = { name: UserSettingsKey.preferencesInstanceName };
             this.sharedPreferences = preferences.getPreferencesSync(this.ctx, options);
         } catch (error) {
             const err: BusinessError = error as BusinessError;
@@ -519,15 +534,17 @@ export class InputController {
             const sharedPreferences = this.obtainSharedPreferences();
             if (sharedPreferences !== undefined) {
                 const savedAudioFeedbackValue: number = sharedPreferences.getSync(UserSettingsKey.audio, 1) as number;
-                this.isAudioFeedbackOn = (savedAudioFeedbackValue == 1);
+                this.isAudioFeedbackOn = (savedAudioFeedbackValue === 1);
                 const savedHapticFeedbackValue: number = sharedPreferences.getSync(UserSettingsKey.haptic, 1) as number;
-                this.isHapticFeedbackOn = (savedHapticFeedbackValue == 1);
+                this.isHapticFeedbackOn = (savedHapticFeedbackValue === 1);
                 const savedCharacterStandardValue: number = sharedPreferences.getSync(UserSettingsKey.charset, 1) as number;
-                this.isMutilated = (savedCharacterStandardValue == 51);
+                this.isMutilated = (savedCharacterStandardValue === 51);
                 const savedKeyboardLayoutValue: number = sharedPreferences.getSync(UserSettingsKey.keyboardLayout, KeyboardLayout.Qwerty) as number;
                 this.keyboardLayout = KeyboardLayoutCompanion.layoutOf(savedKeyboardLayoutValue);
                 const numericLayoutSavedValue: number = sharedPreferences.getSync(UserSettingsKey.numericLayout, NumericLayout.Default) as number;
                 this.useDedicatedNumberPad = (numericLayoutSavedValue === NumericLayout.Dedicated);
+                const globeKeySavedValue: number = sharedPreferences.getSync(UserSettingsKey.globeKey, 2) as number;
+                this.needsGlobeKey = (globeKeySavedValue === 1);
             }
         } catch (error) {
             const err: BusinessError = error as BusinessError;

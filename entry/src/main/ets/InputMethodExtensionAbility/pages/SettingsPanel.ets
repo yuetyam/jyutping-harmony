@@ -125,6 +125,27 @@ export default struct SettingsPanel {
                 .backgroundColor(this.groupBackgroundColor)
                 .borderRadius(this.groupBorderRadius)
 
+                ListItemGroup() {
+                    ListItem() {
+                        Row() {
+                            Text($r('app.string.keyboard_settings_globe_key'))
+                            Blank()
+                            Toggle({ type: ToggleType.Switch, isOn: controller.needsGlobeKey })
+                                .selectedColor($r('app.color.accent'))
+                                .switchPointColor(Color.White)
+                                .onChange((isOn: boolean) => {
+                                    controller.updateGlobeKeyUsage(isOn);
+                                    controller.playModifierSound();
+                                    controller.triggerHapticFeedback();
+                                })
+                        }
+                        .padding({ left: 8, top: 4, right: 8, bottom: 4 })
+                        .width('100%')
+                    }
+                }
+                .backgroundColor(this.groupBackgroundColor)
+                .borderRadius(this.groupBorderRadius)
+
                 /*
                 ListItemGroup() {
                     ListItem() {

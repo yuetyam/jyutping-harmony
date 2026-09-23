@@ -10,10 +10,12 @@ import ShiftKey from './ShiftKey';
 import SpaceKey from './SpaceKey';
 import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
+import GlobeKey from './GlobeKey';
 
 @ComponentV2
 export default struct ABCKeyboard {
-    keyHeight: Length = controller.keyHeight;
+    private keyHeight: Length = controller.keyHeight;
+    private numericForm: KeyboardForm = controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -70,15 +72,28 @@ export default struct ABCKeyboard {
             .width('100%')
             .height(this.keyHeight)
 
-            Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width('20%')
-                ABCLeftKey().width('10%')
-                SpaceKey().width('40%')
-                ABCRightKey().width('10%')
-                EnterKey().width('20%')
+            if (controller.needsGlobeKey) {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: this.numericForm }).width('15%')
+                    GlobeKey().width('10%')
+                    ABCLeftKey().width('10%')
+                    SpaceKey().width('37%')
+                    ABCRightKey().width('10%')
+                    EnterKey().width('18%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
+            } else {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: this.numericForm }).width('20%')
+                    ABCLeftKey().width('10%')
+                    SpaceKey().width('40%')
+                    ABCRightKey().width('10%')
+                    EnterKey().width('20%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
             }
-            .width('100%')
-            .height(this.keyHeight)
         }
     }
 }

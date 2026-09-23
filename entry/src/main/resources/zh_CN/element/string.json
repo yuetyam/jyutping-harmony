@@ -241,6 +241,10 @@
       "value": "使用九宫格数字键盘"
     },
     {
+      "name": "keyboard_settings_globe_key",
+      "value": "输入法切换键（地球键）"
+    },
+    {
       "name": "emoji_board_header_frequently_used",
       "value": "常用"
     },

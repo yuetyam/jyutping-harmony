@@ -241,6 +241,10 @@
       "value": "Use 10 Key Number Pad"
     },
     {
+      "name": "keyboard_settings_globe_key",
+      "value": "Input Method Switch Key"
+    },
+    {
       "name": "emoji_board_header_frequently_used",
       "value": "Frequently Used"
     },

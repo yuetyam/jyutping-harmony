@@ -17,6 +17,7 @@ import { PresetConstant } from '../model/PresetConstant';
 @ComponentV2
 export default struct CantoneseKeyboard {
     private keyHeight: Length = controller.keyHeight;
+    private numericForm: KeyboardForm = controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -79,16 +80,28 @@ export default struct CantoneseKeyboard {
             .width('100%')
             .height(this.keyHeight)
 
-            Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width('15%')
-                GlobeKey().width('10%')
-                LeftKey().width('10%')
-                SpaceKey().width('37%')
-                RightKey().width('10%')
-                EnterKey().width('18%')
+            if (controller.needsGlobeKey) {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: this.numericForm }).width('15%')
+                    GlobeKey().width('10%')
+                    LeftKey().width('10%')
+                    SpaceKey().width('37%')
+                    RightKey().width('10%')
+                    EnterKey().width('18%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
+            } else {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: this.numericForm }).width('20%')
+                    LeftKey().width('10%')
+                    SpaceKey().width('40%')
+                    RightKey().width('10%')
+                    EnterKey().width('20%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
             }
-            .width('100%')
-            .height(this.keyHeight)
         }
     }
 }

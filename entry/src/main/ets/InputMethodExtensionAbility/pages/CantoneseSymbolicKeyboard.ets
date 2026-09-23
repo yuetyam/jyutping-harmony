@@ -2,6 +2,7 @@ import controller from '../InputController';
 import { KeyboardForm } from '../model/KeyboardForm';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
+import GlobeKey from './GlobeKey';
 import LeftKey from './LeftKey';
 import RightKey from './RightKey';
 import SpaceKey from './SpaceKey';
@@ -11,7 +12,7 @@ import TransformKey from './TransformKey';
 
 @ComponentV2
 export default struct CantoneseSymbolicKeyboard {
-    keyHeight: Length = controller.keyHeight;
+    private keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -67,15 +68,28 @@ export default struct CantoneseSymbolicKeyboard {
             .width('100%')
             .height(this.keyHeight)
 
-            Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: KeyboardForm.Primary }).width('20%')
-                LeftKey().width('10%')
-                SpaceKey().width('40%')
-                RightKey().width('10%')
-                EnterKey().width('20%')
+            if (controller.needsGlobeKey) {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: KeyboardForm.Primary }).width('15%')
+                    GlobeKey().width('10%')
+                    LeftKey().width('10%')
+                    SpaceKey().width('37%')
+                    RightKey().width('10%')
+                    EnterKey().width('18%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
+            } else {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: KeyboardForm.Primary }).width('20%')
+                    LeftKey().width('10%')
+                    SpaceKey().width('40%')
+                    RightKey().width('10%')
+                    EnterKey().width('20%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
             }
-            .width('100%')
-            .height(this.keyHeight)
         }
     }
 }

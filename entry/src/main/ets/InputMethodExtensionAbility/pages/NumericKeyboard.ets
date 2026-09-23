@@ -1,9 +1,10 @@
 import controller from '../InputController';
 import { KeyboardForm } from '../model/KeyboardForm';
+import ABCLeftKey from './ABCLeftKey';
+import ABCRightKey from './ABCRightKey';
 import BackspaceKey from './BackspaceKey';
 import EnterKey from './EnterKey';
-import LeftKey from './LeftKey';
-import RightKey from './RightKey';
+import GlobeKey from './GlobeKey';
 import SpaceKey from './SpaceKey';
 import SymbolKey from './SymbolKey';
 import ToolBar from './TooBar';
@@ -11,7 +12,7 @@ import TransformKey from './TransformKey';
 
 @ComponentV2
 export default struct NumericKeyboard {
-    keyHeight: Length = controller.keyHeight;
+    private keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -67,15 +68,28 @@ export default struct NumericKeyboard {
             .width('100%')
             .height(this.keyHeight)
 
-            Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: KeyboardForm.Primary }).width('20%')
-                LeftKey().width('10%')
-                SpaceKey().width('40%')
-                RightKey().width('10%')
-                EnterKey().width('20%')
+            if (controller.needsGlobeKey) {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: KeyboardForm.Primary }).width('15%')
+                    GlobeKey().width('10%')
+                    ABCLeftKey().width('10%')
+                    SpaceKey().width('37%')
+                    ABCRightKey().width('10%')
+                    EnterKey().width('18%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
+            } else {
+                Flex({ justifyContent: FlexAlign.SpaceBetween }) {
+                    TransformKey({ destination: KeyboardForm.Primary }).width('20%')
+                    ABCLeftKey().width('10%')
+                    SpaceKey().width('40%')
+                    ABCRightKey().width('10%')
+                    EnterKey().width('20%')
+                }
+                .width('100%')
+                .height(this.keyHeight)
             }
-            .width('100%')
-            .height(this.keyHeight)
         }
     }
 }
