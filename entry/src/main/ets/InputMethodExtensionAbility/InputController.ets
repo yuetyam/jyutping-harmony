@@ -3,7 +3,7 @@ import { preferences, relationalStore } from '@kit.ArkData';
 import { audio } from '@kit.AudioKit';
 import { BusinessError, pasteboard } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
-import { inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
+import { inputMethod, inputMethodEngine, InputMethodExtensionContext } from '@kit.IMEKit';
 import { resourceManager } from '@kit.LocalizationKit';
 import { media } from '@kit.MediaKit';
 import { vibrator } from '@kit.SensorServiceKit';
@@ -39,6 +39,7 @@ import { UserSettingsKey } from './model/UserSettingsKey';
 import { Emoji } from './emoji/Emoji';
 import { EmojiCategory } from './emoji/EmojiCategory';
 import { EmojiDataHelper } from './emoji/EmojiDataHelper';
+import { PresetConstant } from './model/PresetConstant';
 
 interface ReverseLookupQuery {
     readonly method: ReverseLookupMethod;
@@ -1205,7 +1206,7 @@ export class InputController {
             this.flushBufferText();
             this.clearBuffer();
         } else {
-            let actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
+            const actionCode = this.attribute?.enterKeyType ?? inputMethodEngine.ENTER_KEY_TYPE_DONE;
             this.inputClient?.sendKeyFunction(actionCode).catch(() => {
                 console.error(`Failed to sendKeyFunction() in enterKeyAction(), actionCode: ${actionCode}`);
             })
@@ -1255,6 +1256,28 @@ export class InputController {
         this.updateKeyboardCase(newCase);
     }
 
+    async switchToNextInputMethod() {
+        if (this.isBuffering) {
+            this.flushBufferText();
+            this.clearBuffer();
+        }
+        try {
+            const enabledInputMethods = await inputMethod.getSetting().getInputMethods(true);
+            if (enabledInputMethods.length < 2) { return; }
+            const currentInputMethod = inputMethod.getCurrentInputMethod();
+            for (let i = 0; i < enabledInputMethods.length; i++) {
+                const destination = enabledInputMethods[i];
+                if ((destination.name != currentInputMethod.name) && (destination.id != currentInputMethod.id)) {
+                    await inputMethod.switchInputMethod(destination);
+                    break;
+                }
+            }
+        } catch (err) {
+            const error = err as BusinessError;
+            console.error(`switchInputMethod catch error: ${error.code} ${error.message}`);
+        }
+    }
+
     @Trace keyHeight: Length = 53;
     @Trace keyboardHeight: Length = 268;
     private createInputPanel(screen: display.Display) {
@@ -1284,8 +1307,7 @@ export class InputController {
         const landscapeKeyHeight = 36;
         const portraitKeyHeight = 53 + Math.floor((widthInPoint - 300) / 20);
         this.keyHeight = isPhoneLandscape ? landscapeKeyHeight : Math.min(portraitKeyHeight, 58);
-        const toolBarHeight = 56;
-        this.keyboardHeight = (this.keyHeight * 4) + toolBarHeight;
+        this.keyboardHeight = (this.keyHeight * 4) + PresetConstant.toolBarHeight;
         const panelHeight = this.keyboardHeight * density;
         return panelHeight;
     }

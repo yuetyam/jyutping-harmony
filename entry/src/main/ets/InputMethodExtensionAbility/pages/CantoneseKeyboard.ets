@@ -11,10 +11,12 @@ import ShiftKey from './ShiftKey';
 import SpaceKey from './SpaceKey';
 import ToolBar from './TooBar';
 import TransformKey from './TransformKey';
+import GlobeKey from './GlobeKey';
+import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct CantoneseKeyboard {
-    keyHeight: Length = controller.keyHeight;
+    private keyHeight: Length = controller.keyHeight;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -29,7 +31,7 @@ export default struct CantoneseKeyboard {
                 }
             }
             .width('100%')
-            .height('56vp')
+            .height(PresetConstant.toolBarHeight)
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
                 LetterKey({ virtual: VirtualInputKey.letterQ })
                 LetterKey({ virtual: VirtualInputKey.letterW })
@@ -78,11 +80,12 @@ export default struct CantoneseKeyboard {
             .height(this.keyHeight)
 
             Flex({ justifyContent: FlexAlign.SpaceBetween }) {
-                TransformKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width('20%')
+                TransformKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width('15%')
+                GlobeKey().width('10%')
                 LeftKey().width('10%')
-                SpaceKey().width('40%')
+                SpaceKey().width('37%')
                 RightKey().width('10%')
-                EnterKey().width('20%')
+                EnterKey().width('18%')
             }
             .width('100%')
             .height(this.keyHeight)
