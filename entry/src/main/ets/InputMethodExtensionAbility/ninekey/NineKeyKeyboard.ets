@@ -10,9 +10,13 @@ import NineKeyBackspaceKey from './NineKeyBackspaceKey';
 import NineKeyEnterKey from './NineKeyEnterKey';
 import NineKeySpaceKey from './NineKeySpaceKey';
 import SidebarPanel from './SidebarPanel';
+import { PresetConstant } from '../model/PresetConstant';
+import NineKeyGlobeKey from './NineKeyGlobeKey';
 
 @ComponentV2
 export default struct NineKeyKeyboard {
+    private numericForm: KeyboardForm = controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric;
+    private symbolicForm: KeyboardForm = controller.useDedicatedNumberPad ? KeyboardForm.Numeric : KeyboardForm.Symbolic;
     build() {
         Flex({
             direction: FlexDirection.Column,
@@ -27,7 +31,7 @@ export default struct NineKeyKeyboard {
                 }
             }
             .width("100%")
-            .height("56vp")
+            .height(PresetConstant.toolBarHeight)
 
             Flex({
                 direction: FlexDirection.Row,
@@ -84,15 +88,28 @@ export default struct NineKeyKeyboard {
                         .width("77.8%")
                     }
                     .height("75%")
-                    Flex({
-                        direction: FlexDirection.Row,
-                        alignItems: ItemAlign.Center,
-                        justifyContent: FlexAlign.SpaceBetween
-                    }) {
-                        NineKeyNavigateKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.DedicatedNumbers : KeyboardForm.Numeric }).width("22.2%")
-                        NineKeySpaceKey().width("77.8%")
+                    if (controller.needsGlobeKey) {
+                        Flex({
+                            direction: FlexDirection.Row,
+                            alignItems: ItemAlign.Center,
+                            justifyContent: FlexAlign.SpaceBetween
+                        }) {
+                            NineKeyNavigateKey({ destination: this.numericForm }).width("22.2%")
+                            NineKeyGlobeKey().width("12.8%")
+                            NineKeySpaceKey().width("65%")
+                        }
+                        .height("25%")
+                    } else {
+                        Flex({
+                            direction: FlexDirection.Row,
+                            alignItems: ItemAlign.Center,
+                            justifyContent: FlexAlign.SpaceBetween
+                        }) {
+                            NineKeyNavigateKey({ destination: this.numericForm }).width("22.2%")
+                            NineKeySpaceKey().width("77.8%")
+                        }
+                        .height("25%")
                     }
-                    .height("25%")
                 }
                 .width("81.8%")
                 Flex({
@@ -101,7 +118,7 @@ export default struct NineKeyKeyboard {
                     justifyContent: FlexAlign.SpaceBetween
                 }) {
                     NineKeyBackspaceKey().height("25%")
-                    NineKeyNavigateKey({ destination: controller.useDedicatedNumberPad ? KeyboardForm.Numeric : KeyboardForm.Symbolic }).height("25%")
+                    NineKeyNavigateKey({ destination: this.symbolicForm }).height("25%")
                     NineKeyEnterKey().height("50%")
                 }
                 .width("18.2%")

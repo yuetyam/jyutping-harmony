@@ -3,8 +3,8 @@ import { PresetConstant } from '../model/PresetConstant';
 
 @ComponentV2
 export default struct NineKeyBackspaceKey {
-    @Local private isTouching: boolean = false
-    @Local private actionCounter: number = 0
+    @Local private isTouching: boolean = false;
+    @Local private actionCounter: number = 0;
     build() {
         Stack() {
             Flex({
