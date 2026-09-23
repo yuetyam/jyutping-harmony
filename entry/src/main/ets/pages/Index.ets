@@ -5,7 +5,8 @@ import { AboutScreen } from './AboutScreen';
 import { PrivacyScreen } from './PrivacyScreen';
 import { preferences } from '@kit.ArkData';
 import { SymbolGlyphModifier, uiMaterial } from "@kit.ArkUI";
-import { BusinessError } from '@kit.BasicServicesKit';
+import { BusinessError, deviceInfo } from '@kit.BasicServicesKit';
+import { hdsMaterial, HdsTabs } from '@kit.UIDesignKit';
 
 @Entry
 @Component
@@ -18,6 +19,21 @@ struct Index {
             unselectedColor: $r('sys.color.ohos_id_color_primary'),
             selectedColor: $r('app.color.accent')
         });
+    }
+
+    @State private selection: number = 0;
+
+    @Builder
+    private tabBuilder(index: number, title: Resource, icon: Resource) {
+        Column({ space: 4 }) {
+            SymbolGlyph(icon)
+                .fontSize(24)
+                .fontColor(this.selection === index ? [$r('app.color.accent')] : [$r('sys.color.ohos_id_color_primary')])
+            Text(title)
+                .fontSize(12)
+                .fontColor(this.selection === index ? $r('app.color.accent') : $r('sys.color.ohos_id_color_primary'))
+        }
+        .justifyContent(FlexAlign.Center)
     }
 
     @State private privacy: string = "0";
@@ -40,7 +56,7 @@ struct Index {
     build() {
         if (this.privacy != this.definedPrivacyValue) {
             PrivacyScreen({ privacy: this.privacy })
-        } else {
+        } else if (deviceInfo.apiAvailable('26.0.0')) {
             Tabs({ barPosition: BarPosition.End }) {
                 TabContent() {
                     HomeScreen()
@@ -67,6 +83,38 @@ struct Index {
                     interactive: true,
                     lightEffect: {}
                 })
+            })
+            .width('100%')
+            .height('100%')
+            .background($r('app.color.window_background'))
+        } else {
+            HdsTabs() {
+                TabContent() {
+                    HomeScreen()
+                }
+                .tabBar(this.tabBarStyle($r('sys.symbol.house'), $r('app.string.tab_bar_home')))
+                TabContent() {
+                    RomanizationScreen()
+                }
+                .tabBar(this.tabBarStyle($r('sys.symbol.doc_text_badge_magnifyingglass'), $r('app.string.tab_bar_romanization')))
+                TabContent() {
+                    CantoneseScreen()
+                }
+                .tabBar(this.tabBarStyle($r('sys.symbol.worldclock'), $r('app.string.tab_bar_cantonese')))
+                TabContent() {
+                    AboutScreen()
+                }
+                .tabBar(this.tabBarStyle($r('sys.symbol.info_circle'), $r('app.string.tab_bar_about')))
+            }
+            .barOverlap(true)
+            .barPosition(BarPosition.End)
+            .vertical(false)
+            .barFloatingStyle({
+                barBottomMargin: 28,
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
             })
             .width('100%')
             .height('100%')
