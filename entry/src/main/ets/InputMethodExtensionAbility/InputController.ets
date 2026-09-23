@@ -266,7 +266,7 @@ export class InputController {
     }
 
     private async deleteOldDatabases(context: Context) {
-        const fileNames: string[] = ["ime-20260712-tmp.sqlite3", "ime-20260620-tmp.sqlite3", "imedb-20260505-tmp.sqlite3"];
+        const fileNames: string[] = ["ime-260913-db.sqlite3", "ime-20260712-tmp.sqlite3", "ime-20260620-tmp.sqlite3"];
         const pathPrefix: string = context.databaseDir + "/rdb/ime/";
         for (let index = 0; index < fileNames.length; index++) {
             const name: string = fileNames[index];
@@ -282,7 +282,7 @@ export class InputController {
             }
         }
     }
-    private coreDatabaseFileName: string = "ime-260913-db.sqlite3";
+    private coreDatabaseFileName: string = "ime-260923-db.sqlite3";
     private async copyKeyboardDatabase(context: Context, shouldReplace: boolean = false): Promise<boolean> {
         const databaseDirectory: string = context.databaseDir + "/rdb/ime";
         const desPath: string = databaseDirectory + "/" + this.coreDatabaseFileName;
