@@ -1,3 +1,5 @@
+import { HdsNavDestination, hdsMaterial, ScrollEffectType } from "@kit.UIDesignKit";
+
 @Builder
 export function PageBuilder() {
     ExpressionsPage();
@@ -14,7 +16,7 @@ export struct ExpressionsPage {
     private redColor = [$r('app.color.red')];
     private orangeColor = [$r('app.color.orange')];
     build() {
-        NavDestination() {
+        HdsNavDestination() {
             List({ space: 20 }) {
                 ListItemGroup({ space: 4 }) {
                     ListItem() {
@@ -471,13 +473,28 @@ export struct ExpressionsPage {
 
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.app_bottom_content_offset'))
+            .contentStartOffset($r('app.float.app_content_compact_offset'))
+            .contentEndOffset($r('app.float.app_content_large_offset'))
             .width('100%')
             .height('100%')
         }
-        .title($r('app.string.cantonese_expressions_title'))
-        .width('100%')
-        .height('100%')
+        .titleBar({
+            content: {
+                title: {
+                    mainTitle: $r('app.string.cantonese_expressions_title')
+                }
+            },
+            style: {
+                scrollEffectOpts: {
+                    enableScrollEffect: true,
+                    scrollEffectType: ScrollEffectType.GRADIENT_BLUR
+                },
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
+            }
+        })
         .backgroundColor($r('app.color.window_background'))
     }
 }

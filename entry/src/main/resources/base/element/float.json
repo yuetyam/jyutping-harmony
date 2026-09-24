@@ -1,8 +1,16 @@
 {
   "float": [
     {
-      "name": "app_bottom_content_offset",
-      "value": "50vp"
+      "name": "app_content_compact_offset",
+      "value": "16vp"
+    },
+    {
+      "name": "app_content_medium_offset",
+      "value": "32vp"
+    },
+    {
+      "name": "app_content_large_offset",
+      "value": "44vp"
     }
   ]
 }

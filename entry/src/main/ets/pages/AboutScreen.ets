@@ -1,4 +1,5 @@
 import { bundleManager } from '@kit.AbilityKit';
+import { HdsNavigation, hdsMaterial, ScrollEffectType } from "@kit.UIDesignKit";
 import { QQWebLinkView } from './QQWebLinkView';
 import { WebLinkView } from './WebLinkView';
 
@@ -13,7 +14,7 @@ export struct AboutScreen {
         })
     }
     build() {
-        Navigation() {
+        HdsNavigation() {
             List({ space: 20 }) {
                 ListItem() {
                     Row({ space: 12 }) {
@@ -125,14 +126,28 @@ export struct AboutScreen {
                 */
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.app_bottom_content_offset'))
+            .contentStartOffset($r('app.float.app_content_medium_offset'))
+            .contentEndOffset($r('app.float.app_content_large_offset'))
             .width('100%')
             .height('100%')
         }
-        .mode(NavigationMode.Stack)
-        .title($r('app.string.tab_bar_about'))
-        .width('100%')
-        .height('100%')
-        .backgroundColor($r('app.color.window_background'))
+        .titleBar({
+            content: {
+                title: {
+                    mainTitle: $r('app.string.tab_bar_about')
+                }
+            },
+            style: {
+                scrollEffectOpts: {
+                    enableScrollEffect: true,
+                    scrollEffectType: ScrollEffectType.GRADIENT_BLUR
+                },
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
+            }
+        })
+        .background($r('app.color.window_background'))
     }
 }

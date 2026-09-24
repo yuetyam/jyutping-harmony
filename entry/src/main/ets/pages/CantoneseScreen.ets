@@ -1,3 +1,4 @@
+import { HdsNavigation, hdsMaterial, ScrollEffectType } from "@kit.UIDesignKit";
 import { NavigationLabel } from "./NavigationLabel";
 import { WebLinkView } from "./WebLinkView";
 
@@ -7,7 +8,7 @@ export struct CantoneseScreen {
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     build() {
-        Navigation(this.pageStack) {
+        HdsNavigation(this.pageStack) {
             List({ space: 20 }) {
                 ListItemGroup() {
                     ListItem() {
@@ -86,14 +87,29 @@ export struct CantoneseScreen {
                 .borderRadius(this.groupBorderRadius)
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.app_bottom_content_offset'))
+            .contentStartOffset($r('app.float.app_content_medium_offset'))
+            .contentEndOffset($r('app.float.app_content_large_offset'))
             .width('100%')
             .height('100%')
         }
-        .mode(NavigationMode.Auto)
-        .title($r('app.string.tab_bar_cantonese'))
-        .width('100%')
-        .height('100%')
-        .backgroundColor($r('app.color.window_background'))
+        .mode(NavigationMode.Stack)
+        .titleBar({
+            content: {
+                title: {
+                    mainTitle: $r('app.string.tab_bar_cantonese')
+                }
+            },
+            style: {
+                scrollEffectOpts: {
+                    enableScrollEffect: true,
+                    scrollEffectType: ScrollEffectType.GRADIENT_BLUR
+                },
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
+            }
+        })
+        .background($r('app.color.window_background'))
     }
 }

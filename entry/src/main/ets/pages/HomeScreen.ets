@@ -2,6 +2,7 @@ import { common, Want } from '@kit.AbilityKit';
 import { relationalStore } from '@kit.ArkData';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { fileIo as fs } from '@kit.CoreFileKit';
+import { HdsNavigation, hdsMaterial, ScrollEffectType } from "@kit.UIDesignKit";
 import { CantoneseLexicon } from '../search/CantoneseLexicon';
 import { CantoneseLexiconView } from '../search/CantoneseLexiconView';
 import { ChoHokHelper } from '../search/ChoHokHelper';
@@ -231,8 +232,8 @@ export struct HomeScreen {
     }
 
     build() {
-        Navigation() {
-            List({ space: 24 }) {
+        HdsNavigation() {
+            List({ space: 20 }) {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
                         .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
@@ -512,14 +513,29 @@ export struct HomeScreen {
 
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.app_bottom_content_offset'))
+            .contentStartOffset($r('app.float.app_content_medium_offset'))
+            .contentEndOffset($r('app.float.app_content_large_offset'))
             .width('100%')
             .height('100%')
         }
         .mode(NavigationMode.Stack)
-        .title($r('app.string.home_screen_title'))
-        .width('100%')
-        .height('100%')
-        .backgroundColor($r('app.color.window_background'))
+        .titleBar({
+            content: {
+                title: {
+                    mainTitle: $r("app.string.home_screen_title")
+                }
+            },
+            style: {
+                scrollEffectOpts: {
+                    enableScrollEffect: true,
+                    scrollEffectType: ScrollEffectType.GRADIENT_BLUR
+                },
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
+            }
+        })
+        .background($r('app.color.window_background'))
     }
 }

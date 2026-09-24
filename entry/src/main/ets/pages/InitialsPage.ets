@@ -1,3 +1,5 @@
+import { HdsNavDestination, hdsMaterial, ScrollEffectType } from "@kit.UIDesignKit";
+
 @Builder
 export function PageBuilder() {
     InitialsPage();
@@ -8,7 +10,7 @@ export struct InitialsPage {
     private groupBackgroundColor = $r('app.color.group_background');
     private groupBorderRadius: Length = 16;
     build() {
-        NavDestination() {
+        HdsNavDestination() {
             List({ space: 8 }) {
                 ListItem() {
                     Row() {
@@ -126,13 +128,28 @@ export struct InitialsPage {
                 .padding({ left: 8, right: 8, top: 20, bottom: 20 })
             }
             .padding({ left: 16, right: 16 })
-            .contentEndOffset($r('app.float.app_bottom_content_offset'))
+            .contentStartOffset($r('app.float.app_content_compact_offset'))
+            .contentEndOffset($r('app.float.app_content_large_offset'))
             .width('100%')
             .height('100%')
         }
-        .title($r('app.string.romanization_initials_title'))
-        .width('100%')
-        .height('100%')
+        .titleBar({
+            content: {
+                title: {
+                    mainTitle: $r('app.string.romanization_initials_title')
+                }
+            },
+            style: {
+                scrollEffectOpts: {
+                    enableScrollEffect: true,
+                    scrollEffectType: ScrollEffectType.GRADIENT_BLUR
+                },
+                systemMaterialEffect: {
+                    materialType: hdsMaterial.MaterialType.ADAPTIVE,
+                    materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+                }
+            }
+        })
         .backgroundColor($r('app.color.window_background'))
     }
 }

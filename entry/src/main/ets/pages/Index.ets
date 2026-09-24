@@ -84,8 +84,6 @@ struct Index {
                     lightEffect: {}
                 })
             })
-            .width('100%')
-            .height('100%')
             .background($r('app.color.window_background'))
         } else {
             HdsTabs() {
@@ -116,8 +114,6 @@ struct Index {
                     materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
                 }
             })
-            .width('100%')
-            .height('100%')
             .background($r('app.color.window_background'))
         }
     }
