@@ -237,6 +237,7 @@ export struct HomeScreen {
                 ListItem() {
                     Search({ value: this.inputText, placeholder: $r('app.string.search_placeholder') })
                         .keyboardAppearance(KeyboardAppearance.IMMERSIVE)
+                        .backgroundBlurStyle(BlurStyle.COMPONENT_REGULAR)
                         .onEditChange((changed: boolean) => {
                             if (changed) {
                                 this.prepareStore();

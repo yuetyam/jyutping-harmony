@@ -57,7 +57,7 @@ struct Index {
         if (this.privacy != this.definedPrivacyValue) {
             PrivacyScreen({ privacy: this.privacy })
         } else if (deviceInfo.apiAvailable('26.0.0')) {
-            Tabs({ barPosition: BarPosition.End }) {
+            Tabs() {
                 TabContent() {
                     HomeScreen()
                 }
@@ -76,6 +76,8 @@ struct Index {
                 .tabBar(this.tabBarStyle($r('sys.symbol.info_circle'), $r('app.string.tab_bar_about')))
             }
             .barOverlap(true)
+            .barPosition(BarPosition.End)
+            .vertical(false)
             .barFloatingStyle({
                 adaptToHandedness: true,
                 systemMaterial: new uiMaterial.ImmersiveMaterial({
@@ -109,6 +111,7 @@ struct Index {
             .vertical(false)
             .barFloatingStyle({
                 barBottomMargin: 28,
+                adaptToHandedness: true,
                 systemMaterialEffect: {
                     materialType: hdsMaterial.MaterialType.ADAPTIVE,
                     materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
