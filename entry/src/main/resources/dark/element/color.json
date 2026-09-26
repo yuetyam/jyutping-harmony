@@ -23,6 +23,10 @@
     {
       "name": "key_emphatic",
       "value": "#22FFFFFF"
+    },
+    {
+      "name": "key_highlight",
+      "value": "#000000"
     }
   ]
 }

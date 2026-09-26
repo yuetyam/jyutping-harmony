@@ -22,13 +22,9 @@ export default struct SidebarPanel {
                 }
             }
             .backgroundColor($r('app.color.key_emphatic'))
-            .clip(true)
+            .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
             .borderRadius(PresetConstant.largeKeyCornerRadius)
-            .shadow({
-                radius: 1,
-                color: Color.Gray,
-                offsetY: 1
-            })
+            .clip(true)
             .width("calc(100% - 6vp)")
             .height("calc(100% - 6vp)")
         }

@@ -71,6 +71,10 @@
     {
       "name": "key_emphatic",
       "value": "#40686E80"
+    },
+    {
+      "name": "key_highlight",
+      "value": "#FFFFFF"
     }
   ]
 }

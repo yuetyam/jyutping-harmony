@@ -1,5 +1,6 @@
 import controller from "../InputController";
 import { PresetConstant } from "../model/PresetConstant";
+import { tailoredShapeSize } from "../model/TailoredShapeSize";
 import { VirtualInputKey } from "../model/VirtualInputKey";
 
 @ComponentV2
@@ -16,14 +17,10 @@ export default struct TailoredNumberKey {
                 Text(this.element.text).fontSize(24)
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_emphatic') : $r('app.color.key_shallow'))
+            .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
             .borderRadius(PresetConstant.largeKeyCornerRadius)
-            .shadow({
-                radius: 1,
-                color: Color.Gray,
-                offsetY: 1
-            })
-            .width("calc(100% - 6vp)")
-            .height("calc(100% - 6vp)")
+            .width(tailoredShapeSize(this.isTouching))
+            .height(tailoredShapeSize(this.isTouching))
         }
         .width("100%")
         .height("100%")

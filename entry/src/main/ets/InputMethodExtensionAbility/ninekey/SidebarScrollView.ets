@@ -17,11 +17,11 @@ export default struct SidebarScrollView {
                             .fontSize(15)
                     }
                     .borderRadius(0)
-                    .backgroundColor(item.isSelected ? $r('app.color.key_shallow') : Color.Transparent)
+                    .backgroundColor(item.isSelected ? $r('app.color.key_highlight') : Color.Transparent)
                     .width('100%')
                     .height(item.isSelected ? '15%' : '25%')
                     .onClick(() => {
-                        controller.playInputSound();
+                        controller.playModifierSound();
                         controller.triggerHapticFeedback();
                         controller.handleSidebarTapping(index);
                         this.scroller.scrollToIndex(0);

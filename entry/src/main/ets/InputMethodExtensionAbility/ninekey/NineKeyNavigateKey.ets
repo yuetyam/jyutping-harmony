@@ -1,6 +1,7 @@
 import controller from "../InputController";
 import { KeyboardForm } from "../model/KeyboardForm";
 import { PresetConstant } from "../model/PresetConstant";
+import { tailoredShapeSize } from "../model/TailoredShapeSize";
 
 @ComponentV2
 export default struct NineKeyNavigateKey {
@@ -25,14 +26,10 @@ export default struct NineKeyNavigateKey {
                 Text(this.keyText())
             }
             .backgroundColor(this.isTouching ? $r('app.color.key_shallow') : $r('app.color.key_emphatic'))
+            .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THIN)
             .borderRadius(PresetConstant.largeKeyCornerRadius)
-            .shadow({
-                radius: 1,
-                color: Color.Gray,
-                offsetY: 1
-            })
-            .width("calc(100% - 6vp)")
-            .height("calc(100% - 6vp)")
+            .width(tailoredShapeSize(this.isTouching))
+            .height(tailoredShapeSize(this.isTouching))
         }
         .width("100%")
         .height("100%")
